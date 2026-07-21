@@ -12,3 +12,11 @@ class LectureRepository(ABC):
     @abstractmethod
     async def get_by_ids(self, lecture_ids: list[UUID]) -> list[Lecture]:
         raise NotImplementedError
+
+    @abstractmethod
+    async def add(self, lecture: Lecture) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update(self, lecture: Lecture) -> None:
+        raise NotImplementedError

@@ -12,3 +12,7 @@ class LectureNotFoundError(ApplicationError):
 
 class ModuleNotFoundError(ApplicationError):
     pass
+
+
+class SectionNotFoundError(ApplicationError):
+    pass
