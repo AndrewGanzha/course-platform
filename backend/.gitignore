@@ -39,6 +39,7 @@ dist/
 # Runtime data
 *.log
 *.pid
+*.db
 *.sqlite
 *.sqlite3
 
