@@ -67,7 +67,7 @@ async def create_course(
     )
     return CourseResponse.model_validate(result)
 
-@router.post(
+@router.put(
     "/courses/{course_id}",
     response_model=CourseResponse
 )
@@ -80,3 +80,119 @@ async def update_course(
         UpdateCourseCommand(course_id=course_id, title=request.title, description=request.description)
     )
     return CourseResponse.model_validate(result)
+
+@router.post(
+    "/courses/{course_id}/modules",
+    response_model=ModuleResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_module(
+        course_id: UUID,
+        request: CreateModuleRequest,
+        use_case: FromDishka[CreateModuleUseCase]
+) -> ModuleResponse:
+    result = await use_case.execute(
+        CreateModuleCommand(course_id=course_id,
+                            title=request.title,
+                            description=request.description,
+                            position=request.position
+        )
+    )
+
+    return ModuleResponse.model_validate(result)
+
+@router.put(
+    "/modules/{module_id}",
+    response_model=ModuleResponse,
+)
+async def update_module(
+        module_id: UUID,
+        request: UpdateModuleRequest,
+        use_case: FromDishka[UpdateModuleUseCase]
+) -> ModuleResponse:
+    result = await use_case.execute(
+        UpdateModuleCommand(module_id=module_id,
+                            title=request.title,
+                            description=request.description,
+                            position=request.position
+        )
+    )
+    return ModuleResponse.model_validate(result)
+
+@router.post(
+    "/modules/{module_id}/sections",
+    response_model=SectionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_section(
+        module_id: UUID,
+        request: CreateSectionRequest,
+        use_case: FromDishka[CreateSectionUseCase]
+) -> SectionResponse:
+    result = await use_case.execute(
+        CreateSectionCommand(module_id=module_id,
+                             title=request.title,
+                             description=request.description,
+                             position=request.position
+        )
+    )
+
+    return SectionResponse.model_validate(result)
+
+@router.put(
+    "/sections/{section_id}",
+    response_model=SectionResponse
+)
+async def update_section(
+        section_id: UUID,
+        request: UpdateSectionRequest,
+        use_case: FromDishka[UpdateSectionUseCase]
+) -> SectionResponse:
+    result = await use_case.execute(
+        UpdateSectionCommand(section_id=section_id,
+                             title=request.title,
+                             description=request.description,
+                             position=request.position
+        )
+    )
+
+    return SectionResponse.model_validate(result)
+
+@router.post(
+    "/sections/{section_id}/lectures",
+    response_model=LectureResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_lecture(
+        section_id: UUID,
+        request: CreateLectureRequest,
+        use_case: FromDishka[CreateLectureUseCase]
+) -> LectureResponse:
+    result = await use_case.execute(
+        CreateLectureCommand(section_id=section_id,
+                             title=request.title,
+                             сontent=request.content,
+                             position=request.position
+        )
+    )
+
+    return LectureResponse.model_validate(result)
+
+@router.put(
+    "/lectures/{lecture_id}",
+    response_model=LectureResponse
+)
+async def update_lecture(
+        lecture_id: UUID,
+        request: UpdateLectureRequest,
+        use_case: FromDishka[UpdateLectureUseCase]
+) -> LectureResponse:
+    result = await use_case.execute(
+        UpdateLectureCommand(lecture_id=lecture_id,
+                             title=request.title,
+                             сontent=request.content,
+                             position=request.position
+        )
+    )
+
+    return LectureResponse.model_validate(result)
