@@ -2,6 +2,10 @@ from collections.abc import AsyncIterator
 
 from dishka import Provider, Scope, provide
 
+from app.application.interfaces.services.password_hasher import PasswordHasher
+from app.application.use_cases.auth.register_user import RegisterUserUseCase
+from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
+
 from app.application.use_cases.courses.get_course import GetCourseUseCase
 from app.application.use_cases.courses.get_course_structure import GetCourseStructureUseCase
 from app.application.use_cases.courses.get_courses import GetCoursesUseCase
@@ -111,3 +115,14 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> GetLectureUseCase:
         return GetLectureUseCase(lecture_repository=uow.lectures)
+
+    @provide
+    def get_password_hasher(self) -> PasswordHasher:
+        return PwdlibPasswordHasher()
+
+    @provide
+    def get_register_user_use_case(self) -> RegisterUserUseCase:
+        return RegisterUserUseCase(
+            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
+            password_hasher=self.get_password_hasher(),
+        )
