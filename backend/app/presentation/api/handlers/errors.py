@@ -3,7 +3,10 @@ from fastapi.responses import JSONResponse
 
 from app.application.exceptions import (
     ApplicationError,
-    CourseNotFoundError
+    CourseNotFoundError,
+    LectureNotFoundError,
+    ModuleNotFoundError,
+    SectionNotFoundError,
 )
 from app.domain.exceptions import DomainError
 from app.presentation.api.schemas import ErrorResponse
@@ -16,7 +19,7 @@ def build_error_response(error: str, message: str, status_code: int) -> JSONResp
 
 async def domain_error_handler(request: Request, exc: Exception) -> JSONResponse:
     return build_error_response(
-        error='domain_error',
+        error="domain_error",
         message=str(exc),
         status_code=status.HTTP_400_BAD_REQUEST,
     )
@@ -24,10 +27,11 @@ async def domain_error_handler(request: Request, exc: Exception) -> JSONResponse
 
 async def application_error_handler(request: Request, exc: Exception) -> JSONResponse:
     return build_error_response(
-        error='application_error',
+        error="application_error",
         message=str(exc),
         status_code=status.HTTP_400_BAD_REQUEST,
     )
+
 
 async def course_not_found_handler(request: Request, exc: Exception) -> JSONResponse:
     return build_error_response(
@@ -36,7 +40,35 @@ async def course_not_found_handler(request: Request, exc: Exception) -> JSONResp
         status_code=status.HTTP_404_NOT_FOUND,
     )
 
+
+async def module_not_found_handler(request: Request, exc: Exception) -> JSONResponse:
+    return build_error_response(
+        error="module_not_found",
+        message=str(exc),
+        status_code=status.HTTP_404_NOT_FOUND,
+    )
+
+
+async def section_not_found_handler(request: Request, exc: Exception) -> JSONResponse:
+    return build_error_response(
+        error="section_not_found",
+        message=str(exc),
+        status_code=status.HTTP_404_NOT_FOUND,
+    )
+
+
+async def lecture_not_found_handler(request: Request, exc: Exception) -> JSONResponse:
+    return build_error_response(
+        error="lecture_not_found",
+        message=str(exc),
+        status_code=status.HTTP_404_NOT_FOUND,
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(DomainError, domain_error_handler)
     app.add_exception_handler(ApplicationError, application_error_handler)
     app.add_exception_handler(CourseNotFoundError, course_not_found_handler)
+    app.add_exception_handler(ModuleNotFoundError, module_not_found_handler)
+    app.add_exception_handler(SectionNotFoundError, section_not_found_handler)
+    app.add_exception_handler(LectureNotFoundError, lecture_not_found_handler)
