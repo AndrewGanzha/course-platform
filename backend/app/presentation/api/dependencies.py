@@ -1,6 +1,8 @@
 from collections.abc import AsyncIterator
 
 from dishka import Provider, Scope, provide
+from fastapi import Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
@@ -18,9 +20,16 @@ from app.application.use_cases.modules.create_module import CreateModuleUseCase
 from app.application.use_cases.modules.update_module import UpdateModuleUseCase
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
 from app.application.use_cases.sections.update_section import UpdateSectionUseCase
+from app.domain.entities.user import User
 from app.infrastructure.database import SessionFactory, SqlAlchemyUnitOfWork
-from app.infrastructure.security.jwt_token_service import JwtTokenService
+from app.infrastructure.security.jwt_token_service import (
+    InvalidTokenError,
+    JwtTokenService,
+)
 from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
+from app.presentation.exceptions import AuthenticationError
+
+http_bearer = HTTPBearer(auto_error=False)
 
 
 class ApiProvider(Provider):
@@ -157,3 +166,33 @@ class ApiProvider(Provider):
     @provide
     def get_token_service(self) -> TokenService:
         return JwtTokenService()
+
+    @provide
+    async def get_credentials(
+        self,
+        request: Request,
+    ) -> HTTPAuthorizationCredentials | None:
+        return await http_bearer(request)
+
+    @provide
+    async def get_current_user(
+        self,
+        credentials: HTTPAuthorizationCredentials | None,
+        uow: SqlAlchemyUnitOfWork,
+        token_service: TokenService,
+    ) -> User:
+        if credentials is None:
+            raise AuthenticationError(
+                "Authentication credentials were not provided"
+            )
+
+        try:
+            user_id = token_service.get_user_id(credentials.credentials)
+        except InvalidTokenError as exc:
+            raise AuthenticationError("Token is invalid or expired") from exc
+
+        user = await uow.users.get_by_id(user_id)
+        if user is None:
+            raise AuthenticationError("Authenticated user was not found")
+
+        return user
