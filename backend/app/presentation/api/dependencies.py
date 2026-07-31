@@ -3,9 +3,9 @@ from collections.abc import AsyncIterator
 from dishka import Provider, Scope, provide
 
 from app.application.interfaces.services.password_hasher import PasswordHasher
+from app.application.interfaces.services.token_service import TokenService
+from app.application.use_cases.auth.login_user import LoginUserUseCase
 from app.application.use_cases.auth.register_user import RegisterUserUseCase
-from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
-
 from app.application.use_cases.courses.get_course import GetCourseUseCase
 from app.application.use_cases.courses.get_course_structure import GetCourseStructureUseCase
 from app.application.use_cases.courses.get_courses import GetCoursesUseCase
@@ -19,6 +19,8 @@ from app.application.use_cases.modules.update_module import UpdateModuleUseCase
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
 from app.application.use_cases.sections.update_section import UpdateSectionUseCase
 from app.infrastructure.database import SessionFactory, SqlAlchemyUnitOfWork
+from app.infrastructure.security.jwt_token_service import JwtTokenService
+from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
 
 
 class ApiProvider(Provider):
@@ -62,52 +64,60 @@ class ApiProvider(Provider):
         )
 
     @provide
-    def get_create_course_use_case(self) -> CreateCourseUseCase:
-        return CreateCourseUseCase(
-            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
-        )
+    def get_create_course_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CreateCourseUseCase:
+        return CreateCourseUseCase(uow=uow)
 
     @provide
-    def get_update_course_use_case(self) -> UpdateCourseUseCase:
-        return UpdateCourseUseCase(
-            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
-        )
+    def get_update_course_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateCourseUseCase:
+        return UpdateCourseUseCase(uow=uow)
 
     @provide
-    def get_create_module_use_case(self) -> CreateModuleUseCase:
-        return CreateModuleUseCase(
-            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
-        )
+    def get_create_module_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CreateModuleUseCase:
+        return CreateModuleUseCase(uow=uow)
 
     @provide
-    def get_update_module_use_case(self) -> UpdateModuleUseCase:
-        return UpdateModuleUseCase(
-            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
-        )
+    def get_update_module_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateModuleUseCase:
+        return UpdateModuleUseCase(uow=uow)
 
     @provide
-    def get_create_section_use_case(self) -> CreateSectionUseCase:
-        return CreateSectionUseCase(
-            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
-        )
+    def get_create_section_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CreateSectionUseCase:
+        return CreateSectionUseCase(uow=uow)
 
     @provide
-    def get_update_section_use_case(self) -> UpdateSectionUseCase:
-        return UpdateSectionUseCase(
-            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
-        )
+    def get_update_section_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateSectionUseCase:
+        return UpdateSectionUseCase(uow=uow)
 
     @provide
-    def get_create_lecture_use_case(self) -> CreateLectureUseCase:
-        return CreateLectureUseCase(
-            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
-        )
+    def get_create_lecture_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CreateLectureUseCase:
+        return CreateLectureUseCase(uow=uow)
 
     @provide
-    def get_update_lecture_use_case(self) -> UpdateLectureUseCase:
-        return UpdateLectureUseCase(
-            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
-        )
+    def get_update_lecture_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateLectureUseCase:
+        return UpdateLectureUseCase(uow=uow)
 
     @provide
     def provide_get_lecture_use_case(
@@ -121,8 +131,29 @@ class ApiProvider(Provider):
         return PwdlibPasswordHasher()
 
     @provide
-    def get_register_user_use_case(self) -> RegisterUserUseCase:
+    def get_register_user_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+        password_hasher: PasswordHasher,
+    ) -> RegisterUserUseCase:
         return RegisterUserUseCase(
-            uow=SqlAlchemyUnitOfWork(session_factory=SessionFactory),
-            password_hasher=self.get_password_hasher(),
+            uow=uow,
+            password_hasher=password_hasher,
         )
+
+    @provide
+    def get_login_user_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+        password_hasher: PasswordHasher,
+        token_service: TokenService,
+    ) -> LoginUserUseCase:
+        return LoginUserUseCase(
+            uow=uow,
+            password_hasher=password_hasher,
+            token_service=token_service,
+        )
+
+    @provide
+    def get_token_service(self) -> TokenService:
+        return JwtTokenService()

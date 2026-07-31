@@ -267,13 +267,14 @@ async def update_section(
 async def create_lecture(
         section_id: UUID,
         request: CreateLectureRequest,
-        use_case: FromDishka[CreateLectureUseCase]
+    use_case: FromDishka[CreateLectureUseCase]
 ) -> LectureResponse:
     result = await use_case.execute(
-        CreateLectureCommand(section_id=section_id,
-                             title=request.title,
-                             сontent=request.content,
-                             position=request.position
+        CreateLectureCommand(
+            section_id=section_id,
+            title=request.title,
+            content=request.content,
+            position=request.position,
         )
     )
 
@@ -301,13 +302,14 @@ async def create_lecture(
 async def update_lecture(
         lecture_id: UUID,
         request: UpdateLectureRequest,
-        use_case: FromDishka[UpdateLectureUseCase]
+    use_case: FromDishka[UpdateLectureUseCase]
 ) -> LectureResponse:
     result = await use_case.execute(
-        UpdateLectureCommand(lecture_id=lecture_id,
-                             title=request.title,
-                             сontent=request.content,
-                             position=request.position
+        UpdateLectureCommand(
+            lecture_id=lecture_id,
+            title=request.title,
+            content=request.content,
+            position=request.position,
         )
     )
 

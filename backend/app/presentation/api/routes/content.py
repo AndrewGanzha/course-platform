@@ -17,7 +17,7 @@ from app.presentation.api.schemas import (
     LectureResponse,
 )
 
-from backend.app.presentation.api.schemas.errors import ErrorResponse
+from app.presentation.api.schemas.errors import ErrorResponse
 
 router = APIRouter(tags=["Content"], route_class=DishkaRoute)
 
