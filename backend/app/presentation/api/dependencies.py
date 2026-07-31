@@ -4,6 +4,7 @@ from dishka import Provider, Scope, provide
 from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from app.application.dto.authenticated_user import AuthenticatedUser
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
 from app.application.use_cases.auth.login_user import LoginUserUseCase
@@ -20,7 +21,6 @@ from app.application.use_cases.modules.create_module import CreateModuleUseCase
 from app.application.use_cases.modules.update_module import UpdateModuleUseCase
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
 from app.application.use_cases.sections.update_section import UpdateSectionUseCase
-from app.domain.entities.user import User
 from app.infrastructure.database import SessionFactory, SqlAlchemyUnitOfWork
 from app.infrastructure.security.jwt_token_service import (
     InvalidTokenError,
@@ -180,7 +180,7 @@ class ApiProvider(Provider):
         credentials: HTTPAuthorizationCredentials | None,
         uow: SqlAlchemyUnitOfWork,
         token_service: TokenService,
-    ) -> User:
+    ) -> AuthenticatedUser:
         if credentials is None:
             raise AuthenticationError(
                 "Authentication credentials were not provided"
@@ -195,4 +195,8 @@ class ApiProvider(Provider):
         if user is None:
             raise AuthenticationError("Authenticated user was not found")
 
-        return user
+        return AuthenticatedUser(
+            id=user.id,
+            email=user.email,
+            role=user.role,
+        )

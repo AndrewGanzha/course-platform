@@ -2,6 +2,7 @@ from fastapi import APIRouter, status
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 
+from app.application.dto.authenticated_user import AuthenticatedUser
 from app.application.use_cases.auth.login_user import (
     LoginUserCommand,
     LoginUserUseCase,
@@ -11,6 +12,7 @@ from app.application.use_cases.auth.register_user import (
     RegisterUserUseCase,
 )
 from app.presentation.api.schemas import (
+    CurrentUserResponse,
     LoginRequest,
     RegisteredUserResponse,
     RegisterUserRequest,
@@ -58,3 +60,10 @@ async def login_user(
         access_token=result.access_token,
         token_type=result.token_type,
     )
+
+
+@router.get("/me", response_model=CurrentUserResponse)
+async def get_me(
+    current_user: FromDishka[AuthenticatedUser],
+) -> CurrentUserResponse:
+    return CurrentUserResponse.model_validate(current_user)

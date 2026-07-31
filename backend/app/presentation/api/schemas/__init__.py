@@ -21,10 +21,11 @@ from app.presentation.api.schemas.sections import (
     UpdateSectionRequest,
 )
 from app.presentation.api.schemas.auth import (
-    RegisterUserRequest,
-    RegisteredUserResponse,
+    CurrentUserResponse,
     LoginRequest,
-    TokenResponse
+    RegisteredUserResponse,
+    RegisterUserRequest,
+    TokenResponse,
 )
 
 __all__ = [
@@ -50,4 +51,5 @@ __all__ = [
     "RegisteredUserResponse",
     "LoginRequest",
     "TokenResponse",
+    "CurrentUserResponse",
 ]

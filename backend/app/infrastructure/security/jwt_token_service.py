@@ -37,7 +37,10 @@ class JwtTokenService(TokenService):
             raise InvalidTokenError('Token is invalid or expired.') from exc
 
         subject = payload.get('sub')
-        if subject is None:
-            raise InvalidTokenError('Token does not contain subject.')
+        if not isinstance(subject, str):
+            raise InvalidTokenError('Token does not contain a valid subject.')
 
-        return UUID(subject)
+        try:
+            return UUID(subject)
+        except ValueError as exc:
+            raise InvalidTokenError('Token subject is invalid.') from exc
