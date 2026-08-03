@@ -1,11 +1,7 @@
-from dataclasses import dataclass
-from uuid import UUID
+from typing import NewType
 
-from app.domain.entities.user import UserRole
+from app.domain.entities.user import User
 
 
-@dataclass(frozen=True, slots=True)
-class AuthenticatedUser:
-    id: UUID
-    email: str
-    role: UserRole
+AuthenticatedUser = NewType("AuthenticatedUser", User)
+AuthenticatedAdmin = NewType("AuthenticatedAdmin", User)

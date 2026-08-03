@@ -1,8 +1,11 @@
+from collections.abc import Callable, Coroutine
+from typing import Any
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Request, Response, status
 
+from app.application.dto.authenticated_user import AuthenticatedAdmin
 from app.application.use_cases.courses.create_course import (
     CreateCourseCommand,
     CreateCourseUseCase,
@@ -51,7 +54,25 @@ from app.presentation.api.schemas import (
     ErrorResponse,
 )
 
-router = APIRouter(prefix="/admin", tags=["Admin"], route_class=DishkaRoute)
+
+class AdminDishkaRoute(DishkaRoute):
+    def get_route_handler(
+        self,
+    ) -> Callable[[Request], Coroutine[Any, Any, Response]]:
+        route_handler = super().get_route_handler()
+
+        async def admin_route_handler(request: Request) -> Response:
+            await request.state.dishka_container.get(AuthenticatedAdmin)
+            return await route_handler(request)
+
+        return admin_route_handler
+
+
+router = APIRouter(
+    prefix="/admin",
+    tags=["Admin"],
+    route_class=AdminDishkaRoute,
+)
 
 @router.post(
     "/courses",

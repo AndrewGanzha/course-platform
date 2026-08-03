@@ -4,7 +4,10 @@ from dishka import Provider, Scope, provide
 from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.application.dto.authenticated_user import AuthenticatedUser
+from app.application.dto.authenticated_user import (
+    AuthenticatedAdmin,
+    AuthenticatedUser,
+)
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
 from app.application.use_cases.auth.login_user import LoginUserUseCase
@@ -27,7 +30,7 @@ from app.infrastructure.security.jwt_token_service import (
     JwtTokenService,
 )
 from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
-from app.presentation.exceptions import AuthenticationError
+from app.presentation.exceptions import AuthenticationError, PermissionDeniedError
 
 http_bearer = HTTPBearer(auto_error=False)
 
@@ -195,8 +198,14 @@ class ApiProvider(Provider):
         if user is None:
             raise AuthenticationError("Authenticated user was not found")
 
-        return AuthenticatedUser(
-            id=user.id,
-            email=user.email,
-            role=user.role,
-        )
+        return AuthenticatedUser(user)
+
+    @provide
+    def get_current_admin(
+        self,
+        current_user: AuthenticatedUser,
+    ) -> AuthenticatedAdmin:
+        if not current_user.can_manage_platform():
+            raise PermissionDeniedError("Admin access is required.")
+
+        return AuthenticatedAdmin(current_user)
