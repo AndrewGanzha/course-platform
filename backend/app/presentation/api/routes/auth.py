@@ -13,6 +13,7 @@ from app.application.use_cases.auth.register_user import (
 )
 from app.presentation.api.schemas import (
     CurrentUserResponse,
+    ErrorResponse,
     LoginRequest,
     RegisteredUserResponse,
     RegisterUserRequest,
@@ -23,9 +24,20 @@ router = APIRouter(prefix="/auth", tags=["Auth"], route_class=DishkaRoute)
 
 
 @router.post(
-    "/register",
+    '/register',
     response_model=RegisteredUserResponse,
     status_code=status.HTTP_201_CREATED,
+    summary='Register new user',
+    description=(
+        'Creates a new user account in the system. '
+        'A public registration always creates a user with the student role.'
+    ),
+    responses={
+        400: {
+            'description': 'Domain or application validation error.',
+            'model': ErrorResponse,
+        },
+    },
 )
 async def register_user(
     request: RegisterUserRequest,
@@ -42,8 +54,18 @@ async def register_user(
 
 
 @router.post(
-    "/login",
+    '/login',
     response_model=TokenResponse,
+    summary='Login user',
+    description=(
+        'Authenticates a user by email and password and returns a JWT access token.'
+    ),
+    responses={
+        400: {
+            'description': 'Invalid email or password.',
+            'model': ErrorResponse,
+        },
+    },
 )
 async def login_user(
     request: LoginRequest,
@@ -62,7 +84,18 @@ async def login_user(
     )
 
 
-@router.get("/me", response_model=CurrentUserResponse)
+@router.get(
+    '/me',
+    response_model=CurrentUserResponse,
+    summary='Get current user',
+    description='Returns the currently authenticated user resolved from Bearer token.',
+    responses={
+        401: {
+            'description': 'Authentication credentials are missing or invalid.',
+            'model': ErrorResponse,
+        },
+    },
+)
 async def get_me(
     current_user: FromDishka[AuthenticatedUser],
 ) -> CurrentUserResponse:

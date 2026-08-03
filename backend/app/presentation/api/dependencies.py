@@ -32,7 +32,12 @@ from app.infrastructure.security.jwt_token_service import (
 from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
 from app.presentation.exceptions import AuthenticationError, PermissionDeniedError
 
-http_bearer = HTTPBearer(auto_error=False)
+http_bearer = HTTPBearer(
+    bearerFormat="JWT",
+    scheme_name="BearerAuth",
+    description="Enter JWT access token",
+    auto_error=False,
+)
 
 
 class ApiProvider(Provider):
