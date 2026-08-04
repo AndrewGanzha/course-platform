@@ -9,6 +9,7 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 import app.presentation.api.dependencies as api_dependencies
 from app.infrastructure.database.models import (
@@ -22,13 +23,13 @@ from app.infrastructure.database.models import (
 from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
 from app.main import create_app
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope="session")
 async def test_engine(tmp_path_factory) -> AsyncIterator:
     database_dir = tmp_path_factory.mktemp("test_db")
     database_path = Path(database_dir) / "test_fastapi_education.db"
     database_url = f"sqlite+aiosqlite:///{database_path}"
 
-    engine = create_async_engine(database_url, future=True)
+    engine = create_async_engine(database_url, future=True, poolclass=NullPool)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield engine
@@ -45,6 +46,21 @@ def session_factory(test_engine):
         expire_on_commit=False,
         class_=AsyncSession,
     )
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def clear_database(session_factory) -> None:
+    async with session_factory() as session:
+        for model in [
+            LectureModel,
+            SectionModel,
+            ModuleModel,
+            CourseModel,
+            UserModel,
+        ]:
+            await session.execute(delete(model))
+        await session.commit()
+
 
 @pytest_asyncio.fixture
 async def app(session_factory):
