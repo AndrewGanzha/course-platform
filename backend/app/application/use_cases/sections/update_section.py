@@ -3,7 +3,6 @@ from uuid import UUID
 
 from app.application.exceptions import SectionNotFoundError
 from app.application.interfaces.unit_of_work import UnitOfWork
-from app.application.interfaces.repositories.section_repository import SectionRepository
 from app.domain.entities.section import Section
 
 
@@ -20,15 +19,16 @@ class UpdateSectionUseCase:
         self.uow = uow
 
     async def execute(self, command: UpdateSectionCommand) -> Section:
-        section = await self.section_repository.get_by_id(command.section_id)
-        if section is None:
-            raise SectionNotFoundError("Section not found.")
+        async with self.uow:
+            section = await self.uow.sections.get_by_id(command.section_id)
+            if section is None:
+                raise SectionNotFoundError("Section not found.")
 
-        section.update(
-            title=command.title,
-            description=command.description,
-            position=command.position,
-        )
-        await self.uow.sections.update(section)
-        await self.uow.commit()
-        return section
+            section.update(
+                title=command.title,
+                description=command.description,
+                position=command.position,
+            )
+            await self.uow.sections.update(section)
+            await self.uow.commit()
+            return section

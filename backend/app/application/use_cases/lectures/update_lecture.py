@@ -3,7 +3,6 @@ from uuid import UUID
 
 from app.application.exceptions import LectureNotFoundError
 from app.application.interfaces.unit_of_work import UnitOfWork
-from app.application.interfaces.repositories.lecture_repository import LectureRepository
 from app.domain.entities.lecture import Lecture
 
 
@@ -20,15 +19,16 @@ class UpdateLectureUseCase:
         self.uow = uow
 
     async def execute(self, command: UpdateLectureCommand) -> Lecture:
-        lecture = await self.lecture_repository.get_by_id(command.lecture_id)
-        if lecture is None:
-            raise LectureNotFoundError("Lecture not found.")
+        async with self.uow:
+            lecture = await self.uow.lectures.get_by_id(command.lecture_id)
+            if lecture is None:
+                raise LectureNotFoundError("Lecture not found.")
 
-        lecture.update(
-            title=command.title,
-            content=command.content,
-            position=command.position,
-        )
-        await self.uow.lectures.update(lecture)
-        await self.uow.commit()
-        return lecture
+            lecture.update(
+                title=command.title,
+                content=command.content,
+                position=command.position,
+            )
+            await self.uow.lectures.update(lecture)
+            await self.uow.commit()
+            return lecture
