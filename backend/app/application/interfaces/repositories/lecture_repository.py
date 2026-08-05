@@ -20,7 +20,3 @@ class LectureRepository(ABC):
     @abstractmethod
     async def update(self, lecture: Lecture) -> None:
         raise NotImplementedError
-
-    @abstractmethod
-    async def delete(self, lecture_id: UUID) -> None:
-        raise NotImplementedError

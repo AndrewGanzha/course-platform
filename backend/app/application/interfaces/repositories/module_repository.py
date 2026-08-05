@@ -20,7 +20,3 @@ class ModuleRepository(ABC):
     @abstractmethod
     async def update(self, module: Module) -> None:
         raise NotImplementedError
-
-    @abstractmethod
-    async def delete(self, module_id: UUID) -> None:
-        raise NotImplementedError
