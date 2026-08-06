@@ -22,5 +22,5 @@ class ModuleRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete(self, module_id: UUID) -> None:
+    async def remove(self, module_id: UUID) -> None:
         raise NotImplementedError
