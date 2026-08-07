@@ -29,8 +29,18 @@ class SectionQuestionAlreadyAttachedError(DomainError):
 class SectionQuestionNotAttachedError(DomainError):
     pass
 
+
 class InvalidQuestionError(DomainError):
     pass
 
+
 class InvalidAnswerOptionError(DomainError):
+    pass
+
+
+class InvalidQuestionAttemptError(DomainError):
+    pass
+
+
+class QuestionAttemptLimitExceededError(DomainError):
     pass

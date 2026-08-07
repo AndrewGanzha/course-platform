@@ -62,7 +62,7 @@ class Question:
 
     def validate_answer_options_configuration(
         self,
-        answer_options: Sequence['AnswerOption'],
+        answer_options: Sequence[AnswerOption],
     ) -> None:
         if len(answer_options) < 2:
             raise InvalidQuestionError('Question must have at least two answer options.')
