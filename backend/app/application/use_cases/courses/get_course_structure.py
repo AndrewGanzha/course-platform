@@ -60,6 +60,7 @@ class GetCourseStructureUseCase:
                         title=section.title,
                         description=section.description,
                         position=section.position,
+                        question_ids=list(section.question_ids),
                         lectures=lecture_dtos,
                     )
                 )

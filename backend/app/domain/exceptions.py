@@ -20,3 +20,11 @@ class InvalidLectureError(DomainError):
 
 class InvalidUserError(DomainError):
     pass
+
+
+class SectionQuestionAlreadyAttachedError(DomainError):
+    pass
+
+
+class SectionQuestionNotAttachedError(DomainError):
+    pass
