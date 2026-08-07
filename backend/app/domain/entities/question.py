@@ -5,7 +5,10 @@ from enum import StrEnum
 from collections.abc import Sequence
 from app.domain.entities.answer_option import AnswerOption
 
-from app.domain.exceptions import InvalidQuestionError
+from app.domain.exceptions import (
+    InvalidQuestionError,
+    QuestionAttemptLimitExceededError,
+)
 
 class QuestionType(StrEnum):
     SINGLE_CHOICE = 'single_choice'
@@ -80,3 +83,10 @@ class Question:
             raise InvalidQuestionError(
                 'Multiple choice question must have at least two correct answer options.'
             )
+
+    def can_start_attempt(self, existing_attempts_count: int) -> bool:
+        return existing_attempts_count < self.max_attempts
+
+    def ensure_attempt_available(self, existing_attempts_count: int) -> None:
+        if not self.can_start_attempt(existing_attempts_count):
+            raise QuestionAttemptLimitExceededError('Question attempt limit has been reached.')

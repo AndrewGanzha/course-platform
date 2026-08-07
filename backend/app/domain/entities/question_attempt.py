@@ -2,10 +2,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from uuid import UUID
 
-from app.domain.exceptions import (
-    InvalidQuestionAttemptError,
-    QuestionAttemptLimitExceededError,
-)
+from app.domain.exceptions import InvalidQuestionAttemptError
 
 
 @dataclass(slots=True)
@@ -46,10 +43,3 @@ class QuestionAttempt:
 
     def uses_option(self, answer_option_id: UUID) -> bool:
         return answer_option_id in self.selected_option_ids
-
-    def can_start_attempt(self, existing_attempts_count: int) -> bool:
-        return existing_attempts_count < self.max_attempts
-
-    def ensure_attempt_available(self, existing_attempts_count: int) -> None:
-        if not self.can_start_attempt(existing_attempts_count):
-            raise QuestionAttemptLimitExceededError('Question attempt limit has been reached.')
