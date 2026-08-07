@@ -45,3 +45,19 @@ def test_module_update_changes_fields() -> None:
     assert module.title == 'New title'
     assert module.description == 'New description'
     assert module.position == 2
+
+
+def test_module_remove_section_removes_section_id() -> None:
+    section_id = uuid4()
+    module = Module(
+        id=uuid4(),
+        course_id=uuid4(),
+        title='Module 1',
+        description='Introduction module',
+        position=1,
+        section_ids=[section_id],
+    )
+
+    module.remove_section(section_id)
+
+    assert section_id not in module.section_ids

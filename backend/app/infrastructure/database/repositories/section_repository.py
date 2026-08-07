@@ -47,3 +47,10 @@ class SqlAlchemySectionRepository(SectionRepository):
         model.description = section.description
         model.position = section.position
         await self.session.flush()
+
+    async def remove(self, section_id: UUID) -> None:
+        model = await self.session.get(SectionModel, str(section_id))
+        if model is None:
+            return
+        await self.session.delete(model)
+        await self.session.flush()
