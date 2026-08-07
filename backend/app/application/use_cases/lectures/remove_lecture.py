@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from app.application.exceptions import LectureNotFoundError
+from app.application.exceptions import LectureNotFoundError, SectionNotFoundError
 from app.application.interfaces.unit_of_work import UnitOfWork
 
 
@@ -21,5 +21,12 @@ class RemoveLectureUseCase:
             if lecture is None:
                 raise LectureNotFoundError("Lecture not found")
 
+            section = await self.uow.sections.get_by_id(lecture.section_id)
+
+            if section is None:
+                raise SectionNotFoundError("Section not found")
+
+            section.remove_lecture(lecture.id)
+            await self.uow.sections.update(section)
             await self.uow.lectures.remove(command.lecture_id)
             await self.uow.commit()

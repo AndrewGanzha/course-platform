@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from app.application.exceptions import ModuleNotFoundError
+from app.application.exceptions import CourseNotFoundError, ModuleNotFoundError
 from app.application.interfaces.unit_of_work import UnitOfWork
 
 
@@ -21,5 +21,12 @@ class RemoveModuleUseCase:
             if module is None:
                 raise ModuleNotFoundError("Module not found")
 
+            course = await self.uow.courses.get_by_id(module.course_id)
+
+            if course is None:
+                raise CourseNotFoundError("Course not found")
+
+            course.remove_module(module.id)
+            await self.uow.courses.update(course)
             await self.uow.modules.remove(command.module_id)
             await self.uow.commit()

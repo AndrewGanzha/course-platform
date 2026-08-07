@@ -47,3 +47,17 @@ def test_course_update_changes_state() -> None:
 
     assert course.title == 'New title'
     assert course.description == 'New description'
+
+
+def test_course_remove_module_removes_module_id() -> None:
+    module_id = uuid4()
+    course = Course(
+        id=uuid4(),
+        title='FastAPI course',
+        description='Clean architecture in practice.',
+        module_ids=[module_id],
+    )
+
+    course.remove_module(module_id)
+
+    assert module_id not in course.module_ids

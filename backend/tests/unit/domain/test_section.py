@@ -40,3 +40,19 @@ def test_section_raises_error_when_position_is_not_positive() -> None:
             description='Anything',
             position=0,
         )
+
+
+def test_section_remove_lecture_removes_lecture_id() -> None:
+    lecture_id = uuid4()
+    section = Section(
+        id=uuid4(),
+        module_id=uuid4(),
+        title='Section 1',
+        description='Anything',
+        position=1,
+        lecture_ids=[lecture_id],
+    )
+
+    section.remove_lecture(lecture_id)
+
+    assert lecture_id not in section.lecture_ids

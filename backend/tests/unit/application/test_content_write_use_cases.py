@@ -66,6 +66,7 @@ from app.domain.entities.section import Section
 class FakeCourseRepository:
     def __init__(self) -> None:
         self.items = {}
+        self.updated_ids = []
 
     async def get_by_id(self, course_id):
         return self.items.get(course_id)
@@ -77,6 +78,7 @@ class FakeCourseRepository:
         self.items[course.id] = course
 
     async def update(self, course) -> None:
+        self.updated_ids.append(course.id)
         self.items[course.id] = course
 
     async def remove(self, course_id) -> None:
@@ -86,6 +88,7 @@ class FakeCourseRepository:
 class FakeModuleRepository:
     def __init__(self) -> None:
         self.items = {}
+        self.updated_ids = []
 
     async def get_by_id(self, module_id):
         return self.items.get(module_id)
@@ -97,6 +100,7 @@ class FakeModuleRepository:
         self.items[module.id] = module
 
     async def update(self, module) -> None:
+        self.updated_ids.append(module.id)
         self.items[module.id] = module
 
     async def remove(self, module_id) -> None:
@@ -106,6 +110,7 @@ class FakeModuleRepository:
 class FakeSectionRepository:
     def __init__(self) -> None:
         self.items = {}
+        self.updated_ids = []
 
     async def get_by_id(self, section_id):
         return self.items.get(section_id)
@@ -117,6 +122,7 @@ class FakeSectionRepository:
         self.items[section.id] = section
 
     async def update(self, section) -> None:
+        self.updated_ids.append(section.id)
         self.items[section.id] = section
 
     async def remove(self, section_id) -> None:
@@ -151,6 +157,7 @@ class FakeUnitOfWork(UnitOfWork):
         self.lectures = FakeLectureRepository()
         self.users = None
         self.committed = False
+        self.commit_count = 0
         self.rolled_back = False
 
     async def __aenter__(self):
@@ -162,6 +169,7 @@ class FakeUnitOfWork(UnitOfWork):
 
     async def commit(self) -> None:
         self.committed = True
+        self.commit_count += 1
 
     async def rollback(self) -> None:
         self.rolled_back = True
@@ -326,20 +334,25 @@ async def test_update_module_raises_not_found_when_module_is_missing() -> None:
 @pytest.mark.asyncio
 async def test_remove_module_removes_existing_module_and_commits() -> None:
     uow = FakeUnitOfWork()
+    course = Course(id=uuid4(), title="Course", description="Description")
     module = Module(
         id=uuid4(),
-        course_id=uuid4(),
+        course_id=course.id,
         title="Module",
         description="Description",
         position=1,
     )
+    course.add_module(module.id)
+    await uow.courses.add(course)
     await uow.modules.add(module)
 
     use_case = RemoveModuleUseCase(uow=uow)
     await use_case.execute(RemoveModuleCommand(module_id=module.id))
 
     assert module.id not in uow.modules.items
-    assert uow.committed is True
+    assert module.id not in course.module_ids
+    assert uow.courses.updated_ids == [course.id]
+    assert uow.commit_count == 1
 
 
 @pytest.mark.asyncio
@@ -349,6 +362,26 @@ async def test_remove_module_raises_not_found_when_module_is_missing() -> None:
 
     with pytest.raises(ModuleNotFoundError):
         await use_case.execute(RemoveModuleCommand(module_id=uuid4()))
+
+
+@pytest.mark.asyncio
+async def test_remove_module_raises_not_found_when_course_is_missing() -> None:
+    uow = FakeUnitOfWork()
+    module = Module(
+        id=uuid4(),
+        course_id=uuid4(),
+        title="Module",
+        description="Description",
+        position=1,
+    )
+    await uow.modules.add(module)
+    use_case = RemoveModuleUseCase(uow=uow)
+
+    with pytest.raises(CourseNotFoundError):
+        await use_case.execute(RemoveModuleCommand(module_id=module.id))
+
+    assert module.id in uow.modules.items
+    assert uow.commit_count == 0
 
 
 @pytest.mark.asyncio
@@ -441,20 +474,31 @@ async def test_update_section_raises_not_found_when_section_is_missing() -> None
 @pytest.mark.asyncio
 async def test_remove_section_removes_existing_section_and_commits() -> None:
     uow = FakeUnitOfWork()
+    module = Module(
+        id=uuid4(),
+        course_id=uuid4(),
+        title="Module",
+        description="Description",
+        position=1,
+    )
     section = Section(
         id=uuid4(),
-        module_id=uuid4(),
+        module_id=module.id,
         title="Section",
         description="Description",
         position=1,
     )
+    module.add_section(section.id)
+    await uow.modules.add(module)
     await uow.sections.add(section)
 
     use_case = RemoveSectionUseCase(uow=uow)
     await use_case.execute(RemoveSectionCommand(section_id=section.id))
 
     assert section.id not in uow.sections.items
-    assert uow.committed is True
+    assert section.id not in module.section_ids
+    assert uow.modules.updated_ids == [module.id]
+    assert uow.commit_count == 1
 
 
 @pytest.mark.asyncio
@@ -464,6 +508,26 @@ async def test_remove_section_raises_not_found_when_section_is_missing() -> None
 
     with pytest.raises(SectionNotFoundError):
         await use_case.execute(RemoveSectionCommand(section_id=uuid4()))
+
+
+@pytest.mark.asyncio
+async def test_remove_section_raises_not_found_when_module_is_missing() -> None:
+    uow = FakeUnitOfWork()
+    section = Section(
+        id=uuid4(),
+        module_id=uuid4(),
+        title="Section",
+        description="Description",
+        position=1,
+    )
+    await uow.sections.add(section)
+    use_case = RemoveSectionUseCase(uow=uow)
+
+    with pytest.raises(ModuleNotFoundError):
+        await use_case.execute(RemoveSectionCommand(section_id=section.id))
+
+    assert section.id in uow.sections.items
+    assert uow.commit_count == 0
 
 
 @pytest.mark.asyncio
@@ -556,20 +620,31 @@ async def test_update_lecture_raises_not_found_when_lecture_is_missing() -> None
 @pytest.mark.asyncio
 async def test_remove_lecture_removes_existing_lecture_and_commits() -> None:
     uow = FakeUnitOfWork()
+    section = Section(
+        id=uuid4(),
+        module_id=uuid4(),
+        title="Section",
+        description="Description",
+        position=1,
+    )
     lecture = Lecture(
         id=uuid4(),
-        section_id=uuid4(),
+        section_id=section.id,
         title="Lecture",
         content="Content",
         position=1,
     )
+    section.add_lecture(lecture.id)
+    await uow.sections.add(section)
     await uow.lectures.add(lecture)
 
     use_case = RemoveLectureUseCase(uow=uow)
     await use_case.execute(RemoveLectureCommand(lecture_id=lecture.id))
 
     assert lecture.id not in uow.lectures.items
-    assert uow.committed is True
+    assert lecture.id not in section.lecture_ids
+    assert uow.sections.updated_ids == [section.id]
+    assert uow.commit_count == 1
 
 
 @pytest.mark.asyncio
@@ -579,3 +654,23 @@ async def test_remove_lecture_raises_not_found_when_lecture_is_missing() -> None
 
     with pytest.raises(LectureNotFoundError):
         await use_case.execute(RemoveLectureCommand(lecture_id=uuid4()))
+
+
+@pytest.mark.asyncio
+async def test_remove_lecture_raises_not_found_when_section_is_missing() -> None:
+    uow = FakeUnitOfWork()
+    lecture = Lecture(
+        id=uuid4(),
+        section_id=uuid4(),
+        title="Lecture",
+        content="Content",
+        position=1,
+    )
+    await uow.lectures.add(lecture)
+    use_case = RemoveLectureUseCase(uow=uow)
+
+    with pytest.raises(SectionNotFoundError):
+        await use_case.execute(RemoveLectureCommand(lecture_id=lecture.id))
+
+    assert lecture.id in uow.lectures.items
+    assert uow.commit_count == 0
