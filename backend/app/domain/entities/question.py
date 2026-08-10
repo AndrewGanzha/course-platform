@@ -1,14 +1,17 @@
-from dataclasses import dataclass, field
-from uuid import UUID
-from enum import StrEnum
-
 from collections.abc import Sequence
-from app.domain.entities.answer_option import AnswerOption
+from dataclasses import dataclass, field
+from enum import StrEnum
+from uuid import UUID
 
+from app.domain.entities.answer_option import AnswerOption
+from app.domain.entities.question_attempt import QuestionResultStatus
 from app.domain.exceptions import (
     InvalidQuestionError,
+    InvalidQuestionResultError,
+    QuestionAlreadySolvedError,
     QuestionAttemptLimitExceededError,
 )
+
 
 class QuestionType(StrEnum):
     SINGLE_CHOICE = 'single_choice'
@@ -84,9 +87,59 @@ class Question:
                 'Multiple choice question must have at least two correct answer options.'
             )
 
-    def can_start_attempt(self, existing_attempts_count: int) -> bool:
+    def can_start_attempt(
+        self,
+        existing_attempts_count: int,
+        has_correct_attempt: bool = False,
+    ) -> bool:
+        if has_correct_attempt:
+            return False
         return existing_attempts_count < self.max_attempts
 
-    def ensure_attempt_available(self, existing_attempts_count: int) -> None:
+    def ensure_attempt_available(
+        self,
+        existing_attempts_count: int,
+        has_correct_attempt: bool = False,
+    ) -> None:
+        if has_correct_attempt:
+            raise QuestionAlreadySolvedError('Question has already been answered correctly.')
         if not self.can_start_attempt(existing_attempts_count):
             raise QuestionAttemptLimitExceededError('Question attempt limit has been reached.')
+
+    def is_correct_selection(
+        self,
+        selected_option_ids: Sequence[UUID],
+        answer_options: Sequence[AnswerOption],
+    ) -> bool:
+        expected_option_ids = set(self.answer_option_ids)
+        actual_option_ids = {option.id for option in answer_options}
+        selected_ids = set(selected_option_ids)
+
+        if actual_option_ids != expected_option_ids:
+            raise InvalidQuestionResultError(
+                'Answer options do not match question configuration.'
+            )
+
+        if not selected_ids.issubset(actual_option_ids):
+            raise InvalidQuestionResultError('Selected options contain unknown ids.')
+
+        correct_option_ids = {option.id for option in answer_options if option.is_correct}
+        return selected_ids == correct_option_ids
+
+    def resolve_result_status(
+        self,
+        selected_option_ids: Sequence[UUID],
+        answer_options: Sequence[AnswerOption],
+    ) -> QuestionResultStatus:
+        if self.is_correct_selection(selected_option_ids, answer_options):
+            return QuestionResultStatus.CORRECT
+        return QuestionResultStatus.INCORRECT
+
+    def resolve_awarded_points(
+        self,
+        selected_option_ids: Sequence[UUID],
+        answer_options: Sequence[AnswerOption],
+    ) -> int:
+        if self.is_correct_selection(selected_option_ids, answer_options):
+            return self.reward_points
+        return 0
