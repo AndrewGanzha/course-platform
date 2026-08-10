@@ -17,8 +17,26 @@ class ModuleNotFoundError(ApplicationError):
 class SectionNotFoundError(ApplicationError):
     pass
 
+
 class UserAlreadyExistsError(ApplicationError):
     pass
 
+
 class InvalidCredentialsError(ApplicationError):
+    pass
+
+
+class QuestionNotFoundError(ApplicationError):
+    pass
+
+
+class PermissionDeniedError(ApplicationError):
+    pass
+
+
+class AnswerOptionNotFoundError(ApplicationError):
+    pass
+
+
+class QuestionAlreadyUsedError(ApplicationError):
     pass
