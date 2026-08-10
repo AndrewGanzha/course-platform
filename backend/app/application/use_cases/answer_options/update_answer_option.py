@@ -1,7 +1,11 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from app.application.exceptions import AnswerOptionNotFoundError, PermissionDeniedError
+from app.application.exceptions import (
+    AnswerOptionNotFoundError, 
+    PermissionDeniedError,
+    QuestionAlreadyUsedError, 
+    QuestionNotFoundError)
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.domain.entities.answer_option import AnswerOption
 from app.domain.entities.user import User
@@ -28,6 +32,11 @@ class UpdateAnswerOptionUseCase:
             answer_option = await self.uow.answer_options.get_by_id(command.answer_option_id)
             if answer_option is None:
                 raise AnswerOptionNotFoundError('Answer option not found.')
+
+            question_attempts = await self.uow.question_attempts.exists_by_question_id(answer_option.question_id)
+
+            if question is True:
+                raise QuestionAlreadyUsedError('Question is already used.')
 
             answer_option.update(
                 text=command.text,

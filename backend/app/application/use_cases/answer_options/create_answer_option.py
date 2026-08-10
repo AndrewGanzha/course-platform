@@ -1,7 +1,11 @@
 from dataclasses import dataclass
 from uuid import UUID, uuid4
 
-from app.application.exceptions import PermissionDeniedError, QuestionNotFoundError
+from app.application.exceptions import (
+    PermissionDeniedError,
+    QuestionAlreadyUsedError,
+    QuestionNotFoundError,
+)
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.domain.entities.answer_option import AnswerOption
 from app.domain.entities.user import User
@@ -28,6 +32,12 @@ class CreateAnswerOptionUseCase:
             question = await self.uow.questions.get_by_id(command.question_id)
             if question is None:
                 raise QuestionNotFoundError('Question not found.')
+
+            has_attempts = await self.uow.question_attempts.exists_by_question_id(question.id)
+            if has_attempts:
+                raise QuestionAlreadyUsedError(
+                    'Question already has student attempts and cannot be changed safely.'
+                )
 
             answer_option = AnswerOption(
                 id=uuid4(),
