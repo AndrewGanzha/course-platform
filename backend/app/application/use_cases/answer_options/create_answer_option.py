@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from uuid import UUID, uuid4
 
 from app.application.exceptions import (
-    PermissionDeniedError,
     QuestionAlreadyUsedError,
     QuestionNotFoundError,
 )
 from app.application.interfaces.unit_of_work import UnitOfWork
+from app.application.services.course_access_service import CourseAccessService
 from app.domain.entities.answer_option import AnswerOption
 from app.domain.entities.user import User
 
@@ -23,15 +23,18 @@ class CreateAnswerOptionCommand:
 class CreateAnswerOptionUseCase:
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
+        self.course_access_service = CourseAccessService(uow)
 
     async def execute(self, command: CreateAnswerOptionCommand) -> AnswerOption:
-        if not command.actor.can_manage_interactive_content():
-            raise PermissionDeniedError('User cannot manage interactive content.')
-
         async with self.uow:
             question = await self.uow.questions.get_by_id(command.question_id)
             if question is None:
                 raise QuestionNotFoundError('Question not found.')
+
+            await self.course_access_service.ensure_can_manage_section(
+                actor=command.actor,
+                section_id=question.section_id,
+            )
 
             has_attempts = await self.uow.question_attempts.exists_by_question_id(question.id)
             if has_attempts:
