@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from app.application.exceptions import CourseNotFoundError, PermissionDeniedError
 from app.application.interfaces.unit_of_work import UnitOfWork
+from app.application.services.course_access_service import CourseAccessService
 from app.domain.entities.course import Course
 from app.domain.entities.user import User
 
@@ -18,15 +18,14 @@ class UpdateCourseCommand:
 class UpdateCourseUseCase:
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
+        self.course_access_service = CourseAccessService(uow)
 
     async def execute(self, command: UpdateCourseCommand) -> Course:
         async with self.uow:
-            course = await self.uow.courses.get_by_id(command.course_id)
-            if course is None:
-                raise CourseNotFoundError('Course not found.')
-
-            if not command.actor.can_manage_platform() and not course.is_owned_by(command.actor.id):
-                raise PermissionDeniedError('User cannot manage this course.')
+            course = await self.course_access_service.ensure_can_manage_course(
+                actor=command.actor,
+                course_id=command.course_id,
+            )
 
             course.update(title=command.title, description=command.description)
             await self.uow.courses.update(course)

@@ -40,3 +40,11 @@ class AnswerOptionNotFoundError(ApplicationError):
 
 class QuestionAlreadyUsedError(ApplicationError):
     pass
+
+
+class QuestionAttemptNotFoundError(ApplicationError):
+    pass
+
+
+class InvalidProgressError(DomainError):
+    pass
