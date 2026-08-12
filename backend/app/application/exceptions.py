@@ -44,3 +44,7 @@ class QuestionAlreadyUsedError(ApplicationError):
 
 class QuestionAttemptNotFoundError(ApplicationError):
     pass
+
+
+class InvalidProgressError(DomainError):
+    pass
