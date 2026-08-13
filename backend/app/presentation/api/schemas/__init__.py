@@ -28,6 +28,15 @@ from app.presentation.api.schemas.auth import (
     TokenResponse,
 )
 
+from app.presentation.api.schemas.questions import (
+    AnswerOptionResponse,
+    CreateAnswerOptionRequest,
+    CreateQuestionRequest,
+    QuestionResponse,
+    UpdateAnswerOptionRequest,
+    UpdateQuestionRequest,
+)
+
 __all__ = [
     "CourseListItemResponse",
     "CourseResponse",
@@ -52,4 +61,10 @@ __all__ = [
     "LoginRequest",
     "TokenResponse",
     "CurrentUserResponse",
+    "CreateQuestionRequest",
+    "UpdateQuestionRequest",
+    "QuestionResponse",
+    "CreateAnswerOptionRequest",
+    "UpdateAnswerOptionRequest",
+    "AnswerOptionResponse",
 ]
