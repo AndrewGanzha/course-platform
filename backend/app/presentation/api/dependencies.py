@@ -10,6 +10,12 @@ from app.application.dto.authenticated_user import (
 )
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
+from app.application.use_cases.answer_options.create_answer_option import (
+    CreateAnswerOptionUseCase,
+)
+from app.application.use_cases.answer_options.update_answer_option import (
+    UpdateAnswerOptionUseCase,
+)
 from app.application.use_cases.auth.login_user import LoginUserUseCase
 from app.application.use_cases.auth.register_user import RegisterUserUseCase
 from app.application.use_cases.courses.create_course import CreateCourseUseCase
@@ -25,9 +31,12 @@ from app.application.use_cases.lectures.update_lecture import UpdateLectureUseCa
 from app.application.use_cases.modules.create_module import CreateModuleUseCase
 from app.application.use_cases.modules.remove_module import RemoveModuleUseCase
 from app.application.use_cases.modules.update_module import UpdateModuleUseCase
+from app.application.use_cases.questions.create_question import CreateQuestionUseCase
+from app.application.use_cases.questions.update_question import UpdateQuestionUseCase
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
 from app.application.use_cases.sections.remove_section import RemoveSectionUseCase
 from app.application.use_cases.sections.update_section import UpdateSectionUseCase
+from app.domain.entities.user import User
 from app.infrastructure.database import SessionFactory, SqlAlchemyUnitOfWork
 from app.infrastructure.security.jwt_token_service import (
     InvalidTokenError,
@@ -169,6 +178,34 @@ class ApiProvider(Provider):
         return RemoveLectureUseCase(uow=uow)
 
     @provide
+    def get_create_question_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CreateQuestionUseCase:
+        return CreateQuestionUseCase(uow=uow)
+
+    @provide
+    def get_update_question_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateQuestionUseCase:
+        return UpdateQuestionUseCase(uow=uow)
+
+    @provide
+    def get_create_answer_option_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CreateAnswerOptionUseCase:
+        return CreateAnswerOptionUseCase(uow=uow)
+
+    @provide
+    def get_update_answer_option_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateAnswerOptionUseCase:
+        return UpdateAnswerOptionUseCase(uow=uow)
+
+    @provide
     def provide_get_lecture_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
@@ -246,3 +283,12 @@ class ApiProvider(Provider):
             raise PermissionDeniedError("Admin access is required.")
 
         return AuthenticatedAdmin(current_user)
+
+    @provide
+    def get_current_author_or_admin(
+        self,
+        current_user: AuthenticatedUser
+    ) -> User:
+        if not current_user.can_manage_content():
+            raise PermissionDeniedError("Author or admin access is required.")
+        return current_user
