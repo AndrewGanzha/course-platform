@@ -20,3 +20,10 @@ class SectionModel(Base):
         cascade="all, delete-orphan",
         order_by="LectureModel.position",
     )
+
+    questions = relationship(
+        'QuestionModel',
+        back_populates='section',
+        cascade='all, delete-orphan',
+        order_by='QuestionModel.position',
+    )

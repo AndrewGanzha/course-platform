@@ -46,5 +46,5 @@ class QuestionAttemptNotFoundError(ApplicationError):
     pass
 
 
-class InvalidProgressError(DomainError):
+class InvalidProgressError(ApplicationError):
     pass

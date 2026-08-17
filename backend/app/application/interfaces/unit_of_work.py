@@ -9,6 +9,7 @@ from app.application.interfaces.repositories import (
     UserRepository,
     AnswerOptionRepository,
     QuestionAttemptRepository,
+    ProgressRepository,
 )
 
 
@@ -21,6 +22,7 @@ class UnitOfWork(ABC):
     answer_options: AnswerOptionRepository
     question_attempts: QuestionAttemptRepository
     users: UserRepository
+    progress: ProgressRepository
 
     @abstractmethod
     async def __aenter__(self) -> 'UnitOfWork':
