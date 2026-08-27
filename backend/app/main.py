@@ -36,8 +36,8 @@ def create_app() -> FastAPI:
                 "description": "Public endpoints for reading courses, course structure and lectures.",
             },
             {
-                "name": "Admin",
-                "description": "Administrative endpoints for creating and updating content.",
+                'name': 'Admin',
+                'description': 'Management endpoints for authors and administrators who create and modify learning content.',
             },
             {
                 'name': 'Auth',
