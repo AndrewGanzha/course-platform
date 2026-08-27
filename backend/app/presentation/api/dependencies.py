@@ -31,6 +31,15 @@ from app.application.use_cases.lectures.update_lecture import UpdateLectureUseCa
 from app.application.use_cases.modules.create_module import CreateModuleUseCase
 from app.application.use_cases.modules.remove_module import RemoveModuleUseCase
 from app.application.use_cases.modules.update_module import UpdateModuleUseCase
+from app.application.use_cases.question_attempts.get_question_attempt_result import (
+    GetQuestionAttemptResultUseCase,
+)
+from app.application.use_cases.question_attempts.start_question_attempt import (
+    StartQuestionAttemptUseCase,
+)
+from app.application.use_cases.question_attempts.submit_question_answer import (
+    SubmitQuestionAnswerUseCase,
+)
 from app.application.use_cases.questions.create_question import CreateQuestionUseCase
 from app.application.use_cases.questions.update_question import UpdateQuestionUseCase
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
@@ -204,6 +213,27 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> UpdateAnswerOptionUseCase:
         return UpdateAnswerOptionUseCase(uow=uow)
+
+    @provide
+    def get_start_question_attempt_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> StartQuestionAttemptUseCase:
+        return StartQuestionAttemptUseCase(uow=uow)
+
+    @provide
+    def get_submit_question_answer_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> SubmitQuestionAnswerUseCase:
+        return SubmitQuestionAnswerUseCase(uow=uow)
+
+    @provide
+    def get_get_question_attempt_result_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetQuestionAttemptResultUseCase:
+        return GetQuestionAttemptResultUseCase(uow=uow)
 
     @provide
     def provide_get_lecture_use_case(

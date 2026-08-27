@@ -43,6 +43,10 @@ def create_app() -> FastAPI:
                 'name': 'Auth',
                 'description': 'Endpoints for user registration and login with JWT token issuing.',
             },
+            {
+                'name': 'Learning',
+                'description': 'Authenticated endpoints for question attempts, answer submission and learning results.',
+            },
         ],
     )
     register_exception_handlers(app)
