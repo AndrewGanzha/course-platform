@@ -1,11 +1,8 @@
-from collections.abc import Callable, Coroutine
-from typing import Any
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, Request, Response, status
+from fastapi import APIRouter, Response, status
 
-from app.application.dto.authenticated_user import AuthenticatedAdmin
 from app.application.use_cases.courses.create_course import (
     CreateCourseCommand,
     CreateCourseUseCase,
@@ -54,6 +51,7 @@ from app.application.use_cases.sections.update_section import (
     UpdateSectionCommand,
     UpdateSectionUseCase,
 )
+from app.domain.entities.user import User
 from app.presentation.api.schemas import (
     CourseResponse,
     CreateCourseRequest,
@@ -71,23 +69,20 @@ from app.presentation.api.schemas import (
 )
 
 
-class AdminDishkaRoute(DishkaRoute):
-    def get_route_handler(
-        self,
-    ) -> Callable[[Request], Coroutine[Any, Any, Response]]:
-        route_handler = super().get_route_handler()
-
-        async def admin_route_handler(request: Request) -> Response:
-            await request.state.dishka_container.get(AuthenticatedAdmin)
-            return await route_handler(request)
-
-        return admin_route_handler
-
-
 router = APIRouter(
     prefix="/admin",
     tags=["Admin"],
-    route_class=AdminDishkaRoute,
+    route_class=DishkaRoute,
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "Author or admin access is required.",
+            "model": ErrorResponse,
+        },
+    },
 )
 
 @router.post(
@@ -107,11 +102,16 @@ router = APIRouter(
     },
 )
 async def create_course(
-        request: CreateCourseRequest,
-        use_case: FromDishka[CreateCourseUseCase]
+    request: CreateCourseRequest,
+    actor: FromDishka[User],
+    use_case: FromDishka[CreateCourseUseCase],
 ) -> CourseResponse:
     result = await use_case.execute(
-        CreateCourseCommand(title=request.title, description=request.description)
+        CreateCourseCommand(
+            actor=actor,
+            title=request.title,
+            description=request.description,
+        )
     )
     return CourseResponse.model_validate(result)
 
@@ -137,10 +137,16 @@ async def create_course(
 async def update_course(
     course_id: UUID,
     request: UpdateCourseRequest,
-    use_case: FromDishka[UpdateCourseUseCase]
+    actor: FromDishka[User],
+    use_case: FromDishka[UpdateCourseUseCase],
 ) -> CourseResponse:
     result = await use_case.execute(
-        UpdateCourseCommand(course_id=course_id, title=request.title, description=request.description)
+        UpdateCourseCommand(
+            actor=actor,
+            course_id=course_id,
+            title=request.title,
+            description=request.description,
+        )
     )
     return CourseResponse.model_validate(result)
 
@@ -160,9 +166,12 @@ async def update_course(
 )
 async def remove_course(
     course_id: UUID,
+    actor: FromDishka[User],
     use_case: FromDishka[RemoveCourseUseCase],
 ) -> Response:
-    await use_case.execute(RemoveCourseCommand(course_id=course_id))
+    await use_case.execute(
+        RemoveCourseCommand(actor=actor, course_id=course_id)
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -187,15 +196,18 @@ async def remove_course(
     },
 )
 async def create_module(
-        course_id: UUID,
-        request: CreateModuleRequest,
-        use_case: FromDishka[CreateModuleUseCase]
+    course_id: UUID,
+    request: CreateModuleRequest,
+    actor: FromDishka[User],
+    use_case: FromDishka[CreateModuleUseCase],
 ) -> ModuleResponse:
     result = await use_case.execute(
-        CreateModuleCommand(course_id=course_id,
-                            title=request.title,
-                            description=request.description,
-                            position=request.position
+        CreateModuleCommand(
+            actor=actor,
+            course_id=course_id,
+            title=request.title,
+            description=request.description,
+            position=request.position,
         )
     )
 
@@ -221,15 +233,18 @@ async def create_module(
     },
 )
 async def update_module(
-        module_id: UUID,
-        request: UpdateModuleRequest,
-        use_case: FromDishka[UpdateModuleUseCase]
+    module_id: UUID,
+    request: UpdateModuleRequest,
+    actor: FromDishka[User],
+    use_case: FromDishka[UpdateModuleUseCase],
 ) -> ModuleResponse:
     result = await use_case.execute(
-        UpdateModuleCommand(module_id=module_id,
-                            title=request.title,
-                            description=request.description,
-                            position=request.position
+        UpdateModuleCommand(
+            actor=actor,
+            module_id=module_id,
+            title=request.title,
+            description=request.description,
+            position=request.position,
         )
     )
     return ModuleResponse.model_validate(result)
@@ -250,9 +265,12 @@ async def update_module(
 )
 async def remove_module(
     module_id: UUID,
+    actor: FromDishka[User],
     use_case: FromDishka[RemoveModuleUseCase],
 ) -> Response:
-    await use_case.execute(RemoveModuleCommand(module_id=module_id))
+    await use_case.execute(
+        RemoveModuleCommand(actor=actor, module_id=module_id)
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -277,15 +295,18 @@ async def remove_module(
     },
 )
 async def create_section(
-        module_id: UUID,
-        request: CreateSectionRequest,
-        use_case: FromDishka[CreateSectionUseCase]
+    module_id: UUID,
+    request: CreateSectionRequest,
+    actor: FromDishka[User],
+    use_case: FromDishka[CreateSectionUseCase],
 ) -> SectionResponse:
     result = await use_case.execute(
-        CreateSectionCommand(module_id=module_id,
-                             title=request.title,
-                             description=request.description,
-                             position=request.position
+        CreateSectionCommand(
+            actor=actor,
+            module_id=module_id,
+            title=request.title,
+            description=request.description,
+            position=request.position,
         )
     )
 
@@ -311,15 +332,18 @@ async def create_section(
 
 )
 async def update_section(
-        section_id: UUID,
-        request: UpdateSectionRequest,
-        use_case: FromDishka[UpdateSectionUseCase]
+    section_id: UUID,
+    request: UpdateSectionRequest,
+    actor: FromDishka[User],
+    use_case: FromDishka[UpdateSectionUseCase],
 ) -> SectionResponse:
     result = await use_case.execute(
-        UpdateSectionCommand(section_id=section_id,
-                             title=request.title,
-                             description=request.description,
-                             position=request.position
+        UpdateSectionCommand(
+            actor=actor,
+            section_id=section_id,
+            title=request.title,
+            description=request.description,
+            position=request.position,
         )
     )
 
@@ -341,9 +365,12 @@ async def update_section(
 )
 async def remove_section(
     section_id: UUID,
+    actor: FromDishka[User],
     use_case: FromDishka[RemoveSectionUseCase],
 ) -> Response:
-    await use_case.execute(RemoveSectionCommand(section_id=section_id))
+    await use_case.execute(
+        RemoveSectionCommand(actor=actor, section_id=section_id)
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -368,12 +395,14 @@ async def remove_section(
     },
 )
 async def create_lecture(
-        section_id: UUID,
-        request: CreateLectureRequest,
-    use_case: FromDishka[CreateLectureUseCase]
+    section_id: UUID,
+    request: CreateLectureRequest,
+    actor: FromDishka[User],
+    use_case: FromDishka[CreateLectureUseCase],
 ) -> LectureResponse:
     result = await use_case.execute(
         CreateLectureCommand(
+            actor=actor,
             section_id=section_id,
             title=request.title,
             content=request.content,
@@ -403,12 +432,14 @@ async def create_lecture(
     },
 )
 async def update_lecture(
-        lecture_id: UUID,
-        request: UpdateLectureRequest,
-    use_case: FromDishka[UpdateLectureUseCase]
+    lecture_id: UUID,
+    request: UpdateLectureRequest,
+    actor: FromDishka[User],
+    use_case: FromDishka[UpdateLectureUseCase],
 ) -> LectureResponse:
     result = await use_case.execute(
         UpdateLectureCommand(
+            actor=actor,
             lecture_id=lecture_id,
             title=request.title,
             content=request.content,
@@ -434,7 +465,10 @@ async def update_lecture(
 )
 async def remove_lecture(
     lecture_id: UUID,
+    actor: FromDishka[User],
     use_case: FromDishka[RemoveLectureUseCase],
 ) -> Response:
-    await use_case.execute(RemoveLectureCommand(lecture_id=lecture_id))
+    await use_case.execute(
+        RemoveLectureCommand(actor=actor, lecture_id=lecture_id)
+    )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
