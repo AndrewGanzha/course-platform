@@ -1,1 +1,17 @@
-Generic single-database configuration with an async dbapi.
+Alembic migrations use one linear revision chain split by bounded context:
+
+- `identity/` - users and authentication data;
+- `content/` - courses and their content structure;
+- `assessment/` - questions and answer options;
+- `learning/` - attempts and learner progress.
+
+Each revision changes one entity. Cross-context foreign keys determine revision
+order, so directories express ownership and do not create Alembic branches.
+Keep `branch_labels` empty and maintain exactly one head.
+
+Always select the owning context when creating a revision, for example:
+
+    alembic revision --version-path migrations/versions/content -m 'add course status'
+
+Revision IDs `18473e67180b` and `9e5503fe7a04` remain compatibility milestones
+for databases that applied the former combined revisions.
