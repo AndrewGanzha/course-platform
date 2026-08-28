@@ -34,6 +34,7 @@ def build_control_model(model_type, seeded_course_tree, control_id):
     if model_type is CourseModel:
         return CourseModel(
             id=control_id,
+            author_id=seeded_course_tree.author_id,
             title="Control course",
             description="Must survive removal of another course.",
         )

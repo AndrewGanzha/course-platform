@@ -22,6 +22,7 @@ async def test_remove_course_returns_204_and_removes_content_tree(
         session.add(
             CourseModel(
                 id=control_course_id,
+                author_id=seeded_course_tree.author_id,
                 title="Control course",
                 description="Must survive removal of another course.",
             )

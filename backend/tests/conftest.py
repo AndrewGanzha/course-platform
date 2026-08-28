@@ -13,10 +13,14 @@ from sqlalchemy.pool import NullPool
 
 import app.presentation.api.dependencies as api_dependencies
 from app.infrastructure.database.models import (
+    AnswerOptionModel,
     Base,
     CourseModel,
     LectureModel,
     ModuleModel,
+    ProgressModel,
+    QuestionAttemptModel,
+    QuestionModel,
     SectionModel,
     UserModel,
 )
@@ -52,6 +56,10 @@ def session_factory(test_engine):
 async def clear_database(session_factory) -> None:
     async with session_factory() as session:
         for model in [
+            AnswerOptionModel,
+            QuestionAttemptModel,
+            ProgressModel,
+            QuestionModel,
             LectureModel,
             SectionModel,
             ModuleModel,
@@ -79,7 +87,7 @@ async def client(app) -> AsyncIterator[AsyncClient]:
         yield client
 
 @pytest_asyncio.fixture
-async def seeded_course_tree(session_factory):
+async def seeded_course_tree(session_factory, seeded_admin_user):
     course_id = str(uuid4())
     module_id = str(uuid4())
     section_id = str(uuid4())
@@ -88,6 +96,7 @@ async def seeded_course_tree(session_factory):
     async with session_factory() as session:
         course = CourseModel(
             id=course_id,
+            author_id=seeded_admin_user.id,
             title='FastAPI course',
             description='Clean architecture in practice.',
         )
@@ -117,6 +126,7 @@ async def seeded_course_tree(session_factory):
 
     return SimpleNamespace(
         course_id=course_id,
+        author_id=seeded_admin_user.id,
         module_id=module_id,
         section_id=section_id,
         lecture_id=lecture_id,
@@ -154,6 +164,124 @@ async def seeded_admin_user(session_factory):
         await session.refresh(user)
         return user
 
+
+@pytest_asyncio.fixture
+async def seeded_author_user(session_factory):
+    hasher = PwdlibPasswordHasher()
+    async with session_factory() as session:
+        user = UserModel(
+            id=str(uuid4()),
+            email='author@example.com',
+            hashed_password=hasher.hash('strongpassword123'),
+            role='author',
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        return user
+
+
+@pytest_asyncio.fixture
+async def seeded_other_author_user(session_factory):
+    hasher = PwdlibPasswordHasher()
+    async with session_factory() as session:
+        user = UserModel(
+            id=str(uuid4()),
+            email='other-author@example.com',
+            hashed_password=hasher.hash('strongpassword123'),
+            role='author',
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        return user
+
+
+@pytest_asyncio.fixture
+async def seeded_interactive_tree(session_factory, seeded_author_user):
+    course_id = str(uuid4())
+    module_id = str(uuid4())
+    section_id = str(uuid4())
+    lecture_id = str(uuid4())
+    question_id = str(uuid4())
+    wrong_option_id = str(uuid4())
+    correct_option_id = str(uuid4())
+
+    async with session_factory() as session:
+        course = CourseModel(
+            id=course_id,
+            author_id=seeded_author_user.id,
+            title='Interactive FastAPI',
+            description='Course with questions inside sections.',
+        )
+        module = ModuleModel(
+            id=module_id,
+            course_id=course_id,
+            title='HTTP',
+            description='Methods',
+            position=1,
+        )
+        section = SectionModel(
+            id=section_id,
+            module_id=module_id,
+            title='Basics',
+            description='Intro section',
+            position=1,
+        )
+        lecture = LectureModel(
+            id=lecture_id,
+            section_id=section_id,
+            title='GET and POST',
+            content='Lecture content',
+            position=1,
+        )
+        question = QuestionModel(
+            id=question_id,
+            section_id=section_id,
+            text='Which method reads a resource?',
+            position=1,
+            question_type='single_choice',
+            max_attempts=2,
+            reward_points=5,
+        )
+        wrong_option = AnswerOptionModel(
+            id=wrong_option_id,
+            question_id=question_id,
+            text='POST',
+            position=1,
+            is_correct=False,
+        )
+        correct_option = AnswerOptionModel(
+            id=correct_option_id,
+            question_id=question_id,
+            text='GET',
+            position=2,
+            is_correct=True,
+        )
+
+        session.add_all(
+            [
+                course,
+                module,
+                section,
+                lecture,
+                question,
+                wrong_option,
+                correct_option,
+            ]
+        )
+        await session.commit()
+
+    return SimpleNamespace(
+        course_id=course_id,
+        module_id=module_id,
+        section_id=section_id,
+        lecture_id=lecture_id,
+        question_id=question_id,
+        wrong_option_id=wrong_option_id,
+        correct_option_id=correct_option_id,
+    )
+
 @pytest_asyncio.fixture
 async def student_auth_headers(client, seeded_student_user):
     response = await client.post(
@@ -172,6 +300,32 @@ async def admin_auth_headers(client, seeded_admin_user):
         '/api/auth/login',
         json={
             'email': 'admin@example.com',
+            'password': 'strongpassword123',
+        },
+    )
+    token = response.json()['access_token']
+    return {'Authorization': f'Bearer {token}'}
+
+
+@pytest_asyncio.fixture
+async def author_auth_headers(client, seeded_author_user):
+    response = await client.post(
+        '/api/auth/login',
+        json={
+            'email': 'author@example.com',
+            'password': 'strongpassword123',
+        },
+    )
+    token = response.json()['access_token']
+    return {'Authorization': f'Bearer {token}'}
+
+
+@pytest_asyncio.fixture
+async def other_author_auth_headers(client, seeded_other_author_user):
+    response = await client.post(
+        '/api/auth/login',
+        json={
+            'email': 'other-author@example.com',
             'password': 'strongpassword123',
         },
     )
