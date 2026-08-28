@@ -57,6 +57,17 @@ class Question:
         self.reward_points = reward_points
         self._validate()
 
+    def add_answer_option(self, answer_option_id: UUID) -> None:
+        if answer_option_id not in self.answer_option_ids:
+            self.answer_option_ids.append(answer_option_id)
+
+    def remove_answer_option(self, answer_option_id: UUID) -> None:
+        if answer_option_id in self.answer_option_ids:
+            self.answer_option_ids.remove(answer_option_id)
+
+    def has_answer_options(self) -> bool:
+        return bool(self.answer_option_ids)
+
     def is_single_choice(self) -> bool:
         return self.question_type is QuestionType.SINGLE_CHOICE
 
