@@ -13,6 +13,9 @@ from app.application.interfaces.services.token_service import TokenService
 from app.application.use_cases.answer_options.create_answer_option import (
     CreateAnswerOptionUseCase,
 )
+from app.application.use_cases.answer_options.remove_answer_option import (
+    RemoveAnswerOptionUseCase,
+)
 from app.application.use_cases.answer_options.update_answer_option import (
     UpdateAnswerOptionUseCase,
 )
@@ -41,6 +44,7 @@ from app.application.use_cases.question_attempts.submit_question_answer import (
     SubmitQuestionAnswerUseCase,
 )
 from app.application.use_cases.questions.create_question import CreateQuestionUseCase
+from app.application.use_cases.questions.remove_question import RemoveQuestionUseCase
 from app.application.use_cases.questions.update_question import UpdateQuestionUseCase
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
 from app.application.use_cases.sections.remove_section import RemoveSectionUseCase
@@ -201,6 +205,13 @@ class ApiProvider(Provider):
         return UpdateQuestionUseCase(uow=uow)
 
     @provide
+    def get_remove_question_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> RemoveQuestionUseCase:
+        return RemoveQuestionUseCase(uow=uow)
+
+    @provide
     def get_create_answer_option_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
@@ -213,6 +224,13 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> UpdateAnswerOptionUseCase:
         return UpdateAnswerOptionUseCase(uow=uow)
+
+    @provide
+    def get_remove_answer_option_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> RemoveAnswerOptionUseCase:
+        return RemoveAnswerOptionUseCase(uow=uow)
 
     @provide
     def get_start_question_attempt_use_case(

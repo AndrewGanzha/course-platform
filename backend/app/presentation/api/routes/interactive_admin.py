@@ -1,11 +1,15 @@
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Response, status
 
 from app.application.use_cases.answer_options.create_answer_option import (
     CreateAnswerOptionCommand,
     CreateAnswerOptionUseCase,
+)
+from app.application.use_cases.answer_options.remove_answer_option import (
+    RemoveAnswerOptionCommand,
+    RemoveAnswerOptionUseCase,
 )
 from app.application.use_cases.answer_options.update_answer_option import (
     UpdateAnswerOptionCommand,
@@ -14,6 +18,10 @@ from app.application.use_cases.answer_options.update_answer_option import (
 from app.application.use_cases.questions.create_question import (
     CreateQuestionCommand,
     CreateQuestionUseCase,
+)
+from app.application.use_cases.questions.remove_question import (
+    RemoveQuestionCommand,
+    RemoveQuestionUseCase,
 )
 from app.application.use_cases.questions.update_question import (
     UpdateQuestionCommand,
@@ -100,6 +108,24 @@ async def update_question(
     return QuestionResponse.model_validate(result)
 
 
+@router.delete(
+    "/questions/{question_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    summary="Remove question",
+    description="Removes an unused question from its section.",
+)
+async def remove_question(
+    question_id: UUID,
+    actor: FromDishka[User],
+    use_case: FromDishka[RemoveQuestionUseCase],
+) -> Response:
+    await use_case.execute(
+        RemoveQuestionCommand(actor=actor, question_id=question_id)
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.post(
     "/questions/{question_id}/answer-options",
     response_model=AnswerOptionResponse,
@@ -149,3 +175,26 @@ async def update_answer_option(
         )
     )
     return AnswerOptionResponse.model_validate(result)
+
+
+@router.delete(
+    "/answer-options/{answer_option_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    summary="Remove answer option",
+    description=(
+        "Removes an answer option if the question remains valid and was not used yet."
+    ),
+)
+async def remove_answer_option(
+    answer_option_id: UUID,
+    actor: FromDishka[User],
+    use_case: FromDishka[RemoveAnswerOptionUseCase],
+) -> Response:
+    await use_case.execute(
+        RemoveAnswerOptionCommand(
+            actor=actor,
+            answer_option_id=answer_option_id,
+        )
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
