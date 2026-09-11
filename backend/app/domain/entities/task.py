@@ -1,7 +1,11 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from app.domain.exceptions import InvalidTaskError
+from app.domain.exceptions import (
+    InvalidTaskError,
+    TaskAlreadySolvedError,
+    TaskAttemptLimitExceededError,
+)
 
 
 @dataclass(slots=True)
@@ -40,3 +44,25 @@ class Task:
 
     def is_single_attempt(self) -> bool:
         return self.max_attempts == 1
+
+    def requires_submission(self) -> bool:
+        return True
+
+    def can_start_attempt(
+        self,
+        existing_attempts_count: int,
+        has_correct_attempt: bool = False,
+    ) -> bool:
+        if has_correct_attempt:
+            return False
+        return existing_attempts_count < self.max_attempts
+
+    def ensure_attempt_available(
+        self,
+        existing_attempts_count: int,
+        has_correct_attempt: bool = False,
+    ) -> None:
+        if has_correct_attempt:
+            raise TaskAlreadySolvedError('Task has already been solved successfully.')
+        if not self.can_start_attempt(existing_attempts_count):
+            raise TaskAttemptLimitExceededError('Task attempt limit has been reached.')

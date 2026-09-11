@@ -63,5 +63,18 @@ class InvalidTaskError(DomainError):
 class SectionTaskAlreadyAttachedError(DomainError):
     pass
 
+
 class SectionTaskNotAttachedError(DomainError):
+    pass
+
+
+class InvalidTaskAttemptError(DomainError):
+    pass
+
+
+class TaskAttemptLimitExceededError(DomainError):
+    pass
+
+
+class TaskAlreadySolvedError(DomainError):
     pass
