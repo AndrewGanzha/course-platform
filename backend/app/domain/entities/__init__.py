@@ -2,11 +2,13 @@ from app.domain.entities.answer_option import AnswerOption
 from app.domain.entities.course import Course
 from app.domain.entities.lecture import Lecture
 from app.domain.entities.module import Module
-from app.domain.entities.question import Question
-from app.domain.entities.question_attempt import QuestionAttempt, QuestionResultStatus
-from app.domain.entities.section import Section
-from app.domain.entities.user import User, UserRole
 from app.domain.entities.progress import Progress
+from app.domain.entities.question import Question
+from app.domain.entities.question_attempt import (QuestionAttempt,
+                                                  QuestionResultStatus)
+from app.domain.entities.section import Section
+from app.domain.entities.task import Task
+from app.domain.entities.user import User, UserRole
 
 __all__ = [
     'Course',
@@ -17,7 +19,8 @@ __all__ = [
     'AnswerOption',
     'QuestionAttempt',
     'QuestionResultStatus',
-    'Progress',
+    'Task',
     'User',
     'UserRole',
+    'Progress',
 ]
