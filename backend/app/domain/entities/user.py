@@ -48,10 +48,19 @@ class User:
     def can_manage_interactive_content(self) -> bool:
         return self.role in {UserRole.ADMIN, UserRole.AUTHOR}
 
+    def can_manage_task_content(self) -> bool:
+        return self.role in {UserRole.ADMIN, UserRole.AUTHOR}
+
     def can_take_learning_activities(self) -> bool:
         return self.is_student()
 
+    def can_submit_task_solutions(self) -> bool:
+        return self.is_student()
+
     def can_view_own_learning_results(self) -> bool:
+        return self.is_student()
+
+    def can_view_own_task_attempts(self) -> bool:
         return self.is_student()
 
     def can_view_all_learning_results(self) -> bool:
@@ -59,3 +68,14 @@ class User:
 
     def can_manage_content(self) -> bool:
         return self.can_manage_learning_content()
+
+    def can_view_own_task_attempts(self) -> bool:
+        return self.is_student()
+
+
+    def can_view_task_attempt_results_as_author(self) -> bool:
+        return self.is_author()
+
+
+    def can_view_task_attempt_results_as_admin(self) -> bool:
+        return self.is_admin()
