@@ -48,3 +48,11 @@ class QuestionAttemptNotFoundError(ApplicationError):
 
 class InvalidProgressError(ApplicationError):
     pass
+
+
+class TaskNotFoundError(ApplicationError):
+    pass
+
+
+class TaskAlreadyUsedError(ApplicationError):
+    pass

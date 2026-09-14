@@ -1,6 +1,9 @@
-from dataclasses import dataclass
-from uuid import UUID
+from dataclasses import dataclass, field
+from enum import StrEnum
+from uuid import UUID, uuid4
+import re
 
+from app.domain.entities.task_attempt import TaskAttempt
 from app.domain.exceptions import (
     InvalidTaskError,
     TaskAlreadySolvedError,
@@ -123,3 +126,51 @@ class Task:
             return re.fullmatch(self.answer_pattern, normalized_actual) is not None
 
         raise InvalidTaskError('Unsupported task check type.')
+
+    def reconfigure(
+        self,
+        title: str,
+        statement: str,
+        position: int,
+        check_type: TaskCheckType,
+        expected_answer: str,
+        accepted_answers: list[str],
+        answer_pattern: str,
+        max_attempts: int,
+        reward_points: int,
+    ) -> None:
+        self.title = title
+        self.statement = statement
+        self.position = position
+        self.check_type = check_type
+        self.expected_answer = expected_answer
+        self.accepted_answers = accepted_answers.copy()
+        self.answer_pattern = answer_pattern
+        self.max_attempts = max_attempts
+        self.reward_points = reward_points
+        self._validate()
+
+    def next_attempt_number(self, existing_attempts_count: int) -> int:
+        if existing_attempts_count < 0:
+            raise InvalidTaskError('Existing attempts count cannot be negative.')
+        return existing_attempts_count + 1
+
+    def create_attempt(
+            self,
+            student_id: UUID,
+            submitted_answer: str,
+            existing_attempts_count: int,
+            has_correct_attempt: bool = False,
+        ) -> TaskAttempt:
+        self.ensure_attempt_available(
+            existing_attempts_count=existing_attempts_count,
+            has_correct_attempt=has_correct_attempt,
+        )
+
+        return TaskAttempt(
+            id=uuid4(),
+            task_id=self.id,
+            student_id=student_id,
+            submitted_answer=submitted_answer,
+            attempt_number=self.next_attempt_number(existing_attempts_count),
+        )

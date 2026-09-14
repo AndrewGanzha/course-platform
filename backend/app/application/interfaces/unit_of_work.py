@@ -1,15 +1,17 @@
 from abc import ABC, abstractmethod
 
 from app.application.interfaces.repositories import (
+    AnswerOptionRepository,
     CourseRepository,
     LectureRepository,
     ModuleRepository,
-    SectionRepository,
-    QuestionRepository,
-    UserRepository,
-    AnswerOptionRepository,
-    QuestionAttemptRepository,
     ProgressRepository,
+    QuestionAttemptRepository,
+    QuestionRepository,
+    SectionRepository,
+    TaskAttemptRepository,
+    TaskRepository,
+    UserRepository,
 )
 
 
@@ -18,10 +20,12 @@ class UnitOfWork(ABC):
     modules: ModuleRepository
     sections: SectionRepository
     lectures: LectureRepository
+    users: UserRepository
     questions: QuestionRepository
     answer_options: AnswerOptionRepository
     question_attempts: QuestionAttemptRepository
-    users: UserRepository
+    tasks: TaskRepository
+    task_attempts: TaskAttemptRepository
     progress: ProgressRepository
 
     @abstractmethod
