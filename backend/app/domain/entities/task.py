@@ -3,7 +3,7 @@ from enum import StrEnum
 from uuid import UUID, uuid4
 import re
 
-from app.domain.entities.task_attempt import TaskAttempt
+from app.domain.entities.task_attempt import TaskAttempt, TaskAttemptStatus
 from app.domain.exceptions import (
     InvalidTaskError,
     TaskAlreadySolvedError,
@@ -174,3 +174,17 @@ class Task:
             submitted_answer=submitted_answer,
             attempt_number=self.next_attempt_number(existing_attempts_count),
         )
+
+    def check_attempt(self, attempt: TaskAttempt) -> None:
+        if attempt.task_id != self.id:
+            raise InvalidTaskError('Task attempt does not belong to this task.')
+
+        is_correct = self.is_correct_answer(attempt.submitted_answer)
+        status = (
+            TaskAttemptStatus.CORRECT
+            if is_correct
+            else TaskAttemptStatus.INCORRECT
+        )
+        awarded_points = self.reward_points if is_correct else 0
+
+        attempt.apply_result(status=status, awarded_points=awarded_points)
