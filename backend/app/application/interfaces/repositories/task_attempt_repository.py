@@ -18,6 +18,14 @@ class TaskAttemptRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def get_by_student_and_task(
+            self,
+            student_id: UUID,
+            task_id: UUID,
+    ) -> list[TaskAttempt]:
+        raise NotImplementedError
+
+    @abstractmethod
     async def exists_by_task_id(self, task_id: UUID) -> bool:
         raise NotImplementedError
 

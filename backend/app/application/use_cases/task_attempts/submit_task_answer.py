@@ -12,6 +12,9 @@ from app.domain.entities.progress import Progress
 from app.domain.entities.task_attempt import TaskAttempt
 from app.domain.entities.user import User
 
+from app.application.interfaces.services.task_checker import TaskChecker
+from app.application.services.simple_task_checker import SimpleTaskChecker
+
 
 @dataclass(slots=True)
 class SubmitTaskAnswerCommand:
@@ -20,8 +23,9 @@ class SubmitTaskAnswerCommand:
     submitted_answer: str
 
 class SubmitTaskAnswerUseCase:
-    def __init__(self, uow: UnitOfWork) -> None:
+    def __init__(self, uow: UnitOfWork, task_checker: TaskChecker | None) -> None:
         self.uow = uow
+        self.task_checker = task_checker or SimpleTaskChecker()
 
     async def execute(self, command: SubmitTaskAnswerCommand) -> TaskAttempt:
         if not command.actor.can_submit_task_solutions():
@@ -32,12 +36,10 @@ class SubmitTaskAnswerUseCase:
             if task is None:
                 raise TaskNotFoundError('Task not found.')
 
-            attempts = await self.uow.task_attempts.list_by_task_id(task.id)
-            student_attempts = [
-                attempt
-                for attempt in attempts
-                if attempt.student_id == command.actor.id
-            ]
+            student_attempts = await self.uow.task_attempts.get_by_student_and_task(
+                student_id=command.actor.id,
+                task_id=task.id,
+            )
             existing_attempts_count = len(student_attempts)
             has_correct_attempt = any(attempt.is_correct() for attempt in student_attempts)
 
@@ -47,7 +49,15 @@ class SubmitTaskAnswerUseCase:
                 existing_attempts_count=existing_attempts_count,
                 has_correct_attempt=has_correct_attempt,
             )
-            task.check_attempt(attempt)
+
+            check_result = await self.task_checker.check(
+                task=task,
+                submitted_answer=attempt.submitted_answer,
+            )
+            attempt.apply_result(
+                status=check_result.status,
+                awarded_points=check_result.awarded_points,
+            )
 
             await self.uow.task_attempts.add(attempt)
 
