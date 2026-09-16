@@ -82,3 +82,9 @@ class TaskAlreadySolvedError(DomainError):
 
 class InvalidCodeTaskError(DomainError):
     pass
+
+class SectionCodeTaskAlreadyAttachedError(DomainError):
+    pass
+
+class SectionCodeTaskNotAttachedError(DomainError):
+    pass
