@@ -78,3 +78,7 @@ class TaskAttemptLimitExceededError(DomainError):
 
 class TaskAlreadySolvedError(DomainError):
     pass
+
+
+class InvalidCodeTaskError(DomainError):
+    pass

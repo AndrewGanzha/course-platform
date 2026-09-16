@@ -27,3 +27,7 @@ class ProgressModel(Base):
         default=list,
     )
     total_points: Mapped[int] = mapped_column(Integer, default=0)
+    completed_task_ids: Mapped[list[str]] = mapped_column(
+        MutableList.as_mutable(JSON),
+        default=list,
+    )
