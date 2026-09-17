@@ -2,20 +2,24 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
 from app.application.exceptions import (
-    ApplicationError,
     AnswerOptionNotFoundError,
+    ApplicationError,
     CourseNotFoundError,
     LectureNotFoundError,
     ModuleNotFoundError,
-    PermissionDeniedError as ApplicationPermissionDeniedError,
     QuestionAttemptNotFoundError,
     QuestionNotFoundError,
     SectionNotFoundError,
+)
+from app.application.exceptions import (
+    PermissionDeniedError as ApplicationPermissionDeniedError,
 )
 from app.domain.exceptions import DomainError
 from app.presentation.api.schemas import ErrorResponse
 from app.presentation.exceptions import (
     AuthenticationError,
+)
+from app.presentation.exceptions import (
     PermissionDeniedError as PresentationPermissionDeniedError,
 )
 

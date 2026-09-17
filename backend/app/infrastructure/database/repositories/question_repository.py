@@ -4,7 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.application.interfaces.repositories.question_repository import QuestionRepository
+from app.application.interfaces.repositories.question_repository import (
+    QuestionRepository,
+)
 from app.domain.entities.question import Question
 from app.infrastructure.database.mappers.question_mapper import QuestionMapper
 from app.infrastructure.database.models.question_model import QuestionModel

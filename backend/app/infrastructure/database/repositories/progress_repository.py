@@ -3,7 +3,9 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.interfaces.repositories.progress_repository import ProgressRepository
+from app.application.interfaces.repositories.progress_repository import (
+    ProgressRepository,
+)
 from app.domain.entities.progress import Progress
 from app.infrastructure.database.mappers.progress_mapper import ProgressMapper
 from app.infrastructure.database.models.progress_model import ProgressModel

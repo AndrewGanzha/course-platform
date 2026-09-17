@@ -7,13 +7,12 @@ from app.application.exceptions import (
     SectionNotFoundError,
     TaskNotFoundError,
 )
+from app.application.interfaces.services.task_checker import TaskChecker
 from app.application.interfaces.unit_of_work import UnitOfWork
+from app.application.services.simple_task_checker import SimpleTaskChecker
 from app.domain.entities.progress import Progress
 from app.domain.entities.task_attempt import TaskAttempt
 from app.domain.entities.user import User
-
-from app.application.interfaces.services.task_checker import TaskChecker
-from app.application.services.simple_task_checker import SimpleTaskChecker
 
 
 @dataclass(slots=True)

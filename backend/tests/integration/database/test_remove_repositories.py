@@ -21,7 +21,6 @@ from app.infrastructure.database.repositories.section_repository import (
     SqlAlchemySectionRepository,
 )
 
-
 REPOSITORIES = (
     SqlAlchemyCourseRepository,
     SqlAlchemyModuleRepository,

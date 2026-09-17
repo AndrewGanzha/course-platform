@@ -3,20 +3,28 @@ from uuid import UUID
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter
 
-from app.application.use_cases.courses.get_course import GetCourseQuery, GetCourseUseCase
+from app.application.use_cases.courses.get_course import (
+    GetCourseQuery,
+    GetCourseUseCase,
+)
 from app.application.use_cases.courses.get_course_structure import (
     GetCourseStructureQuery,
     GetCourseStructureUseCase,
 )
-from app.application.use_cases.courses.get_courses import GetCoursesQuery, GetCoursesUseCase
-from app.application.use_cases.lectures.get_lecture import GetLectureQuery, GetLectureUseCase
+from app.application.use_cases.courses.get_courses import (
+    GetCoursesQuery,
+    GetCoursesUseCase,
+)
+from app.application.use_cases.lectures.get_lecture import (
+    GetLectureQuery,
+    GetLectureUseCase,
+)
 from app.presentation.api.schemas import (
     CourseListItemResponse,
     CourseResponse,
     CourseStructureResponse,
     LectureResponse,
 )
-
 from app.presentation.api.schemas.errors import ErrorResponse
 
 router = APIRouter(tags=["Content"], route_class=DishkaRoute)

@@ -1,3 +1,10 @@
+from app.presentation.api.schemas.auth import (
+    CurrentUserResponse,
+    LoginRequest,
+    RegisteredUserResponse,
+    RegisterUserRequest,
+    TokenResponse,
+)
 from app.presentation.api.schemas.content import (
     CourseListItemResponse,
     CourseResponse,
@@ -7,27 +14,25 @@ from app.presentation.api.schemas.content import (
     ModuleStructureResponse,
     SectionStructureResponse,
 )
-from app.presentation.api.schemas.courses import CreateCourseRequest, UpdateCourseRequest
+from app.presentation.api.schemas.courses import (
+    CreateCourseRequest,
+    UpdateCourseRequest,
+)
 from app.presentation.api.schemas.errors import ErrorResponse
-from app.presentation.api.schemas.lectures import CreateLectureRequest, UpdateLectureRequest
+from app.presentation.api.schemas.lectures import (
+    CreateLectureRequest,
+    UpdateLectureRequest,
+)
 from app.presentation.api.schemas.modules import (
     CreateModuleRequest,
     ModuleResponse,
     UpdateModuleRequest,
 )
-from app.presentation.api.schemas.sections import (
-    CreateSectionRequest,
-    SectionResponse,
-    UpdateSectionRequest,
+from app.presentation.api.schemas.question_attempts import (
+    QuestionAttemptResultResponse,
+    StartQuestionAttemptResponse,
+    SubmitQuestionAnswerRequest,
 )
-from app.presentation.api.schemas.auth import (
-    CurrentUserResponse,
-    LoginRequest,
-    RegisteredUserResponse,
-    RegisterUserRequest,
-    TokenResponse,
-)
-
 from app.presentation.api.schemas.questions import (
     AnswerOptionResponse,
     CreateAnswerOptionRequest,
@@ -36,11 +41,10 @@ from app.presentation.api.schemas.questions import (
     UpdateAnswerOptionRequest,
     UpdateQuestionRequest,
 )
-
-from app.presentation.api.schemas.question_attempts import (
-    QuestionAttemptResultResponse,
-    StartQuestionAttemptResponse,
-    SubmitQuestionAnswerRequest,
+from app.presentation.api.schemas.sections import (
+    CreateSectionRequest,
+    SectionResponse,
+    UpdateSectionRequest,
 )
 
 __all__ = [

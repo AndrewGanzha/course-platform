@@ -1,6 +1,5 @@
-from fastapi import APIRouter, status
-
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
+from fastapi import APIRouter, status
 
 from app.application.dto.authenticated_user import AuthenticatedUser
 from app.application.use_cases.auth.login_user import (

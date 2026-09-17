@@ -1,4 +1,7 @@
-from app.application.interfaces.services.task_checker import TaskCheckResult, TaskChecker
+from app.application.interfaces.services.task_checker import (
+    TaskChecker,
+    TaskCheckResult,
+)
 from app.domain.entities.task import Task
 from app.domain.entities.task_attempt import TaskAttemptStatus
 

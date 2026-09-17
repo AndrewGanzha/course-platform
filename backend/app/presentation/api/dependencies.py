@@ -20,7 +20,9 @@ from app.application.use_cases.auth.login_user import LoginUserUseCase
 from app.application.use_cases.auth.register_user import RegisterUserUseCase
 from app.application.use_cases.courses.create_course import CreateCourseUseCase
 from app.application.use_cases.courses.get_course import GetCourseUseCase
-from app.application.use_cases.courses.get_course_structure import GetCourseStructureUseCase
+from app.application.use_cases.courses.get_course_structure import (
+    GetCourseStructureUseCase,
+)
 from app.application.use_cases.courses.get_courses import GetCoursesUseCase
 from app.application.use_cases.courses.remove_course import RemoveCourseUseCase
 from app.application.use_cases.courses.update_course import UpdateCourseUseCase

@@ -3,7 +3,9 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.interfaces.repositories.answer_option_repository import AnswerOptionRepository
+from app.application.interfaces.repositories.answer_option_repository import (
+    AnswerOptionRepository,
+)
 from app.domain.entities.answer_option import AnswerOption
 from app.infrastructure.database.mappers.answer_option_mapper import AnswerOptionMapper
 from app.infrastructure.database.models.answer_option_model import AnswerOptionModel

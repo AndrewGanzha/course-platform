@@ -1,8 +1,8 @@
 import os
 from collections.abc import AsyncIterator
+from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4
-from pathlib import Path
 
 import pytest
 import pytest_asyncio
@@ -26,6 +26,7 @@ from app.infrastructure.database.models import (
 )
 from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
 from app.main import create_app
+
 
 @pytest_asyncio.fixture(scope="session")
 async def test_engine(tmp_path_factory) -> AsyncIterator:

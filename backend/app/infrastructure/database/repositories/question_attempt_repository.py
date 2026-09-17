@@ -3,10 +3,16 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.interfaces.repositories.question_attempt_repository import QuestionAttemptRepository
+from app.application.interfaces.repositories.question_attempt_repository import (
+    QuestionAttemptRepository,
+)
 from app.domain.entities.question_attempt import QuestionAttempt
-from app.infrastructure.database.mappers.question_attempt_mapper import QuestionAttemptMapper
-from app.infrastructure.database.models.question_attempt_model import QuestionAttemptModel
+from app.infrastructure.database.mappers.question_attempt_mapper import (
+    QuestionAttemptMapper,
+)
+from app.infrastructure.database.models.question_attempt_model import (
+    QuestionAttemptModel,
+)
 
 
 class SqlAlchemyQuestionAttemptRepository(QuestionAttemptRepository):

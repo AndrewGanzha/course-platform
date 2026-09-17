@@ -4,11 +4,13 @@ from app.application.exceptions import (
     CourseNotFoundError,
     ModuleNotFoundError,
     PermissionDeniedError,
+    QuestionNotFoundError,
     SectionNotFoundError,
 )
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.domain.entities.course import Course
 from app.domain.entities.module import Module
+from app.domain.entities.question import Question
 from app.domain.entities.section import Section
 from app.domain.entities.user import User
 

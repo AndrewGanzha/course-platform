@@ -3,7 +3,9 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.interfaces.repositories.task_attempt_repository import TaskAttemptRepository
+from app.application.interfaces.repositories.task_attempt_repository import (
+    TaskAttemptRepository,
+)
 from app.domain.entities.task_attempt import TaskAttempt
 from app.infrastructure.database.mappers.task_attempt_mapper import TaskAttemptMapper
 from app.infrastructure.database.models.task_attempt_model import TaskAttemptModel

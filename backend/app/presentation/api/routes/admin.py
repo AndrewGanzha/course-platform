@@ -58,6 +58,7 @@ from app.presentation.api.schemas import (
     CreateLectureRequest,
     CreateModuleRequest,
     CreateSectionRequest,
+    ErrorResponse,
     LectureResponse,
     ModuleResponse,
     SectionResponse,
@@ -65,9 +66,7 @@ from app.presentation.api.schemas import (
     UpdateLectureRequest,
     UpdateModuleRequest,
     UpdateSectionRequest,
-    ErrorResponse,
 )
-
 
 router = APIRouter(
     prefix="/admin",

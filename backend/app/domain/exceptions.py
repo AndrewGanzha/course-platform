@@ -88,3 +88,15 @@ class SectionCodeTaskAlreadyAttachedError(DomainError):
 
 class SectionCodeTaskNotAttachedError(DomainError):
     pass
+
+
+class InvalidCodeSubmissionError(DomainError):
+    pass
+
+
+class CodeSubmissionLimitExceededError(DomainError):
+    pass
+
+
+class CodeTaskAlreadySolvedError(DomainError):
+    pass

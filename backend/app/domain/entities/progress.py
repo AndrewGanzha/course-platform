@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
 from uuid import UUID
 
+from app.domain.entities.module import Module
+from app.domain.entities.question_attempt import QuestionAttempt
+from app.domain.entities.section import Section
 from app.domain.entities.task_attempt import TaskAttempt
 from app.domain.exceptions import InvalidProgressError
 
@@ -64,14 +67,6 @@ class Progress:
         self.mark_question_completed(attempt.question_id)
         self.add_points(attempt.awarded_points)
         return True
-
-    def sync_section_completion(self, section: Section) -> bool:
-        if not section.is_completed_by(self.completed_question_ids):
-            return False
-
-        already_completed = self.has_completed_section(section.id)
-        self.mark_section_completed(section.id)
-        return not already_completed
 
     def completed_sections_count(self) -> int:
         return len(self.completed_section_ids)

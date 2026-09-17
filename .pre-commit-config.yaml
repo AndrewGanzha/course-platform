@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --project backend ruff check --config backend/pyproject.toml
+        language: system
+        files: ^backend/.*\.py$
+        types: [python]

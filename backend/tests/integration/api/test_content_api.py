@@ -2,6 +2,7 @@ from uuid import uuid4
 
 import pytest
 
+
 @pytest.mark.asyncio
 async def test_get_courses_returns_public_list(client, seeded_course_tree):
     response = await client.get('/api/courses')

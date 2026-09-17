@@ -1,7 +1,9 @@
 from uuid import UUID
 
 from app.domain.entities.question_attempt import QuestionAttempt, QuestionResultStatus
-from app.infrastructure.database.models.question_attempt_model import QuestionAttemptModel
+from app.infrastructure.database.models.question_attempt_model import (
+    QuestionAttemptModel,
+)
 
 
 class QuestionAttemptMapper:

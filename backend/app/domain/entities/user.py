@@ -69,10 +69,6 @@ class User:
     def can_manage_content(self) -> bool:
         return self.can_manage_learning_content()
 
-    def can_view_own_task_attempts(self) -> bool:
-        return self.is_student()
-
-
     def can_view_task_attempt_results_as_author(self) -> bool:
         return self.is_author()
 

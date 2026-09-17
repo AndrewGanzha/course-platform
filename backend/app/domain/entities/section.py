@@ -1,6 +1,6 @@
+from collections.abc import Collection
 from dataclasses import dataclass, field
 from uuid import UUID
-from collections.abc import Collection
 
 from app.domain.exceptions import (
     InvalidSectionError,

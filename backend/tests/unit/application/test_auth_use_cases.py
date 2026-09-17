@@ -1,13 +1,13 @@
 from uuid import uuid4
+
 import pytest
 
-from app.application.exceptions import UserAlreadyExistsError
+from app.application.exceptions import InvalidCredentialsError, UserAlreadyExistsError
+from app.application.use_cases.auth.login_user import LoginUserCommand, LoginUserUseCase
 from app.application.use_cases.auth.register_user import (
     RegisterUserCommand,
     RegisterUserUseCase,
 )
-from app.application.exceptions import InvalidCredentialsError
-from app.application.use_cases.auth.login_user import LoginUserCommand, LoginUserUseCase
 from app.domain.entities.user import User, UserRole
 
 

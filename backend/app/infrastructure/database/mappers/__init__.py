@@ -3,7 +3,9 @@ from app.infrastructure.database.mappers.course_mapper import CourseMapper
 from app.infrastructure.database.mappers.lecture_mapper import LectureMapper
 from app.infrastructure.database.mappers.module_mapper import ModuleMapper
 from app.infrastructure.database.mappers.progress_mapper import ProgressMapper
-from app.infrastructure.database.mappers.question_attempt_mapper import QuestionAttemptMapper
+from app.infrastructure.database.mappers.question_attempt_mapper import (
+    QuestionAttemptMapper,
+)
 from app.infrastructure.database.mappers.question_mapper import QuestionMapper
 from app.infrastructure.database.mappers.section_mapper import SectionMapper
 from app.infrastructure.database.mappers.task_attempt_mapper import TaskAttemptMapper

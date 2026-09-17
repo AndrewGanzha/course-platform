@@ -1,7 +1,7 @@
+import re
 from dataclasses import dataclass, field
 from enum import StrEnum
 from uuid import UUID, uuid4
-import re
 
 from app.domain.entities.task_attempt import TaskAttempt, TaskAttemptStatus
 from app.domain.exceptions import (
@@ -9,6 +9,7 @@ from app.domain.exceptions import (
     TaskAlreadySolvedError,
     TaskAttemptLimitExceededError,
 )
+
 
 class TaskCheckType(StrEnum):
     EXACT_MATCH = 'exact_match'
@@ -96,11 +97,6 @@ class Task:
 
     def normalize_answer(self, answer: str) -> str:
         return answer.strip()
-
-    def is_correct_answer(self, answer: str) -> bool:
-        normalized_actual = self.normalize_answer(answer)
-        normalized_expected = self.normalize_answer(self.expected_answer)
-        return normalized_actual == normalized_expected
 
     def normalized_accepted_answers(self) -> list[str]:
         normalized: list[str] = []

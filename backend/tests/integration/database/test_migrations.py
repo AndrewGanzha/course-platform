@@ -7,7 +7,6 @@ from pathlib import Path
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 
-
 BACKEND_ROOT = Path(__file__).resolve().parents[3]
 ALEMBIC_CONFIG = BACKEND_ROOT / 'alembic.ini'
 
@@ -22,9 +21,23 @@ REVISION_CHAIN = [
     '9e430cf12b91',
     '88447622b6d8',
     '9e5503fe7a04',
+    '9ce3331e8ef9',
+]
+REVISION_CONTEXTS = [
+    'identity',
+    'content',
+    'content',
+    'content',
+    'content',
+    'content',
+    'learning',
+    'assessment',
+    'assessment',
+    'learning',
+    'learning',
 ]
 INITIAL_REVISION = '18473e67180b'
-HEAD_REVISION = '9e5503fe7a04'
+HEAD_REVISION = '9ce3331e8ef9'
 
 INITIAL_TABLES = {
     'courses',
@@ -38,6 +51,8 @@ HEAD_TABLES = INITIAL_TABLES | {
     'progress',
     'question_attempts',
     'questions',
+    'task_attempts',
+    'tasks',
 }
 
 
@@ -125,9 +140,9 @@ def test_revision_chain_is_linear_and_grouped_by_context() -> None:
     assert [revision.revision for revision in revisions] == REVISION_CHAIN
     assert scripts.get_bases() == [REVISION_CHAIN[0]]
     assert scripts.get_heads() == [HEAD_REVISION]
-    assert {
+    assert [
         Path(revision.path).parent.name for revision in revisions
-    } == {'identity', 'content', 'assessment', 'learning'}
+    ] == REVISION_CONTEXTS
 
 
 def test_fresh_database_upgrades_and_downgrades_cleanly(tmp_path: Path) -> None:
