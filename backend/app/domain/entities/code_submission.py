@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from uuid import UUID
 
+from app.domain.entities.execution_result import ExecutionResult, ExecutionStatus
 from app.domain.exceptions import InvalidCodeSubmissionError
 
 
@@ -64,3 +65,29 @@ class CodeSubmission:
             )
         self.status = CodeSubmissionStatus.ERROR
         self.finished_at = datetime.now(UTC)
+
+    def apply_execution_result(self, result: ExecutionResult) -> None:
+        if result.submission_id != self.id:
+            raise InvalidCodeSubmissionError(
+                "Execution result does not belong to this submission."
+            )
+        if not result.is_final():
+            raise InvalidCodeSubmissionError(
+                "Only final execution result can be applied to submission."
+            )
+        if self.status is not CodeSubmissionStatus.RUNNING:
+            raise InvalidCodeSubmissionError(
+                "Only running submission can accept final execution result."
+            )
+
+        if result.status is ExecutionStatus.PASSED:
+            self.mark_passed()
+            return
+        if result.status is ExecutionStatus.FAILED:
+            self.mark_failed()
+            return
+        if result.status is ExecutionStatus.ERROR:
+            self.mark_error()
+            return
+
+        raise InvalidCodeSubmissionError("Unsupported execution result status.")

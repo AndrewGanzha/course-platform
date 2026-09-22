@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from uuid import UUID, uuid4
 
@@ -27,6 +27,7 @@ class CodeTask:
     reward_points: int = 1
     time_limit_seconds: int = 2
     memory_limit_mb: int = 128
+    test_case_ids: list[UUID] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self._validate()
@@ -125,3 +126,14 @@ class CodeTask:
             source_code=source_code,
             attempt_number=self.next_submission_number(existing_submissions_count),
         )
+
+    def add_test_case(self, test_case_id: UUID) -> None:
+        if test_case_id not in self.test_case_ids:
+            self.test_case_ids.append(test_case_id)
+
+    def remove_test_case(self, test_case_id: UUID) -> None:
+        if test_case_id in self.test_case_ids:
+            self.test_case_ids.remove(test_case_id)
+
+    def has_test_cases(self) -> bool:
+        return bool(self.test_case_ids)
