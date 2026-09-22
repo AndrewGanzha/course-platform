@@ -24,27 +24,27 @@ from app.presentation.api.schemas import (
 )
 
 router = APIRouter(
-    prefix='/learning',
-    tags=['Learning'],
+    prefix="/learning",
+    tags=["Learning"],
     route_class=DishkaRoute,
     responses={
         401: {
-            'description': 'Authentication credentials are missing or invalid.',
-            'model': ErrorResponse,
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
         },
         403: {
-            'description': 'User cannot perform this learning action.',
-            'model': ErrorResponse,
+            "description": "User cannot perform this learning action.",
+            "model": ErrorResponse,
         },
     },
 )
 
 
 @router.get(
-    '/questions/{question_id}/attempt',
+    "/questions/{question_id}/attempt",
     response_model=StartQuestionAttemptResponse,
-    summary='Get question attempt context',
-    description='Returns all data required before the student submits a new answer.',
+    summary="Get question attempt context",
+    description="Returns all data required before the student submits a new answer.",
 )
 async def start_question_attempt(
     question_id: UUID,
@@ -61,11 +61,11 @@ async def start_question_attempt(
 
 
 @router.post(
-    '/questions/{question_id}/attempts',
+    "/questions/{question_id}/attempts",
     response_model=QuestionAttemptResultResponse,
     status_code=status.HTTP_201_CREATED,
-    summary='Submit question answer',
-    description='Creates a new question attempt and immediately applies the result.',
+    summary="Submit question answer",
+    description="Creates a new question attempt and immediately applies the result.",
 )
 async def submit_question_answer(
     question_id: UUID,
@@ -92,10 +92,10 @@ async def submit_question_answer(
 
 
 @router.get(
-    '/attempts/{attempt_id}/result',
+    "/attempts/{attempt_id}/result",
     response_model=QuestionAttemptResultResponse,
-    summary='Get question attempt result',
-    description='Returns a previously stored result of the selected question attempt.',
+    summary="Get question attempt result",
+    description="Returns a previously stored result of the selected question attempt.",
 )
 async def get_question_attempt_result(
     attempt_id: UUID,

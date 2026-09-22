@@ -1,4 +1,5 @@
 from app.domain.entities.answer_option import AnswerOption
+from app.domain.entities.code_submission import CodeSubmission, CodeSubmissionStatus
 from app.domain.entities.code_task import CodeTask, CodeTaskLanguage
 from app.domain.entities.course import Course
 from app.domain.entities.lecture import Lecture
@@ -11,18 +12,20 @@ from app.domain.entities.task import Task
 from app.domain.entities.user import User, UserRole
 
 __all__ = [
-    'Course',
-    'Module',
-    'Section',
-    'Lecture',
-    'Question',
-    'AnswerOption',
-    'QuestionAttempt',
-    'QuestionResultStatus',
-    'Task',
-    'User',
-    'UserRole',
-    'Progress',
-    'CodeTask',
-    'CodeTaskLanguage',
+    "Course",
+    "Module",
+    "Section",
+    "Lecture",
+    "Question",
+    "AnswerOption",
+    "QuestionAttempt",
+    "QuestionResultStatus",
+    "Task",
+    "User",
+    "UserRole",
+    "Progress",
+    "CodeTask",
+    "CodeTaskLanguage",
+    "CodeSubmission",
+    "CodeSubmissionStatus",
 ]

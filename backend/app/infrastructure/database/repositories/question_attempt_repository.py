@@ -20,7 +20,9 @@ class SqlAlchemyQuestionAttemptRepository(QuestionAttemptRepository):
         self.session = session
 
     async def get_by_id(self, attempt_id: UUID) -> QuestionAttempt | None:
-        stmt = select(QuestionAttemptModel).where(QuestionAttemptModel.id == str(attempt_id))
+        stmt = select(QuestionAttemptModel).where(
+            QuestionAttemptModel.id == str(attempt_id)
+        )
         result = await self.session.execute(stmt)
         model = result.scalar_one_or_none()
         return None if model is None else QuestionAttemptMapper.to_domain(model)
@@ -39,7 +41,9 @@ class SqlAlchemyQuestionAttemptRepository(QuestionAttemptRepository):
             .order_by(QuestionAttemptModel.attempt_number)
         )
         result = await self.session.execute(stmt)
-        return [QuestionAttemptMapper.to_domain(model) for model in result.scalars().all()]
+        return [
+            QuestionAttemptMapper.to_domain(model) for model in result.scalars().all()
+        ]
 
     async def exists_by_question_id(self, question_id: UUID) -> bool:
         stmt = (

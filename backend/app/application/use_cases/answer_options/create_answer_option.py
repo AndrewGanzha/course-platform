@@ -29,17 +29,19 @@ class CreateAnswerOptionUseCase:
         async with self.uow:
             question = await self.uow.questions.get_by_id(command.question_id)
             if question is None:
-                raise QuestionNotFoundError('Question not found.')
+                raise QuestionNotFoundError("Question not found.")
 
             await self.course_access_service.ensure_can_manage_section(
                 actor=command.actor,
                 section_id=question.section_id,
             )
 
-            has_attempts = await self.uow.question_attempts.exists_by_question_id(question.id)
+            has_attempts = await self.uow.question_attempts.exists_by_question_id(
+                question.id
+            )
             if has_attempts:
                 raise QuestionAlreadyUsedError(
-                    'Question already has student attempts and cannot be changed safely.'
+                    "Question already has student attempts and cannot be changed safely."
                 )
 
             answer_option = AnswerOption(

@@ -12,64 +12,64 @@ async def test_interactive_flow_from_author_setup_to_student_progress(
     session_factory,
 ):
     course_response = await client.post(
-        '/api/admin/courses',
+        "/api/admin/courses",
         headers=author_auth_headers,
         json={
-            'title': 'Interactive FastAPI',
-            'description': 'Course with questions inside sections.',
+            "title": "Interactive FastAPI",
+            "description": "Course with questions inside sections.",
         },
     )
-    course_id = course_response.json()['id']
+    course_id = course_response.json()["id"]
 
     module_response = await client.post(
-        f'/api/admin/courses/{course_id}/modules',
+        f"/api/admin/courses/{course_id}/modules",
         headers=author_auth_headers,
-        json={'title': 'HTTP', 'description': 'Methods', 'position': 1},
+        json={"title": "HTTP", "description": "Methods", "position": 1},
     )
-    module_id = module_response.json()['id']
+    module_id = module_response.json()["id"]
 
     section_response = await client.post(
-        f'/api/admin/modules/{module_id}/sections',
+        f"/api/admin/modules/{module_id}/sections",
         headers=author_auth_headers,
-        json={'title': 'Basics', 'description': 'Intro', 'position': 1},
+        json={"title": "Basics", "description": "Intro", "position": 1},
     )
-    section_id = section_response.json()['id']
+    section_id = section_response.json()["id"]
 
     question_response = await client.post(
-        f'/api/admin/sections/{section_id}/questions',
+        f"/api/admin/sections/{section_id}/questions",
         headers=author_auth_headers,
         json={
-            'text': 'Which method reads a resource?',
-            'position': 1,
-            'question_type': 'single_choice',
-            'max_attempts': 2,
-            'reward_points': 5,
+            "text": "Which method reads a resource?",
+            "position": 1,
+            "question_type": "single_choice",
+            "max_attempts": 2,
+            "reward_points": 5,
         },
     )
-    question_id = question_response.json()['id']
+    question_id = question_response.json()["id"]
 
     await client.post(
-        f'/api/admin/questions/{question_id}/answer-options',
+        f"/api/admin/questions/{question_id}/answer-options",
         headers=author_auth_headers,
-        json={'text': 'POST', 'position': 1, 'is_correct': False},
+        json={"text": "POST", "position": 1, "is_correct": False},
     )
     correct_option_response = await client.post(
-        f'/api/admin/questions/{question_id}/answer-options',
+        f"/api/admin/questions/{question_id}/answer-options",
         headers=author_auth_headers,
-        json={'text': 'GET', 'position': 2, 'is_correct': True},
+        json={"text": "GET", "position": 2, "is_correct": True},
     )
-    correct_option_id = correct_option_response.json()['id']
+    correct_option_id = correct_option_response.json()["id"]
 
     start_response = await client.get(
-        f'/api/learning/questions/{question_id}/attempt',
+        f"/api/learning/questions/{question_id}/attempt",
         headers=student_auth_headers,
     )
     assert start_response.status_code == 200
 
     submit_response = await client.post(
-        f'/api/learning/questions/{question_id}/attempts',
+        f"/api/learning/questions/{question_id}/attempts",
         headers=student_auth_headers,
-        json={'selected_option_ids': [correct_option_id]},
+        json={"selected_option_ids": [correct_option_id]},
     )
     assert submit_response.status_code == 201
 

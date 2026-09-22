@@ -17,9 +17,9 @@ class Course:
 
     def _validate(self) -> None:
         if not self.title or not self.title.strip():
-            raise InvalidCourseError('Course title cannot be empty.')
+            raise InvalidCourseError("Course title cannot be empty.")
         if not self.description or not self.description.strip():
-            raise InvalidCourseError('Course description cannot be empty.')
+            raise InvalidCourseError("Course description cannot be empty.")
 
     def update(self, title: str, description: str) -> None:
         self.title = title

@@ -16,7 +16,7 @@ class SectionStructureDTO:
     description: str
     position: int
     question_ids: list[UUID] = field(default_factory=list)
-    task_ids: list[UUID] = field(default_factory=list)     # New
+    task_ids: list[UUID] = field(default_factory=list)  # New
     lectures: list[LectureStructureDTO] = field(default_factory=list)
 
 

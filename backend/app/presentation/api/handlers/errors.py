@@ -159,5 +159,9 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(SectionNotFoundError, section_not_found_handler)
     app.add_exception_handler(LectureNotFoundError, lecture_not_found_handler)
     app.add_exception_handler(QuestionNotFoundError, question_not_found_handler)
-    app.add_exception_handler(AnswerOptionNotFoundError, answer_option_not_found_handler)
-    app.add_exception_handler(QuestionAttemptNotFoundError, question_attempt_not_found_handler)
+    app.add_exception_handler(
+        AnswerOptionNotFoundError, answer_option_not_found_handler
+    )
+    app.add_exception_handler(
+        QuestionAttemptNotFoundError, question_attempt_not_found_handler
+    )

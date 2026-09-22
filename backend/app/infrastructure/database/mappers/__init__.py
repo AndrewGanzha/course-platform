@@ -13,15 +13,15 @@ from app.infrastructure.database.mappers.task_mapper import TaskMapper
 from app.infrastructure.database.mappers.user_mapper import UserMapper
 
 __all__ = [
-    'CourseMapper',
-    'ModuleMapper',
-    'SectionMapper',
-    'LectureMapper',
-    'UserMapper',
-    'QuestionMapper',
-    'AnswerOptionMapper',
-    'QuestionAttemptMapper',
-    'TaskMapper',
-    'TaskAttemptMapper',
-    'ProgressMapper',
+    "CourseMapper",
+    "ModuleMapper",
+    "SectionMapper",
+    "LectureMapper",
+    "UserMapper",
+    "QuestionMapper",
+    "AnswerOptionMapper",
+    "QuestionAttemptMapper",
+    "TaskMapper",
+    "TaskAttemptMapper",
+    "ProgressMapper",
 ]

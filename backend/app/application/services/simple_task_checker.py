@@ -11,9 +11,7 @@ class SimpleTaskChecker(TaskChecker):
         is_correct = task.is_correct_answer(submitted_answer)
         return TaskCheckResult(
             status=(
-                TaskAttemptStatus.CORRECT
-                if is_correct
-                else TaskAttemptStatus.INCORRECT
+                TaskAttemptStatus.CORRECT if is_correct else TaskAttemptStatus.INCORRECT
             ),
             awarded_points=task.reward_points if is_correct else 0,
         )

@@ -48,18 +48,19 @@ class FakeUnitOfWork:
 
 class StubPasswordHasher:
     def hash(self, raw_password: str) -> str:
-        return f'hashed::{raw_password}'
+        return f"hashed::{raw_password}"
 
     def verify(self, raw_password: str, hashed_password: str) -> bool:
-        return hashed_password == f'hashed::{raw_password}'
+        return hashed_password == f"hashed::{raw_password}"
 
 
 class StubTokenService:
     def create_access_token(self, user_id, role: str) -> str:
-        return f'token-for-{user_id}-{role}'
+        return f"token-for-{user_id}-{role}"
 
     def get_user_id(self, token: str):
         raise NotImplementedError
+
 
 @pytest.mark.asyncio
 async def test_register_user_creates_student_and_commits() -> None:
@@ -68,14 +69,14 @@ async def test_register_user_creates_student_and_commits() -> None:
 
     result = await use_case.execute(
         RegisterUserCommand(
-            email='student@example.com',
-            password='secret123',
+            email="student@example.com",
+            password="secret123",
         )
     )
 
-    assert result.email == 'student@example.com'
+    assert result.email == "student@example.com"
     assert result.role is UserRole.STUDENT
-    assert result.hashed_password == 'hashed::secret123'
+    assert result.hashed_password == "hashed::secret123"
     assert uow.committed is True
 
 
@@ -84,8 +85,8 @@ async def test_register_user_raises_error_when_email_already_exists() -> None:
     uow = FakeUnitOfWork()
     existing_user = User(
         id=uuid4(),
-        email='student@example.com',
-        hashed_password='hashed::secret123',
+        email="student@example.com",
+        hashed_password="hashed::secret123",
         role=UserRole.STUDENT,
     )
     await uow.users.add(existing_user)
@@ -95,18 +96,19 @@ async def test_register_user_raises_error_when_email_already_exists() -> None:
     with pytest.raises(UserAlreadyExistsError):
         await use_case.execute(
             RegisterUserCommand(
-                email='student@example.com',
-                password='another-password',
+                email="student@example.com",
+                password="another-password",
             )
         )
+
 
 @pytest.mark.asyncio
 async def test_login_user_returns_access_token() -> None:
     uow = FakeUnitOfWork()
     user = User(
         id=uuid4(),
-        email='admin@example.com',
-        hashed_password='hashed::secret123',
+        email="admin@example.com",
+        hashed_password="hashed::secret123",
         role=UserRole.ADMIN,
     )
     await uow.users.add(user)
@@ -119,13 +121,13 @@ async def test_login_user_returns_access_token() -> None:
 
     result = await use_case.execute(
         LoginUserCommand(
-            email='admin@example.com',
-            password='secret123',
+            email="admin@example.com",
+            password="secret123",
         )
     )
 
-    assert result.token_type == 'bearer'
-    assert result.access_token.startswith('token-for-')
+    assert result.token_type == "bearer"
+    assert result.access_token.startswith("token-for-")
 
 
 @pytest.mark.asyncio
@@ -139,8 +141,8 @@ async def test_login_user_raises_error_when_email_is_unknown() -> None:
     with pytest.raises(InvalidCredentialsError):
         await use_case.execute(
             LoginUserCommand(
-                email='missing@example.com',
-                password='secret123',
+                email="missing@example.com",
+                password="secret123",
             )
         )
 
@@ -150,8 +152,8 @@ async def test_login_user_raises_error_when_password_is_invalid() -> None:
     uow = FakeUnitOfWork()
     user = User(
         id=uuid4(),
-        email='admin@example.com',
-        hashed_password='hashed::secret123',
+        email="admin@example.com",
+        hashed_password="hashed::secret123",
         role=UserRole.ADMIN,
     )
     await uow.users.add(user)
@@ -165,7 +167,7 @@ async def test_login_user_raises_error_when_password_is_invalid() -> None:
     with pytest.raises(InvalidCredentialsError):
         await use_case.execute(
             LoginUserCommand(
-                email='admin@example.com',
-                password='wrong-password',
+                email="admin@example.com",
+                password="wrong-password",
             )
         )

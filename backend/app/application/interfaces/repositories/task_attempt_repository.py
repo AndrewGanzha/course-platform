@@ -19,9 +19,9 @@ class TaskAttemptRepository(ABC):
 
     @abstractmethod
     async def get_by_student_and_task(
-            self,
-            student_id: UUID,
-            task_id: UUID,
+        self,
+        student_id: UUID,
+        task_id: UUID,
     ) -> list[TaskAttempt]:
         raise NotImplementedError
 

@@ -14,9 +14,7 @@ async def test_admin_can_remove_an_entire_course_tree_incrementally(
         },
     )
     assert login_response.status_code == 200
-    headers = {
-        "Authorization": f"Bearer {login_response.json()['access_token']}"
-    }
+    headers = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
 
     course_response = await client.post(
         "/api/admin/courses",
@@ -91,12 +89,11 @@ async def test_admin_can_remove_an_entire_course_tree_incrementally(
     assert structure_response.status_code == 200
     structure = structure_response.json()
     assert [module["id"] for module in structure["modules"]] == [module_id]
+    assert [section["id"] for section in structure["modules"][0]["sections"]] == [
+        section_id
+    ]
     assert [
-        section["id"] for section in structure["modules"][0]["sections"]
-    ] == [section_id]
-    assert [
-        lecture["id"]
-        for lecture in structure["modules"][0]["sections"][0]["lectures"]
+        lecture["id"] for lecture in structure["modules"][0]["sections"][0]["lectures"]
     ] == [lecture_id]
 
     lecture_read_response = await client.get(f"/api/lectures/{lecture_id}")
@@ -157,9 +154,7 @@ async def test_admin_can_remove_an_entire_course_tree_incrementally(
     assert removed_course_response.status_code == 404
     assert removed_course_response.json()["error"] == "course_not_found"
 
-    removed_structure_response = await client.get(
-        f"/api/courses/{course_id}/structure"
-    )
+    removed_structure_response = await client.get(f"/api/courses/{course_id}/structure")
     assert removed_structure_response.status_code == 404
     assert removed_structure_response.json()["error"] == "course_not_found"
 
@@ -167,7 +162,5 @@ async def test_admin_can_remove_an_entire_course_tree_incrementally(
     assert courses_response.status_code == 200
     assert [course["id"] for course in courses_response.json()] == [control_course_id]
 
-    control_course_read_response = await client.get(
-        f"/api/courses/{control_course_id}"
-    )
+    control_course_read_response = await client.get(f"/api/courses/{control_course_id}")
     assert control_course_read_response.status_code == 200

@@ -30,16 +30,16 @@ def test_progress_syncs_section_and_module_completion() -> None:
     section = Section(
         id=uuid4(),
         module_id=uuid4(),
-        title='HTTP',
-        description='Methods',
+        title="HTTP",
+        description="Methods",
         position=1,
         question_ids=[question_id],
     )
     module = Module(
         id=uuid4(),
         course_id=uuid4(),
-        title='Basics',
-        description='Base module',
+        title="Basics",
+        description="Base module",
         position=1,
         section_ids=[section.id],
     )

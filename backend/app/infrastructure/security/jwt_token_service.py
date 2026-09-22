@@ -24,9 +24,9 @@ class JwtTokenService(TokenService):
             minutes=self.access_token_expire_minutes,
         )
         payload = {
-            'sub': str(user_id),
-            'role': role,
-            'exp': expires_at,
+            "sub": str(user_id),
+            "role": role,
+            "exp": expires_at,
         }
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
 
@@ -34,13 +34,13 @@ class JwtTokenService(TokenService):
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
         except JwtInvalidTokenError as exc:
-            raise InvalidTokenError('Token is invalid or expired.') from exc
+            raise InvalidTokenError("Token is invalid or expired.") from exc
 
-        subject = payload.get('sub')
+        subject = payload.get("sub")
         if not isinstance(subject, str):
-            raise InvalidTokenError('Token does not contain a valid subject.')
+            raise InvalidTokenError("Token does not contain a valid subject.")
 
         try:
             return UUID(subject)
         except ValueError as exc:
-            raise InvalidTokenError('Token subject is invalid.') from exc
+            raise InvalidTokenError("Token subject is invalid.") from exc

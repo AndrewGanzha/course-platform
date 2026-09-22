@@ -84,14 +84,15 @@ router = APIRouter(
     },
 )
 
+
 @router.post(
     "/courses",
     response_model=CourseResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create course",
     description=(
-            "Creates a new course in the administrative API. "
-            "The course is the root entity of the content tree."
+        "Creates a new course in the administrative API. "
+        "The course is the root entity of the content tree."
     ),
     responses={
         400: {
@@ -114,13 +115,14 @@ async def create_course(
     )
     return CourseResponse.model_validate(result)
 
+
 @router.put(
     "/courses/{course_id}",
     response_model=CourseResponse,
     summary="Update course",
     description=(
-            "Updates an existing course by its identifier. "
-            "Allows changing the course title and description."
+        "Updates an existing course by its identifier. "
+        "Allows changing the course title and description."
     ),
     responses={
         400: {
@@ -168,9 +170,7 @@ async def remove_course(
     actor: FromDishka[User],
     use_case: FromDishka[RemoveCourseUseCase],
 ) -> Response:
-    await use_case.execute(
-        RemoveCourseCommand(actor=actor, course_id=course_id)
-    )
+    await use_case.execute(RemoveCourseCommand(actor=actor, course_id=course_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -180,8 +180,8 @@ async def remove_course(
     status_code=status.HTTP_201_CREATED,
     summary="Create module",
     description=(
-            "Creates a new module inside an existing course. "
-            "Modules are used to group sections within a course."
+        "Creates a new module inside an existing course. "
+        "Modules are used to group sections within a course."
     ),
     responses={
         400: {
@@ -212,13 +212,14 @@ async def create_module(
 
     return ModuleResponse.model_validate(result)
 
+
 @router.put(
     "/modules/{module_id}",
     response_model=ModuleResponse,
     summary="Update module",
     description=(
-            "Updates an existing module by its identifier. "
-            "Allows changing the module title, description and position."
+        "Updates an existing module by its identifier. "
+        "Allows changing the module title, description and position."
     ),
     responses={
         400: {
@@ -267,9 +268,7 @@ async def remove_module(
     actor: FromDishka[User],
     use_case: FromDishka[RemoveModuleUseCase],
 ) -> Response:
-    await use_case.execute(
-        RemoveModuleCommand(actor=actor, module_id=module_id)
-    )
+    await use_case.execute(RemoveModuleCommand(actor=actor, module_id=module_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -279,8 +278,8 @@ async def remove_module(
     status_code=status.HTTP_201_CREATED,
     summary="Create section",
     description=(
-            "Creates a new section inside an existing module. "
-            "Sections are used to group lectures within a module."
+        "Creates a new section inside an existing module. "
+        "Sections are used to group lectures within a module."
     ),
     responses={
         400: {
@@ -311,12 +310,13 @@ async def create_section(
 
     return SectionResponse.model_validate(result)
 
+
 @router.put(
     "/sections/{section_id}",
     response_model=SectionResponse,
     description=(
-            "Updates an existing section by its identifier. "
-            "Allows changing the section title, description and position."
+        "Updates an existing section by its identifier. "
+        "Allows changing the section title, description and position."
     ),
     responses={
         400: {
@@ -328,7 +328,6 @@ async def create_section(
             "model": ErrorResponse,
         },
     },
-
 )
 async def update_section(
     section_id: UUID,
@@ -367,9 +366,7 @@ async def remove_section(
     actor: FromDishka[User],
     use_case: FromDishka[RemoveSectionUseCase],
 ) -> Response:
-    await use_case.execute(
-        RemoveSectionCommand(actor=actor, section_id=section_id)
-    )
+    await use_case.execute(RemoveSectionCommand(actor=actor, section_id=section_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -379,8 +376,8 @@ async def remove_section(
     status_code=status.HTTP_201_CREATED,
     summary="Create lecture",
     description=(
-            "Creates a new lecture inside an existing section. "
-            "A lecture is the final content item in the course tree."
+        "Creates a new lecture inside an existing section. "
+        "A lecture is the final content item in the course tree."
     ),
     responses={
         400: {
@@ -411,13 +408,14 @@ async def create_lecture(
 
     return LectureResponse.model_validate(result)
 
+
 @router.put(
     "/lectures/{lecture_id}",
     response_model=LectureResponse,
     summary="Update lecture",
     description=(
-            "Updates an existing lecture by its identifier. "
-            "Allows changing the lecture title, content and position."
+        "Updates an existing lecture by its identifier. "
+        "Allows changing the lecture title, content and position."
     ),
     responses={
         400: {
@@ -467,7 +465,5 @@ async def remove_lecture(
     actor: FromDishka[User],
     use_case: FromDishka[RemoveLectureUseCase],
 ) -> Response:
-    await use_case.execute(
-        RemoveLectureCommand(actor=actor, lecture_id=lecture_id)
-    )
+    await use_case.execute(RemoveLectureCommand(actor=actor, lecture_id=lecture_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -57,8 +57,10 @@ class QuestionAlreadySolvedError(DomainError):
 class InvalidProgressError(DomainError):
     pass
 
+
 class InvalidTaskError(DomainError):
     pass
+
 
 class SectionTaskAlreadyAttachedError(DomainError):
     pass
@@ -83,8 +85,10 @@ class TaskAlreadySolvedError(DomainError):
 class InvalidCodeTaskError(DomainError):
     pass
 
+
 class SectionCodeTaskAlreadyAttachedError(DomainError):
     pass
+
 
 class SectionCodeTaskNotAttachedError(DomainError):
     pass
@@ -99,4 +103,8 @@ class CodeSubmissionLimitExceededError(DomainError):
 
 
 class CodeTaskAlreadySolvedError(DomainError):
+    pass
+
+
+class InvalidTestCaseError(DomainError):
     pass

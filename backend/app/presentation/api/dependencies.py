@@ -291,9 +291,7 @@ class ApiProvider(Provider):
         token_service: TokenService,
     ) -> AuthenticatedUser:
         if credentials is None:
-            raise AuthenticationError(
-                "Authentication credentials were not provided"
-            )
+            raise AuthenticationError("Authentication credentials were not provided")
 
         try:
             user_id = token_service.get_user_id(credentials.credentials)
@@ -317,10 +315,7 @@ class ApiProvider(Provider):
         return AuthenticatedAdmin(current_user)
 
     @provide
-    def get_current_author_or_admin(
-        self,
-        current_user: AuthenticatedUser
-    ) -> User:
+    def get_current_author_or_admin(self, current_user: AuthenticatedUser) -> User:
         if not current_user.can_manage_content():
             raise PermissionDeniedError("Author or admin access is required.")
         return current_user

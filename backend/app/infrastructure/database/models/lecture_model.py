@@ -8,7 +8,9 @@ class LectureModel(Base):
     __tablename__ = "lectures"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    section_id: Mapped[str] = mapped_column(ForeignKey("sections.id", ondelete="CASCADE"))
+    section_id: Mapped[str] = mapped_column(
+        ForeignKey("sections.id", ondelete="CASCADE")
+    )
     title: Mapped[str] = mapped_column(String(255))
     content: Mapped[str] = mapped_column(Text)
     position: Mapped[int] = mapped_column(Integer)

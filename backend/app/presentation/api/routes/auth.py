@@ -23,18 +23,18 @@ router = APIRouter(prefix="/auth", tags=["Auth"], route_class=DishkaRoute)
 
 
 @router.post(
-    '/register',
+    "/register",
     response_model=RegisteredUserResponse,
     status_code=status.HTTP_201_CREATED,
-    summary='Register new user',
+    summary="Register new user",
     description=(
-        'Creates a new user account in the system. '
-        'A public registration always creates a user with the student role.'
+        "Creates a new user account in the system. "
+        "A public registration always creates a user with the student role."
     ),
     responses={
         400: {
-            'description': 'Domain or application validation error.',
-            'model': ErrorResponse,
+            "description": "Domain or application validation error.",
+            "model": ErrorResponse,
         },
     },
 )
@@ -53,16 +53,16 @@ async def register_user(
 
 
 @router.post(
-    '/login',
+    "/login",
     response_model=TokenResponse,
-    summary='Login user',
+    summary="Login user",
     description=(
-        'Authenticates a user by email and password and returns a JWT access token.'
+        "Authenticates a user by email and password and returns a JWT access token."
     ),
     responses={
         400: {
-            'description': 'Invalid email or password.',
-            'model': ErrorResponse,
+            "description": "Invalid email or password.",
+            "model": ErrorResponse,
         },
     },
 )
@@ -84,14 +84,14 @@ async def login_user(
 
 
 @router.get(
-    '/me',
+    "/me",
     response_model=CurrentUserResponse,
-    summary='Get current user',
-    description='Returns the currently authenticated user resolved from Bearer token.',
+    summary="Get current user",
+    description="Returns the currently authenticated user resolved from Bearer token.",
     responses={
         401: {
-            'description': 'Authentication credentials are missing or invalid.',
-            'model': ErrorResponse,
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
         },
     },
 )

@@ -22,7 +22,7 @@ class RegisterUserUseCase:
         async with self.uow:
             existing_user = await self.uow.users.get_by_email(command.email)
             if existing_user is not None:
-                raise UserAlreadyExistsError('User with this email already exists.')
+                raise UserAlreadyExistsError("User with this email already exists.")
 
             user = User(
                 id=uuid4(),

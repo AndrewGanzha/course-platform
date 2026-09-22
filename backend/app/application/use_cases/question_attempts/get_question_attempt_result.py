@@ -26,7 +26,7 @@ class GetQuestionAttemptResultUseCase:
         async with self.uow:
             attempt = await self.uow.question_attempts.get_by_id(command.attempt_id)
             if attempt is None:
-                raise QuestionAttemptNotFoundError('Question attempt not found.')
+                raise QuestionAttemptNotFoundError("Question attempt not found.")
 
             if attempt.student_id != command.actor.id:
                 await self.course_access_service.ensure_can_view_question_results(

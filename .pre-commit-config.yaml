@@ -7,3 +7,9 @@ repos:
         language: system
         files: ^backend/.*\.py$
         types: [python]
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --project backend ruff format --config backend/pyproject.toml
+        language: system
+        files: ^backend/.*\.py$
+        types: [python]

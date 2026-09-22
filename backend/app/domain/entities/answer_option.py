@@ -17,9 +17,9 @@ class AnswerOption:
 
     def _validate(self) -> None:
         if not self.text or not self.text.strip():
-            raise InvalidAnswerOptionError('Answer option text cannot be empty.')
+            raise InvalidAnswerOptionError("Answer option text cannot be empty.")
         if self.position < 1:
-            raise InvalidAnswerOptionError('Answer option position must be positive.')
+            raise InvalidAnswerOptionError("Answer option position must be positive.")
 
     def update(self, text: str, position: int, is_correct: bool) -> None:
         self.text = text

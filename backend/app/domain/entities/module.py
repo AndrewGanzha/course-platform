@@ -45,4 +45,6 @@ class Module:
     def is_completed_by(self, completed_section_ids: Collection[UUID]) -> bool:
         if not self.can_be_completed():
             return False
-        return all(section_id in completed_section_ids for section_id in self.section_ids)
+        return all(
+            section_id in completed_section_ids for section_id in self.section_ids
+        )

@@ -164,14 +164,14 @@ async def test_start_question_attempt_returns_question_state() -> None:
     uow = FakeInteractiveUnitOfWork()
     student = User(
         id=uuid4(),
-        email='student@example.com',
-        hashed_password='hashed',
+        email="student@example.com",
+        hashed_password="hashed",
         role=UserRole.STUDENT,
     )
     question = Question(
         id=uuid4(),
         section_id=uuid4(),
-        text='Which method reads a resource?',
+        text="Which method reads a resource?",
         position=1,
         question_type=QuestionType.SINGLE_CHOICE,
         max_attempts=2,
@@ -180,14 +180,14 @@ async def test_start_question_attempt_returns_question_state() -> None:
     wrong_option = AnswerOption(
         id=uuid4(),
         question_id=question.id,
-        text='POST',
+        text="POST",
         position=1,
         is_correct=False,
     )
     correct_option = AnswerOption(
         id=uuid4(),
         question_id=question.id,
-        text='GET',
+        text="GET",
         position=2,
         is_correct=True,
     )
@@ -214,30 +214,30 @@ async def test_submit_question_answer_creates_attempt_and_updates_progress() -> 
     uow = FakeInteractiveUnitOfWork()
     student = User(
         id=uuid4(),
-        email='student@example.com',
-        hashed_password='hashed',
+        email="student@example.com",
+        hashed_password="hashed",
         role=UserRole.STUDENT,
     )
     course_id = uuid4()
     section = Section(
         id=uuid4(),
         module_id=uuid4(),
-        title='HTTP',
-        description='Methods',
+        title="HTTP",
+        description="Methods",
         position=1,
     )
     module = Module(
         id=section.module_id,
         course_id=course_id,
-        title='Basics',
-        description='Base module',
+        title="Basics",
+        description="Base module",
         position=1,
         section_ids=[section.id],
     )
     question = Question(
         id=uuid4(),
         section_id=section.id,
-        text='Which method reads a resource?',
+        text="Which method reads a resource?",
         position=1,
         question_type=QuestionType.SINGLE_CHOICE,
         max_attempts=2,
@@ -246,14 +246,14 @@ async def test_submit_question_answer_creates_attempt_and_updates_progress() -> 
     correct_option = AnswerOption(
         id=uuid4(),
         question_id=question.id,
-        text='GET',
+        text="GET",
         position=1,
         is_correct=True,
     )
     wrong_option = AnswerOption(
         id=uuid4(),
         question_id=question.id,
-        text='POST',
+        text="POST",
         position=2,
         is_correct=False,
     )
@@ -292,31 +292,31 @@ async def test_get_question_attempt_result_allows_owner_author() -> None:
     uow = FakeInteractiveUnitOfWork()
     author = User(
         id=uuid4(),
-        email='author@example.com',
-        hashed_password='hashed',
+        email="author@example.com",
+        hashed_password="hashed",
         role=UserRole.AUTHOR,
     )
     course = Course(
         id=uuid4(),
         author_id=author.id,
-        title='Course',
-        description='Description',
+        title="Course",
+        description="Description",
     )
     module = Module(
         id=uuid4(),
         course_id=course.id,
-        title='M',
-        description='D',
+        title="M",
+        description="D",
         position=1,
     )
     section = Section(
         id=uuid4(),
         module_id=module.id,
-        title='S',
-        description='D',
+        title="S",
+        description="D",
         position=1,
     )
-    question = Question(id=uuid4(), section_id=section.id, text='Q', position=1)
+    question = Question(id=uuid4(), section_id=section.id, text="Q", position=1)
     attempt = QuestionAttempt(
         id=uuid4(),
         question_id=question.id,

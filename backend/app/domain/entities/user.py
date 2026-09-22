@@ -6,9 +6,9 @@ from app.domain.exceptions import InvalidUserError
 
 
 class UserRole(StrEnum):
-    STUDENT = 'student'
-    AUTHOR = 'author'
-    ADMIN = 'admin'
+    STUDENT = "student"
+    AUTHOR = "author"
+    ADMIN = "admin"
 
 
 @dataclass(slots=True)
@@ -22,10 +22,10 @@ class User:
         self._validate()
 
     def _validate(self) -> None:
-        if not self.email or '@' not in self.email:
-            raise InvalidUserError('User email is invalid.')
+        if not self.email or "@" not in self.email:
+            raise InvalidUserError("User email is invalid.")
         if not self.hashed_password or not self.hashed_password.strip():
-            raise InvalidUserError('User hashed password cannot be empty.')
+            raise InvalidUserError("User hashed password cannot be empty.")
 
     def is_admin(self) -> bool:
         return self.role is UserRole.ADMIN
@@ -71,7 +71,6 @@ class User:
 
     def can_view_task_attempt_results_as_author(self) -> bool:
         return self.is_author()
-
 
     def can_view_task_attempt_results_as_admin(self) -> bool:
         return self.is_admin()

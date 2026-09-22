@@ -28,23 +28,27 @@ class UpdateAnswerOptionUseCase:
 
     async def execute(self, command: UpdateAnswerOptionCommand) -> AnswerOption:
         async with self.uow:
-            answer_option = await self.uow.answer_options.get_by_id(command.answer_option_id)
+            answer_option = await self.uow.answer_options.get_by_id(
+                command.answer_option_id
+            )
             if answer_option is None:
-                raise AnswerOptionNotFoundError('Answer option not found.')
+                raise AnswerOptionNotFoundError("Answer option not found.")
 
             question = await self.uow.questions.get_by_id(answer_option.question_id)
             if question is None:
-                raise QuestionNotFoundError('Question not found.')
+                raise QuestionNotFoundError("Question not found.")
 
             await self.course_access_service.ensure_can_manage_section(
                 actor=command.actor,
                 section_id=question.section_id,
             )
 
-            has_attempts = await self.uow.question_attempts.exists_by_question_id(question.id)
+            has_attempts = await self.uow.question_attempts.exists_by_question_id(
+                question.id
+            )
             if has_attempts:
                 raise QuestionAlreadyUsedError(
-                    'Question already has student attempts and cannot be changed safely.'
+                    "Question already has student attempts and cannot be changed safely."
                 )
 
             answer_option.update(

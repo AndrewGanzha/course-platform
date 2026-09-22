@@ -21,15 +21,15 @@ from app.application.interfaces.repositories.task_repository import TaskReposito
 from app.application.interfaces.repositories.user_repository import UserRepository
 
 __all__ = [
-    'CourseRepository',
-    'ModuleRepository',
-    'SectionRepository',
-    'LectureRepository',
-    'QuestionRepository',
-    'AnswerOptionRepository',
-    'UserRepository',
-    'QuestionAttemptRepository',
-    'TaskRepository',
-    'TaskAttemptRepository',
-    'ProgressRepository',
+    "CourseRepository",
+    "ModuleRepository",
+    "SectionRepository",
+    "LectureRepository",
+    "QuestionRepository",
+    "AnswerOptionRepository",
+    "UserRepository",
+    "QuestionAttemptRepository",
+    "TaskRepository",
+    "TaskAttemptRepository",
+    "ProgressRepository",
 ]

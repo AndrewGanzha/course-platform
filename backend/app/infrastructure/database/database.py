@@ -8,4 +8,6 @@ engine = create_async_engine(
     echo=settings.database.echo,
     future=True,
 )
-SessionFactory = async_sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSession)
+SessionFactory = async_sessionmaker(
+    bind=engine, expire_on_commit=False, class_=AsyncSession
+)

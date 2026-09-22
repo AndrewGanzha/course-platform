@@ -26,14 +26,16 @@ class SubmitQuestionAnswerUseCase:
 
     async def execute(self, command: SubmitQuestionAnswerCommand) -> QuestionAttempt:
         if not command.actor.can_take_learning_activities():
-            raise PermissionDeniedError('User cannot submit question answers.')
+            raise PermissionDeniedError("User cannot submit question answers.")
 
         async with self.uow:
             question = await self.uow.questions.get_by_id(command.question_id)
             if question is None:
-                raise QuestionNotFoundError('Question not found.')
+                raise QuestionNotFoundError("Question not found.")
 
-            answer_options = await self.uow.answer_options.get_by_ids(question.answer_option_ids)
+            answer_options = await self.uow.answer_options.get_by_ids(
+                question.answer_option_ids
+            )
             question.validate_answer_options_configuration(answer_options)
 
             attempts = await self.uow.question_attempts.get_by_student_and_question(
@@ -74,11 +76,11 @@ class SubmitQuestionAnswerUseCase:
             if attempt.is_correct():
                 section = await self.uow.sections.get_by_id(question.section_id)
                 if section is None:
-                    raise SectionNotFoundError('Section not found.')
+                    raise SectionNotFoundError("Section not found.")
 
                 module = await self.uow.modules.get_by_id(section.module_id)
                 if module is None:
-                    raise ModuleNotFoundError('Module not found.')
+                    raise ModuleNotFoundError("Module not found.")
 
                 progress = await self.uow.progress.get_by_student_and_course(
                     student_id=command.actor.id,

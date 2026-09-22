@@ -7,8 +7,8 @@ from app.domain.exceptions import InvalidQuestionAttemptError
 
 
 class QuestionResultStatus(StrEnum):
-    CORRECT = 'correct'
-    INCORRECT = 'incorrect'
+    CORRECT = "correct"
+    INCORRECT = "incorrect"
 
 
 @dataclass(slots=True)
@@ -28,14 +28,16 @@ class QuestionAttempt:
 
     def _validate(self) -> None:
         if self.attempt_number < 1:
-            raise InvalidQuestionAttemptError('Question attempt number must be positive.')
+            raise InvalidQuestionAttemptError(
+                "Question attempt number must be positive."
+            )
         if not self.selected_option_ids:
             raise InvalidQuestionAttemptError(
-                'Question attempt must contain at least one selected option.'
+                "Question attempt must contain at least one selected option."
             )
         if len(self.selected_option_ids) != len(set(self.selected_option_ids)):
             raise InvalidQuestionAttemptError(
-                'Question attempt cannot contain duplicate selected options.'
+                "Question attempt cannot contain duplicate selected options."
             )
 
     def is_first_attempt(self) -> bool:
@@ -68,12 +70,14 @@ class QuestionAttempt:
         awarded_points: int,
     ) -> None:
         if self.has_result():
-            raise InvalidQuestionAttemptError('Question attempt result is already defined.')
+            raise InvalidQuestionAttemptError(
+                "Question attempt result is already defined."
+            )
         if awarded_points < 0:
-            raise InvalidQuestionAttemptError('Awarded points cannot be negative.')
+            raise InvalidQuestionAttemptError("Awarded points cannot be negative.")
         if result_status is QuestionResultStatus.INCORRECT and awarded_points != 0:
             raise InvalidQuestionAttemptError(
-                'Incorrect question attempt cannot have awarded points.'
+                "Incorrect question attempt cannot have awarded points."
             )
 
         self.result_status = result_status

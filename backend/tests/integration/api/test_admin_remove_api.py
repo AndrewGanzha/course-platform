@@ -148,7 +148,9 @@ async def test_remove_lecture_returns_204_and_preserves_parents(
     async with session_factory() as session:
         assert await session.get(CourseModel, seeded_course_tree.course_id) is not None
         assert await session.get(ModuleModel, seeded_course_tree.module_id) is not None
-        assert await session.get(SectionModel, seeded_course_tree.section_id) is not None
+        assert (
+            await session.get(SectionModel, seeded_course_tree.section_id) is not None
+        )
         assert await session.get(LectureModel, seeded_course_tree.lecture_id) is None
         assert await session.get(LectureModel, control_lecture_id) is not None
 

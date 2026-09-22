@@ -67,8 +67,8 @@ from app.domain.entities.user import User, UserRole
 def make_author() -> User:
     return User(
         id=uuid4(),
-        email='author@example.com',
-        hashed_password='hashed-password',
+        email="author@example.com",
+        hashed_password="hashed-password",
         role=UserRole.AUTHOR,
     )
 
@@ -77,8 +77,8 @@ def make_owned_course(author: User) -> Course:
     return Course(
         id=uuid4(),
         author_id=author.id,
-        title='Course',
-        description='Description',
+        title="Course",
+        description="Description",
     )
 
 
@@ -113,7 +113,9 @@ class FakeModuleRepository:
         return self.items.get(module_id)
 
     async def get_by_ids(self, module_ids):
-        return [self.items[module_id] for module_id in module_ids if module_id in self.items]
+        return [
+            self.items[module_id] for module_id in module_ids if module_id in self.items
+        ]
 
     async def add(self, module) -> None:
         self.items[module.id] = module
@@ -135,7 +137,11 @@ class FakeSectionRepository:
         return self.items.get(section_id)
 
     async def get_by_ids(self, section_ids):
-        return [self.items[section_id] for section_id in section_ids if section_id in self.items]
+        return [
+            self.items[section_id]
+            for section_id in section_ids
+            if section_id in self.items
+        ]
 
     async def add(self, section) -> None:
         self.items[section.id] = section
@@ -156,7 +162,11 @@ class FakeLectureRepository:
         return self.items.get(lecture_id)
 
     async def get_by_ids(self, lecture_ids):
-        return [self.items[lecture_id] for lecture_id in lecture_ids if lecture_id in self.items]
+        return [
+            self.items[lecture_id]
+            for lecture_id in lecture_ids
+            if lecture_id in self.items
+        ]
 
     async def add(self, lecture) -> None:
         self.items[lecture.id] = lecture

@@ -129,9 +129,7 @@ async def create_answer_option(
     "/answer-options/{answer_option_id}",
     response_model=AnswerOptionResponse,
     summary="Update answer option",
-    description=(
-        "Updates an existing answer option if the question was not used yet."
-    ),
+    description=("Updates an existing answer option if the question was not used yet."),
 )
 async def update_answer_option(
     answer_option_id: UUID,

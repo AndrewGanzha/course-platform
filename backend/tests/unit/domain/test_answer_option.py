@@ -11,7 +11,7 @@ def test_answer_option_raises_error_when_text_is_blank() -> None:
         AnswerOption(
             id=uuid4(),
             question_id=uuid4(),
-            text='   ',
+            text="   ",
             position=1,
         )
 
@@ -20,13 +20,13 @@ def test_answer_option_update_changes_text_position_and_flag() -> None:
     option = AnswerOption(
         id=uuid4(),
         question_id=uuid4(),
-        text='POST',
+        text="POST",
         position=1,
         is_correct=False,
     )
 
-    option.update(text='GET', position=2, is_correct=True)
+    option.update(text="GET", position=2, is_correct=True)
 
-    assert option.text == 'GET'
+    assert option.text == "GET"
     assert option.position == 2
     assert option.is_correct is True

@@ -44,6 +44,7 @@ async def test_engine(tmp_path_factory) -> AsyncIterator:
     if database_path.exists():
         os.remove(database_path)
 
+
 @pytest.fixture
 def session_factory(test_engine):
     return async_sessionmaker(
@@ -81,11 +82,13 @@ async def app(session_factory):
     finally:
         api_dependencies.SessionFactory = original_session_factory
 
+
 @pytest_asyncio.fixture
 async def client(app) -> AsyncIterator[AsyncClient]:
     transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url='http://test') as client:
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
+
 
 @pytest_asyncio.fixture
 async def seeded_course_tree(session_factory, seeded_admin_user):
@@ -98,28 +101,28 @@ async def seeded_course_tree(session_factory, seeded_admin_user):
         course = CourseModel(
             id=course_id,
             author_id=seeded_admin_user.id,
-            title='FastAPI course',
-            description='Clean architecture in practice.',
+            title="FastAPI course",
+            description="Clean architecture in practice.",
         )
         module = ModuleModel(
             id=module_id,
             course_id=course_id,
-            title='MVP stage',
-            description='Content, users and access.',
+            title="MVP stage",
+            description="Content, users and access.",
             position=1,
         )
         section = SectionModel(
             id=section_id,
             module_id=module_id,
-            title='Auth section',
-            description='JWT and route protection.',
+            title="Auth section",
+            description="JWT and route protection.",
             position=1,
         )
         lecture = LectureModel(
             id=lecture_id,
             section_id=section_id,
-            title='Bearer token in practice',
-            content='Lecture content',
+            title="Bearer token in practice",
+            content="Lecture content",
             position=1,
         )
         session.add_all([course, module, section, lecture])
@@ -131,9 +134,10 @@ async def seeded_course_tree(session_factory, seeded_admin_user):
         module_id=module_id,
         section_id=section_id,
         lecture_id=lecture_id,
-        course_title='FastAPI course',
-        lecture_content='Lecture content',
+        course_title="FastAPI course",
+        lecture_content="Lecture content",
     )
+
 
 @pytest_asyncio.fixture
 async def seeded_student_user(session_factory):
@@ -141,14 +145,15 @@ async def seeded_student_user(session_factory):
     async with session_factory() as session:
         user = UserModel(
             id=str(uuid4()),
-            email='student@example.com',
-            hashed_password=hasher.hash('strongpassword123'),
-            role='student',
+            email="student@example.com",
+            hashed_password=hasher.hash("strongpassword123"),
+            role="student",
         )
         session.add(user)
         await session.commit()
         await session.refresh(user)
         return user
+
 
 @pytest_asyncio.fixture
 async def seeded_admin_user(session_factory):
@@ -156,9 +161,9 @@ async def seeded_admin_user(session_factory):
     async with session_factory() as session:
         user = UserModel(
             id=str(uuid4()),
-            email='admin@example.com',
-            hashed_password=hasher.hash('strongpassword123'),
-            role='admin',
+            email="admin@example.com",
+            hashed_password=hasher.hash("strongpassword123"),
+            role="admin",
         )
         session.add(user)
         await session.commit()
@@ -172,9 +177,9 @@ async def seeded_author_user(session_factory):
     async with session_factory() as session:
         user = UserModel(
             id=str(uuid4()),
-            email='author@example.com',
-            hashed_password=hasher.hash('strongpassword123'),
-            role='author',
+            email="author@example.com",
+            hashed_password=hasher.hash("strongpassword123"),
+            role="author",
         )
         session.add(user)
         await session.commit()
@@ -188,9 +193,9 @@ async def seeded_other_author_user(session_factory):
     async with session_factory() as session:
         user = UserModel(
             id=str(uuid4()),
-            email='other-author@example.com',
-            hashed_password=hasher.hash('strongpassword123'),
-            role='author',
+            email="other-author@example.com",
+            hashed_password=hasher.hash("strongpassword123"),
+            role="author",
         )
         session.add(user)
         await session.commit()
@@ -212,50 +217,50 @@ async def seeded_interactive_tree(session_factory, seeded_author_user):
         course = CourseModel(
             id=course_id,
             author_id=seeded_author_user.id,
-            title='Interactive FastAPI',
-            description='Course with questions inside sections.',
+            title="Interactive FastAPI",
+            description="Course with questions inside sections.",
         )
         module = ModuleModel(
             id=module_id,
             course_id=course_id,
-            title='HTTP',
-            description='Methods',
+            title="HTTP",
+            description="Methods",
             position=1,
         )
         section = SectionModel(
             id=section_id,
             module_id=module_id,
-            title='Basics',
-            description='Intro section',
+            title="Basics",
+            description="Intro section",
             position=1,
         )
         lecture = LectureModel(
             id=lecture_id,
             section_id=section_id,
-            title='GET and POST',
-            content='Lecture content',
+            title="GET and POST",
+            content="Lecture content",
             position=1,
         )
         question = QuestionModel(
             id=question_id,
             section_id=section_id,
-            text='Which method reads a resource?',
+            text="Which method reads a resource?",
             position=1,
-            question_type='single_choice',
+            question_type="single_choice",
             max_attempts=2,
             reward_points=5,
         )
         wrong_option = AnswerOptionModel(
             id=wrong_option_id,
             question_id=question_id,
-            text='POST',
+            text="POST",
             position=1,
             is_correct=False,
         )
         correct_option = AnswerOptionModel(
             id=correct_option_id,
             question_id=question_id,
-            text='GET',
+            text="GET",
             position=2,
             is_correct=True,
         )
@@ -283,52 +288,54 @@ async def seeded_interactive_tree(session_factory, seeded_author_user):
         correct_option_id=correct_option_id,
     )
 
+
 @pytest_asyncio.fixture
 async def student_auth_headers(client, seeded_student_user):
     response = await client.post(
-        '/api/auth/login',
+        "/api/auth/login",
         json={
-            'email': 'student@example.com',
-            'password': 'strongpassword123',
+            "email": "student@example.com",
+            "password": "strongpassword123",
         },
     )
-    token = response.json()['access_token']
-    return {'Authorization': f'Bearer {token}'}
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
 
 @pytest_asyncio.fixture
 async def admin_auth_headers(client, seeded_admin_user):
     response = await client.post(
-        '/api/auth/login',
+        "/api/auth/login",
         json={
-            'email': 'admin@example.com',
-            'password': 'strongpassword123',
+            "email": "admin@example.com",
+            "password": "strongpassword123",
         },
     )
-    token = response.json()['access_token']
-    return {'Authorization': f'Bearer {token}'}
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest_asyncio.fixture
 async def author_auth_headers(client, seeded_author_user):
     response = await client.post(
-        '/api/auth/login',
+        "/api/auth/login",
         json={
-            'email': 'author@example.com',
-            'password': 'strongpassword123',
+            "email": "author@example.com",
+            "password": "strongpassword123",
         },
     )
-    token = response.json()['access_token']
-    return {'Authorization': f'Bearer {token}'}
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest_asyncio.fixture
 async def other_author_auth_headers(client, seeded_other_author_user):
     response = await client.post(
-        '/api/auth/login',
+        "/api/auth/login",
         json={
-            'email': 'other-author@example.com',
-            'password': 'strongpassword123',
+            "email": "other-author@example.com",
+            "password": "strongpassword123",
         },
     )
-    token = response.json()['access_token']
-    return {'Authorization': f'Bearer {token}'}
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}

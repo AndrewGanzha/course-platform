@@ -29,7 +29,7 @@ class UnitOfWork(ABC):
     progress: ProgressRepository
 
     @abstractmethod
-    async def __aenter__(self) -> 'UnitOfWork':
+    async def __aenter__(self) -> "UnitOfWork":
         raise NotImplementedError
 
     @abstractmethod

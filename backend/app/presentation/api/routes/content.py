@@ -68,8 +68,8 @@ async def get_course(
     response_model=CourseStructureResponse,
     summary="Get course structure",
     description=(
-            "Returns the course navigation tree: modules, sections and lectures "
-            "without full lecture content."
+        "Returns the course navigation tree: modules, sections and lectures "
+        "without full lecture content."
     ),
     responses={
         404: {

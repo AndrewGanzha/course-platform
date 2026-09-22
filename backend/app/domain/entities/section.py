@@ -18,7 +18,7 @@ class Section:
     id: UUID
     module_id: UUID
     title: str
-    description: str = ''
+    description: str = ""
     position: int = 1
     lecture_ids: list[UUID] = field(default_factory=list)
     question_ids: list[UUID] = field(default_factory=list)
@@ -30,9 +30,9 @@ class Section:
 
     def _validate(self) -> None:
         if not self.title or not self.title.strip():
-            raise InvalidSectionError('Section title cannot be empty.')
+            raise InvalidSectionError("Section title cannot be empty.")
         if self.position < 1:
-            raise InvalidSectionError('Section position must be positive.')
+            raise InvalidSectionError("Section position must be positive.")
 
     def update(self, title: str, description: str, position: int) -> None:
         self.title = title
@@ -51,28 +51,28 @@ class Section:
     def add_question(self, question_id: UUID) -> None:
         if question_id in self.question_ids:
             raise SectionQuestionAlreadyAttachedError(
-                'Section already has this question attached.'
+                "Section already has this question attached."
             )
         self.question_ids.append(question_id)
 
     def remove_question(self, question_id: UUID) -> None:
         if question_id not in self.question_ids:
             raise SectionQuestionNotAttachedError(
-                'Section does not have this question attached.'
+                "Section does not have this question attached."
             )
         self.question_ids.remove(question_id)
 
     def add_task(self, task_id: UUID) -> None:
         if task_id in self.task_ids:
             raise SectionTaskAlreadyAttachedError(
-                'Section already has this task attached.'
+                "Section already has this task attached."
             )
         self.task_ids.append(task_id)
 
     def remove_task(self, task_id: UUID) -> None:
         if task_id not in self.task_ids:
             raise SectionTaskNotAttachedError(
-                'Section does not have this task attached.'
+                "Section does not have this task attached."
             )
         self.task_ids.remove(task_id)
 
@@ -92,10 +92,10 @@ class Section:
         return bool(self.question_ids or self.task_ids or self.code_task_ids)
 
     def is_completed_by(
-            self,
-            completed_question_ids: Collection[UUID],
-            completed_task_ids: Collection[UUID] | None = None,
-            completed_code_task_ids: Collection[UUID] | None = None,
+        self,
+        completed_question_ids: Collection[UUID],
+        completed_task_ids: Collection[UUID] | None = None,
+        completed_code_task_ids: Collection[UUID] | None = None,
     ) -> bool:
         if not self.can_be_completed():
             return False
@@ -104,22 +104,28 @@ class Section:
         completed_code_task_ids = completed_code_task_ids or ()
 
         return (
-                all(question_id in completed_question_ids for question_id in self.question_ids)
-                and all(task_id in completed_task_ids for task_id in self.task_ids)
-                and all(code_task_id in completed_code_task_ids for code_task_id in self.code_task_ids)
+            all(
+                question_id in completed_question_ids
+                for question_id in self.question_ids
+            )
+            and all(task_id in completed_task_ids for task_id in self.task_ids)
+            and all(
+                code_task_id in completed_code_task_ids
+                for code_task_id in self.code_task_ids
+            )
         )
 
     def add_code_task(self, code_task_id: UUID) -> None:
         if code_task_id in self.code_task_ids:
             raise SectionCodeTaskAlreadyAttachedError(
-                'Section already has this code task attached.'
+                "Section already has this code task attached."
             )
         self.code_task_ids.append(code_task_id)
 
     def remove_code_task(self, code_task_id: UUID) -> None:
         if code_task_id not in self.code_task_ids:
             raise SectionCodeTaskNotAttachedError(
-                'Section does not have this code task attached.'
+                "Section does not have this code task attached."
             )
         self.code_task_ids.remove(code_task_id)
 

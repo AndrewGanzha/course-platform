@@ -41,7 +41,7 @@ __all__ = [
     "SqlAlchemyQuestionRepository",
     "SqlAlchemyAnswerOptionRepository",
     "SqlAlchemyQuestionAttemptRepository",
-    'SqlAlchemyTaskRepository',
-    'SqlAlchemyTaskAttemptRepository',
-    "SqlAlchemyProgressRepository"
+    "SqlAlchemyTaskRepository",
+    "SqlAlchemyTaskAttemptRepository",
+    "SqlAlchemyProgressRepository",
 ]

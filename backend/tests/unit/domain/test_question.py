@@ -12,14 +12,14 @@ def test_question_is_created_with_valid_data() -> None:
     question = Question(
         id=uuid4(),
         section_id=uuid4(),
-        text='What does GET usually do?',
+        text="What does GET usually do?",
         position=1,
         question_type=QuestionType.SINGLE_CHOICE,
         max_attempts=2,
         reward_points=5,
     )
 
-    assert question.text == 'What does GET usually do?'
+    assert question.text == "What does GET usually do?"
     assert question.max_attempts == 2
     assert question.reward_points == 5
 
@@ -29,7 +29,7 @@ def test_question_raises_error_when_text_is_blank() -> None:
         Question(
             id=uuid4(),
             section_id=uuid4(),
-            text='   ',
+            text="   ",
             position=1,
         )
 
@@ -38,7 +38,7 @@ def test_single_choice_question_requires_exactly_one_correct_option() -> None:
     question = Question(
         id=uuid4(),
         section_id=uuid4(),
-        text='Choose one',
+        text="Choose one",
         position=1,
         question_type=QuestionType.SINGLE_CHOICE,
     )
@@ -46,14 +46,14 @@ def test_single_choice_question_requires_exactly_one_correct_option() -> None:
         AnswerOption(
             id=uuid4(),
             question_id=question.id,
-            text='A',
+            text="A",
             position=1,
             is_correct=True,
         ),
         AnswerOption(
             id=uuid4(),
             question_id=question.id,
-            text='B',
+            text="B",
             position=2,
             is_correct=True,
         ),
@@ -69,7 +69,7 @@ def test_question_resolves_correct_status_and_points() -> None:
     question = Question(
         id=uuid4(),
         section_id=uuid4(),
-        text='What method reads a resource?',
+        text="What method reads a resource?",
         position=1,
         question_type=QuestionType.SINGLE_CHOICE,
         answer_option_ids=[wrong_option_id, correct_option_id],
@@ -79,14 +79,14 @@ def test_question_resolves_correct_status_and_points() -> None:
         AnswerOption(
             id=wrong_option_id,
             question_id=question.id,
-            text='POST',
+            text="POST",
             position=1,
             is_correct=False,
         ),
         AnswerOption(
             id=correct_option_id,
             question_id=question.id,
-            text='GET',
+            text="GET",
             position=2,
             is_correct=True,
         ),

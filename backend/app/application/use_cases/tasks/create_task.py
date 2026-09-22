@@ -15,11 +15,12 @@ class CreateTaskCommand:
     statement: str
     position: int
     check_type: TaskCheckType
-    expected_answer: str = ''
+    expected_answer: str = ""
     accepted_answers: list[str] | None = None
-    answer_pattern: str = ''
+    answer_pattern: str = ""
     max_attempts: int = 1
     reward_points: int = 1
+
 
 class CreateTaskUseCase:
     def __init__(self, uow: UnitOfWork) -> None:

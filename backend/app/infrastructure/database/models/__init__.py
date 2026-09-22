@@ -14,16 +14,16 @@ from app.infrastructure.database.models.task_model import TaskModel
 from app.infrastructure.database.models.user_model import UserModel
 
 __all__ = [
-    'Base',
-    'CourseModel',
-    'ModuleModel',
-    'SectionModel',
-    'LectureModel',
-    'UserModel',
-    'QuestionModel',
-    'AnswerOptionModel',
-    'QuestionAttemptModel',
-    'TaskModel',
-    'TaskAttemptModel',
-    'ProgressModel',
+    "Base",
+    "CourseModel",
+    "ModuleModel",
+    "SectionModel",
+    "LectureModel",
+    "UserModel",
+    "QuestionModel",
+    "AnswerOptionModel",
+    "QuestionAttemptModel",
+    "TaskModel",
+    "TaskAttemptModel",
+    "ProgressModel",
 ]
