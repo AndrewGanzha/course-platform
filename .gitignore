@@ -1,3 +1,4 @@
 # Local development tools
 .idea/
 .pytest_cache/
+.omo/
