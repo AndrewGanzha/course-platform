@@ -72,3 +72,7 @@ class CodeTaskNotFoundError(ApplicationError):
 
 class CodeSubmissionNotFoundError(ApplicationError):
     pass
+
+
+class RetryableExecutionError(ApplicationError):
+    pass

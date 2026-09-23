@@ -2,6 +2,8 @@ import asyncio
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.application.exceptions import RetryableExecutionError
+
 
 @dataclass(slots=True)
 class DockerRunResult:
@@ -11,9 +13,17 @@ class DockerRunResult:
     logs: str = ""
 
 
+@dataclass(slots=True)
+class DockerRunConfig:
+    container_workdir: str = "/workspace"
+    cpus: str = "1"
+    tmpfs_size_mb: int = 64
+    pids_limit: int = 64
+
+
 class DockerRunner:
-    def __init__(self, container_workdir: str = "/workspace") -> None:
-        self.container_workdir = container_workdir
+    def __init__(self, config: DockerRunConfig) -> None:
+        self.config = config
 
     async def run(
         self,
@@ -29,23 +39,39 @@ class DockerRunner:
             "--rm",
             "--network",
             "none",
+            "--read-only",
+            "--tmpfs",
+            f"/tmp:size={self.config.tmpfs_size_mb}m",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges",
+            "--pids-limit",
+            str(self.config.pids_limit),
             "--memory",
             f"{memory_limit_mb}m",
             "--cpus",
-            "1",
+            self.config.cpus,
             "-v",
-            f"{bundle_dir}:{self.container_workdir}:ro",
+            f"{bundle_dir}:{self.config.container_workdir}:ro",
             "-w",
-            self.container_workdir,
+            self.config.container_workdir,
             image,
             *command,
         ]
 
-        process = await asyncio.create_subprocess_exec(
-            *docker_command,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
+        try:
+            process = await asyncio.create_subprocess_exec(
+                *docker_command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+        except FileNotFoundError as exc:
+            raise RetryableExecutionError("Docker executable not found.") from exc
+        except OSError as exc:
+            raise RetryableExecutionError(
+                "Docker process could not be started."
+            ) from exc
 
         try:
             stdout_bytes, stderr_bytes = await asyncio.wait_for(

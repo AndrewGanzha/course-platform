@@ -10,7 +10,7 @@ from app.infrastructure.database.unit_of_work import SqlAlchemyUnitOfWork
 from app.infrastructure.execution.docker_code_execution_gateway import (
     DockerCodeExecutionGateway,
 )
-from app.infrastructure.execution.docker_runner import DockerRunner
+from app.infrastructure.execution.docker_runner import DockerRunConfig, DockerRunner
 from app.infrastructure.execution.execution_profile_registry import (
     ExecutionProfile,
     ExecutionProfileRegistry,
@@ -25,7 +25,9 @@ from app.infrastructure.workers.code_submission_worker import CodeSubmissionWork
 def build_code_submission_worker() -> CodeSubmissionWorker:
     queue = InMemorySubmissionQueue()
     uow = SqlAlchemyUnitOfWork(session_factory=SessionFactory)
-    runner = DockerRunner()
+    runner = DockerRunner(
+        config=DockerRunConfig(),
+    )
     profile_registry = ExecutionProfileRegistry(
         profiles={
             CodeTaskLanguage.PYTHON: ExecutionProfile(

@@ -1,5 +1,6 @@
 import logging
 
+from app.application.exceptions import RetryableExecutionError
 from app.application.interfaces.submission_queue import SubmissionQueue
 from app.application.use_cases.code_submissions.process_code_submission import (
     ProcessCodeSubmissionCommand,
@@ -26,6 +27,12 @@ class CodeSubmissionWorker:
                 await self.process_use_case.execute(
                     ProcessCodeSubmissionCommand(submission_id=submission_id)
                 )
+            except RetryableExecutionError:
+                logger.warning(
+                    "Code submission processing will be retried",
+                    extra={"submission_id": str(submission_id)},
+                )
+                await self.queue.enqueue(submission_id)
             except Exception:
                 logger.exception(
                     "Code submission processing failed",
