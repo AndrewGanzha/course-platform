@@ -3,6 +3,7 @@ from enum import StrEnum
 from uuid import UUID, uuid4
 
 from app.domain.entities.code_submission import CodeSubmission
+from app.domain.entities.test_case import TestCase
 from app.domain.exceptions import (
     CodeSubmissionLimitExceededError,
     CodeTaskAlreadySolvedError,
@@ -48,7 +49,7 @@ class CodeTask:
         if self.memory_limit_mb < 16:
             raise InvalidCodeTaskError("CodeTask memory_limit_mb is too small.")
 
-    def update(
+    def update_content(
         self,
         title: str,
         statement: str,
@@ -59,6 +60,22 @@ class CodeTask:
         self.statement = statement
         self.position = position
         self.starter_code = starter_code
+        self._validate()
+
+    def update_learning_policy(self, max_attempts: int, reward_points: int) -> None:
+        self.max_attempts = max_attempts
+        self.reward_points = reward_points
+        self._validate()
+
+    def update_execution_policy(
+        self,
+        language: CodeTaskLanguage,
+        time_limit_seconds: int,
+        memory_limit_mb: int,
+    ) -> None:
+        self.language = language
+        self.time_limit_seconds = time_limit_seconds
+        self.memory_limit_mb = memory_limit_mb
         self._validate()
 
     def allows_multiple_attempts(self) -> bool:
@@ -137,3 +154,41 @@ class CodeTask:
 
     def has_test_cases(self) -> bool:
         return bool(self.test_case_ids)
+
+    def create_test_case(
+        self,
+        position: int,
+        input_data: str,
+        expected_output: str,
+        is_hidden: bool = True,
+        explanation: str = "",
+    ) -> TestCase:
+        test_case = TestCase(
+            id=uuid4(),
+            code_task_id=self.id,
+            position=position,
+            input_data=input_data,
+            expected_output=expected_output,
+            is_hidden=is_hidden,
+            explanation=explanation,
+        )
+        self.add_test_case(test_case.id)
+        return test_case
+
+    def ensure_execution_policy_can_be_changed(self, has_submissions: bool) -> None:
+        if has_submissions:
+            raise InvalidCodeTaskError(
+                "CodeTask execution policy cannot be changed after submissions."
+            )
+
+    def ensure_learning_policy_can_be_changed(self, has_submissions: bool) -> None:
+        if has_submissions:
+            raise InvalidCodeTaskError(
+                "CodeTask learning policy cannot be changed after submissions."
+            )
+
+    def ensure_test_cases_can_be_changed(self, has_submissions: bool) -> None:
+        if has_submissions:
+            raise InvalidCodeTaskError(
+                "CodeTask test cases cannot be changed after submissions."
+            )
