@@ -1,6 +1,9 @@
 from app.application.interfaces.repositories.answer_option_repository import (
     AnswerOptionRepository,
 )
+from app.application.interfaces.repositories.code_submission_repository import (
+    CodeSubmissionRepository,
+)
 from app.application.interfaces.repositories.code_task_repository import (
     CodeTaskRepository,
 )
@@ -40,4 +43,5 @@ __all__ = [
     "ProgressRepository",
     "CodeTaskRepository",
     "TestCaseRepository",
+    "CodeSubmissionRepository",
 ]

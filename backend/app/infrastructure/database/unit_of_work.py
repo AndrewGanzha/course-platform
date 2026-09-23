@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.infrastructure.database.repositories import (
     SqlAlchemyAnswerOptionRepository,
+    SqlAlchemyCodeSubmissionRepository,
+    SqlAlchemyCodeTaskRepository,
     SqlAlchemyCourseRepository,
     SqlAlchemyLectureRepository,
     SqlAlchemyModuleRepository,
@@ -12,6 +14,7 @@ from app.infrastructure.database.repositories import (
     SqlAlchemySectionRepository,
     SqlAlchemyTaskAttemptRepository,
     SqlAlchemyTaskRepository,
+    SqlAlchemyTestCaseRepository,
     SqlAlchemyUserRepository,
 )
 
@@ -45,6 +48,9 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self.tasks = SqlAlchemyTaskRepository(self.session)
         self.task_attempts = SqlAlchemyTaskAttemptRepository(self.session)
         self.progress = SqlAlchemyProgressRepository(self.session)
+        self.code_tasks = SqlAlchemyCodeTaskRepository(self.session)
+        self.test_cases = SqlAlchemyTestCaseRepository(self.session)
+        self.code_submissions = SqlAlchemyCodeSubmissionRepository(self.session)
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:

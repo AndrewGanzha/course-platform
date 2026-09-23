@@ -34,3 +34,10 @@ class SectionModel(Base):
         cascade="all, delete-orphan",
         order_by="TaskModel.position",
     )
+
+    code_tasks = relationship(
+        "CodeTaskModel",
+        back_populates="section",
+        cascade="all, delete-orphan",
+        order_by="CodeTaskModel.position",
+    )
