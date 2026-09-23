@@ -1,0 +1,50 @@
+from app.application.use_cases.code_submissions.complete_code_submission import (
+    CompleteCodeSubmissionUseCase,
+)
+from app.application.use_cases.code_submissions.process_code_submission import (
+    ProcessCodeSubmissionUseCase,
+)
+from app.domain.entities.code_task import CodeTaskLanguage
+from app.infrastructure.database.database import SessionFactory
+from app.infrastructure.database.unit_of_work import SqlAlchemyUnitOfWork
+from app.infrastructure.execution.docker_code_execution_gateway import (
+    DockerCodeExecutionGateway,
+)
+from app.infrastructure.execution.docker_runner import DockerRunner
+from app.infrastructure.execution.execution_profile_registry import (
+    ExecutionProfile,
+    ExecutionProfileRegistry,
+)
+from app.infrastructure.execution.python_submission_bundle_builder import (
+    PythonSubmissionBundleBuilder,
+)
+from app.infrastructure.queues.in_memory_submission_queue import InMemorySubmissionQueue
+from app.infrastructure.workers.code_submission_worker import CodeSubmissionWorker
+
+
+def build_code_submission_worker() -> CodeSubmissionWorker:
+    queue = InMemorySubmissionQueue()
+    uow = SqlAlchemyUnitOfWork(session_factory=SessionFactory)
+    runner = DockerRunner()
+    profile_registry = ExecutionProfileRegistry(
+        profiles={
+            CodeTaskLanguage.PYTHON: ExecutionProfile(
+                image="python:3.12-alpine",
+                bundle_builder=PythonSubmissionBundleBuilder(),
+            ),
+        }
+    )
+    execution_gateway = DockerCodeExecutionGateway(
+        runner=runner,
+        profile_registry=profile_registry,
+    )
+    complete_use_case = CompleteCodeSubmissionUseCase(uow=uow)
+    process_use_case = ProcessCodeSubmissionUseCase(
+        uow=uow,
+        execution_gateway=execution_gateway,
+        complete_use_case=complete_use_case,
+    )
+    return CodeSubmissionWorker(
+        queue=queue,
+        process_use_case=process_use_case,
+    )

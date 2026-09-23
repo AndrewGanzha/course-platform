@@ -48,7 +48,7 @@ class ProcessCodeSubmissionUseCase:
                 await self.uow.code_submissions.update(submission)
                 await self.uow.commit()
 
-        result = await self.execution_gateway.execute(submission, test_cases)
+        result = await self.execution_gateway.execute(code_task, submission, test_cases)
 
         await self.complete_use_case.execute(
             CompleteCodeSubmissionCommand(
