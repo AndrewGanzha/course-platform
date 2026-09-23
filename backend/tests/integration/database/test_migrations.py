@@ -22,6 +22,7 @@ REVISION_CHAIN = [
     "88447622b6d8",
     "9e5503fe7a04",
     "9ce3331e8ef9",
+    "a9e96d41816e",
 ]
 REVISION_CONTEXTS = [
     "identity",
@@ -35,9 +36,10 @@ REVISION_CONTEXTS = [
     "assessment",
     "learning",
     "learning",
+    "learning",
 ]
 INITIAL_REVISION = "18473e67180b"
-HEAD_REVISION = "9ce3331e8ef9"
+HEAD_REVISION = "a9e96d41816e"
 
 INITIAL_TABLES = {
     "courses",
@@ -48,11 +50,14 @@ INITIAL_TABLES = {
 }
 HEAD_TABLES = INITIAL_TABLES | {
     "answer_options",
+    "code_submissions",
+    "code_tasks",
     "progress",
     "question_attempts",
     "questions",
     "task_attempts",
     "tasks",
+    "test_cases",
 }
 
 
