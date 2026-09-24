@@ -41,6 +41,9 @@ class SqlAlchemyProgressRepository(ProgressRepository):
             str(item) for item in progress.completed_question_ids
         ]
         model.completed_task_ids = [str(item) for item in progress.completed_task_ids]
+        model.completed_code_task_ids = [
+            str(item) for item in progress.completed_code_task_ids
+        ]
         model.completed_section_ids = [
             str(item) for item in progress.completed_section_ids
         ]
