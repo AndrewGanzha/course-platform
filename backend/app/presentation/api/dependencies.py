@@ -10,6 +10,7 @@ from app.application.dto.authenticated_user import (
 )
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
+from app.application.interfaces.submission_queue import SubmissionQueue
 from app.application.use_cases.answer_options.create_answer_option import (
     CreateAnswerOptionUseCase,
 )
@@ -18,6 +19,15 @@ from app.application.use_cases.answer_options.update_answer_option import (
 )
 from app.application.use_cases.auth.login_user import LoginUserUseCase
 from app.application.use_cases.auth.register_user import RegisterUserUseCase
+from app.application.use_cases.code_submissions.submit_code_submission import (
+    SubmitCodeSubmissionUseCase,
+)
+from app.application.use_cases.code_tasks.create_code_task import (
+    CreateCodeTaskUseCase,
+)
+from app.application.use_cases.code_tasks.update_code_task import (
+    UpdateCodeTaskUseCase,
+)
 from app.application.use_cases.courses.create_course import CreateCourseUseCase
 from app.application.use_cases.courses.get_course import GetCourseUseCase
 from app.application.use_cases.courses.get_course_structure import (
@@ -47,6 +57,18 @@ from app.application.use_cases.questions.update_question import UpdateQuestionUs
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
 from app.application.use_cases.sections.remove_section import RemoveSectionUseCase
 from app.application.use_cases.sections.update_section import UpdateSectionUseCase
+from app.application.use_cases.task_attempts.submit_task_answer import (
+    SubmitTaskAnswerUseCase,
+)
+from app.application.use_cases.tasks.create_task import CreateTaskUseCase
+from app.application.use_cases.tasks.update_task import UpdateTaskUseCase
+from app.application.use_cases.test_cases.create_test_case import (
+    CreateTestCaseUseCase,
+)
+from app.application.use_cases.test_cases.update_test_case import (
+    UpdateTestCaseUseCase,
+)
+from app.bootstrap.runtime_objects import submission_queue
 from app.domain.entities.user import User
 from app.infrastructure.database import SessionFactory, SqlAlchemyUnitOfWork
 from app.infrastructure.security.jwt_token_service import (
@@ -73,6 +95,10 @@ class ApiProvider(Provider):
     ) -> AsyncIterator[SqlAlchemyUnitOfWork]:
         async with SqlAlchemyUnitOfWork(session_factory=SessionFactory) as uow:
             yield uow
+
+    @provide(scope=Scope.APP)
+    def get_submission_queue(self) -> SubmissionQueue:
+        return submission_queue
 
     @provide
     def provide_get_courses_use_case(
@@ -187,6 +213,66 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> RemoveLectureUseCase:
         return RemoveLectureUseCase(uow=uow)
+
+    @provide
+    def get_create_task_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CreateTaskUseCase:
+        return CreateTaskUseCase(uow=uow)
+
+    @provide
+    def get_update_task_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateTaskUseCase:
+        return UpdateTaskUseCase(uow=uow)
+
+    @provide
+    def get_create_code_task_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CreateCodeTaskUseCase:
+        return CreateCodeTaskUseCase(uow=uow)
+
+    @provide
+    def get_update_code_task_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateCodeTaskUseCase:
+        return UpdateCodeTaskUseCase(uow=uow)
+
+    @provide
+    def get_create_test_case_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CreateTestCaseUseCase:
+        return CreateTestCaseUseCase(uow=uow)
+
+    @provide
+    def get_update_test_case_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateTestCaseUseCase:
+        return UpdateTestCaseUseCase(uow=uow)
+
+    @provide
+    def get_submit_task_answer_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> SubmitTaskAnswerUseCase:
+        return SubmitTaskAnswerUseCase(uow=uow)
+
+    @provide
+    def get_submit_code_submission_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+        submission_queue: SubmissionQueue,
+    ) -> SubmitCodeSubmissionUseCase:
+        return SubmitCodeSubmissionUseCase(
+            uow=uow,
+            submission_queue=submission_queue,
+        )
 
     @provide
     def get_create_question_use_case(

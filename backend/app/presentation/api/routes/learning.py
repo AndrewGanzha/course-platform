@@ -4,6 +4,10 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, status
 
 from app.application.dto.authenticated_user import AuthenticatedUser
+from app.application.use_cases.code_submissions.submit_code_submission import (
+    SubmitCodeSubmissionCommand,
+    SubmitCodeSubmissionUseCase,
+)
 from app.application.use_cases.question_attempts.get_question_attempt_result import (
     GetQuestionAttemptResultCommand,
     GetQuestionAttemptResultUseCase,
@@ -16,11 +20,19 @@ from app.application.use_cases.question_attempts.submit_question_answer import (
     SubmitQuestionAnswerCommand,
     SubmitQuestionAnswerUseCase,
 )
+from app.application.use_cases.task_attempts.submit_task_answer import (
+    SubmitTaskAnswerCommand,
+    SubmitTaskAnswerUseCase,
+)
 from app.presentation.api.schemas import (
+    CodeSubmissionResponse,
     ErrorResponse,
     QuestionAttemptResultResponse,
     StartQuestionAttemptResponse,
+    SubmitCodeSubmissionRequest,
     SubmitQuestionAnswerRequest,
+    SubmitTaskAnswerRequest,
+    TaskAttemptResponse,
 )
 
 router = APIRouter(
@@ -109,3 +121,49 @@ async def get_question_attempt_result(
         )
     )
     return QuestionAttemptResultResponse.model_validate(result)
+
+
+@router.post(
+    "/tasks/{task_id}/attempts",
+    response_model=TaskAttemptResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Submit task answer",
+    description="Creates a task attempt and immediately returns its result.",
+)
+async def submit_task_answer(
+    task_id: UUID,
+    request: SubmitTaskAnswerRequest,
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[SubmitTaskAnswerUseCase],
+) -> TaskAttemptResponse:
+    result = await use_case.execute(
+        SubmitTaskAnswerCommand(
+            actor=actor,
+            task_id=task_id,
+            submitted_answer=request.submitted_answer,
+        )
+    )
+    return TaskAttemptResponse.model_validate(result)
+
+
+@router.post(
+    "/code-tasks/{code_task_id}/submissions",
+    response_model=CodeSubmissionResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Submit code solution",
+    description="Creates a new code submission and hands it off to asynchronous checking.",
+)
+async def submit_code_submission(
+    code_task_id: UUID,
+    request: SubmitCodeSubmissionRequest,
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[SubmitCodeSubmissionUseCase],
+) -> CodeSubmissionResponse:
+    result = await use_case.execute(
+        SubmitCodeSubmissionCommand(
+            actor=actor,
+            code_task_id=code_task_id,
+            source_code=request.source_code,
+        )
+    )
+    return CodeSubmissionResponse.model_validate(result)
