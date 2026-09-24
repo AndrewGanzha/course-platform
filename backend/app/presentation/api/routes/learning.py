@@ -4,6 +4,14 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, status
 
 from app.application.dto.authenticated_user import AuthenticatedUser
+from app.application.use_cases.code_submissions.get_code_submission import (
+    GetCodeSubmissionCommand,
+    GetCodeSubmissionUseCase,
+)
+from app.application.use_cases.code_submissions.list_code_submissions import (
+    ListCodeSubmissionsCommand,
+    ListCodeSubmissionsUseCase,
+)
 from app.application.use_cases.code_submissions.submit_code_submission import (
     SubmitCodeSubmissionCommand,
     SubmitCodeSubmissionUseCase,
@@ -167,3 +175,43 @@ async def submit_code_submission(
         )
     )
     return CodeSubmissionResponse.model_validate(result)
+
+
+@router.get(
+    "/code-submissions/{submission_id}",
+    response_model=CodeSubmissionResponse,
+    summary="Get code submission status",
+    description="Returns current status of the selected code submission.",
+)
+async def get_code_submission(
+    submission_id: UUID,
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[GetCodeSubmissionUseCase],
+) -> CodeSubmissionResponse:
+    result = await use_case.execute(
+        GetCodeSubmissionCommand(
+            actor=actor,
+            submission_id=submission_id,
+        )
+    )
+    return CodeSubmissionResponse.model_validate(result)
+
+
+@router.get(
+    "/code-tasks/{code_task_id}/submissions",
+    response_model=list[CodeSubmissionResponse],
+    summary="List code submission history",
+    description="Returns submission history of the current student for the selected code task.",
+)
+async def list_code_submissions(
+    code_task_id: UUID,
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[ListCodeSubmissionsUseCase],
+) -> list[CodeSubmissionResponse]:
+    result = await use_case.execute(
+        ListCodeSubmissionsCommand(
+            actor=actor,
+            code_task_id=code_task_id,
+        )
+    )
+    return [CodeSubmissionResponse.model_validate(item) for item in result]

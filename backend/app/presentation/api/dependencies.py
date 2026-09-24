@@ -19,12 +19,19 @@ from app.application.use_cases.answer_options.update_answer_option import (
 )
 from app.application.use_cases.auth.login_user import LoginUserUseCase
 from app.application.use_cases.auth.register_user import RegisterUserUseCase
+from app.application.use_cases.code_submissions.get_code_submission import (
+    GetCodeSubmissionUseCase,
+)
+from app.application.use_cases.code_submissions.list_code_submissions import (
+    ListCodeSubmissionsUseCase,
+)
 from app.application.use_cases.code_submissions.submit_code_submission import (
     SubmitCodeSubmissionUseCase,
 )
 from app.application.use_cases.code_tasks.create_code_task import (
     CreateCodeTaskUseCase,
 )
+from app.application.use_cases.code_tasks.get_code_task import GetCodeTaskUseCase
 from app.application.use_cases.code_tasks.update_code_task import (
     UpdateCodeTaskUseCase,
 )
@@ -53,6 +60,7 @@ from app.application.use_cases.question_attempts.submit_question_answer import (
     SubmitQuestionAnswerUseCase,
 )
 from app.application.use_cases.questions.create_question import CreateQuestionUseCase
+from app.application.use_cases.questions.get_question import GetQuestionUseCase
 from app.application.use_cases.questions.update_question import UpdateQuestionUseCase
 from app.application.use_cases.sections.create_section import CreateSectionUseCase
 from app.application.use_cases.sections.remove_section import RemoveSectionUseCase
@@ -61,6 +69,7 @@ from app.application.use_cases.task_attempts.submit_task_answer import (
     SubmitTaskAnswerUseCase,
 )
 from app.application.use_cases.tasks.create_task import CreateTaskUseCase
+from app.application.use_cases.tasks.get_task import GetTaskUseCase
 from app.application.use_cases.tasks.update_task import UpdateTaskUseCase
 from app.application.use_cases.test_cases.create_test_case import (
     CreateTestCaseUseCase,
@@ -128,6 +137,8 @@ class ApiProvider(Provider):
             module_repository=uow.modules,
             section_repository=uow.sections,
             lecture_repository=uow.lectures,
+            task_repository=uow.tasks,
+            code_task_repository=uow.code_tasks,
         )
 
     @provide
@@ -275,6 +286,20 @@ class ApiProvider(Provider):
         )
 
     @provide
+    def get_get_code_submission_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetCodeSubmissionUseCase:
+        return GetCodeSubmissionUseCase(uow=uow)
+
+    @provide
+    def get_list_code_submissions_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> ListCodeSubmissionsUseCase:
+        return ListCodeSubmissionsUseCase(uow=uow)
+
+    @provide
     def get_create_question_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
@@ -329,6 +354,30 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> GetLectureUseCase:
         return GetLectureUseCase(lecture_repository=uow.lectures)
+
+    @provide
+    def get_get_question_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetQuestionUseCase:
+        return GetQuestionUseCase(
+            question_repository=uow.questions,
+            answer_option_repository=uow.answer_options,
+        )
+
+    @provide
+    def get_get_task_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetTaskUseCase:
+        return GetTaskUseCase(task_repository=uow.tasks)
+
+    @provide
+    def get_get_code_task_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetCodeTaskUseCase:
+        return GetCodeTaskUseCase(code_task_repository=uow.code_tasks)
 
     @provide
     def get_password_hasher(self) -> PasswordHasher:

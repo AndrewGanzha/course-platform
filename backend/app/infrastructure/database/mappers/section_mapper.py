@@ -21,6 +21,13 @@ class SectionMapper:
                 UUID(question.id)
                 for question in sorted(model.questions, key=lambda x: x.position)
             ],
+            task_ids=[
+                UUID(task.id) for task in sorted(model.tasks, key=lambda x: x.position)
+            ],
+            code_task_ids=[
+                UUID(code_task.id)
+                for code_task in sorted(model.code_tasks, key=lambda x: x.position)
+            ],
         )
 
     @staticmethod

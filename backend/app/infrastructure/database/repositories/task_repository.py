@@ -19,6 +19,17 @@ class SqlAlchemyTaskRepository(TaskRepository):
         model = result.scalar_one_or_none()
         return None if model is None else TaskMapper.to_domain(model)
 
+    async def get_by_ids(self, task_ids: list[UUID]) -> list[Task]:
+        if not task_ids:
+            return []
+
+        stmt = select(TaskModel).where(
+            TaskModel.id.in_([str(task_id) for task_id in task_ids])
+        )
+        result = await self.session.execute(stmt)
+        models = result.scalars().all()
+        return [TaskMapper.to_domain(model) for model in models]
+
     async def add(self, task: Task) -> None:
         self.session.add(TaskMapper.to_model(task))
         await self.session.flush()

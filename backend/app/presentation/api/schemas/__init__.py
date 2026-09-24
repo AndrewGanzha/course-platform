@@ -15,13 +15,19 @@ from app.presentation.api.schemas.code_tasks import (
     UpdateCodeTaskRequest,
 )
 from app.presentation.api.schemas.content import (
+    AnswerOptionDetailsResponse,
+    CodeTaskDetailsResponse,
+    CodeTaskStructureResponse,
     CourseListItemResponse,
     CourseResponse,
     CourseStructureResponse,
     LectureResponse,
     LectureStructureResponse,
     ModuleStructureResponse,
+    QuestionDetailsResponse,
     SectionStructureResponse,
+    TaskDetailsResponse,
+    TaskStructureResponse,
 )
 from app.presentation.api.schemas.courses import (
     CreateCourseRequest,
@@ -71,13 +77,19 @@ from app.presentation.api.schemas.test_cases import (
 )
 
 __all__ = [
+    "AnswerOptionDetailsResponse",
+    "CodeTaskDetailsResponse",
+    "CodeTaskStructureResponse",
     "CourseListItemResponse",
     "CourseResponse",
     "CourseStructureResponse",
     "LectureResponse",
     "LectureStructureResponse",
     "ModuleStructureResponse",
+    "QuestionDetailsResponse",
     "SectionStructureResponse",
+    "TaskDetailsResponse",
+    "TaskStructureResponse",
     "CreateCourseRequest",
     "UpdateCourseRequest",
     "CreateModuleRequest",

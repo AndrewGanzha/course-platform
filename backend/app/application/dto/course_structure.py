@@ -10,13 +10,31 @@ class LectureStructureDTO:
 
 
 @dataclass(slots=True)
+class TaskStructureDTO:
+    id: UUID
+    title: str
+    position: int
+
+
+@dataclass(slots=True)
+class CodeTaskStructureDTO:
+    id: UUID
+    title: str
+    position: int
+    language: str
+
+
+@dataclass(slots=True)
 class SectionStructureDTO:
     id: UUID
     title: str
     description: str
     position: int
     question_ids: list[UUID] = field(default_factory=list)
-    task_ids: list[UUID] = field(default_factory=list)  # New
+    task_ids: list[UUID] = field(default_factory=list)
+    code_task_ids: list[UUID] = field(default_factory=list)
+    tasks: list[TaskStructureDTO] = field(default_factory=list)
+    code_tasks: list[CodeTaskStructureDTO] = field(default_factory=list)
     lectures: list[LectureStructureDTO] = field(default_factory=list)
 
 

@@ -3,6 +3,10 @@ from uuid import UUID
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter
 
+from app.application.use_cases.code_tasks.get_code_task import (
+    GetCodeTaskQuery,
+    GetCodeTaskUseCase,
+)
 from app.application.use_cases.courses.get_course import (
     GetCourseQuery,
     GetCourseUseCase,
@@ -19,11 +23,19 @@ from app.application.use_cases.lectures.get_lecture import (
     GetLectureQuery,
     GetLectureUseCase,
 )
+from app.application.use_cases.questions.get_question import (
+    GetQuestionQuery,
+    GetQuestionUseCase,
+)
+from app.application.use_cases.tasks.get_task import GetTaskQuery, GetTaskUseCase
 from app.presentation.api.schemas import (
+    CodeTaskDetailsResponse,
     CourseListItemResponse,
     CourseResponse,
     CourseStructureResponse,
     LectureResponse,
+    QuestionDetailsResponse,
+    TaskDetailsResponse,
 )
 from app.presentation.api.schemas.errors import ErrorResponse
 
@@ -104,3 +116,65 @@ async def get_lecture(
 ) -> LectureResponse:
     result = await use_case.execute(GetLectureQuery(lecture_id=lecture_id))
     return LectureResponse.model_validate(result)
+
+
+@router.get(
+    "/questions/{question_id}",
+    response_model=QuestionDetailsResponse,
+    summary="Get question by ID",
+    description="Returns the content of a single question with public answer options.",
+    responses={
+        404: {
+            "description": "Question was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_question(
+    question_id: UUID,
+    use_case: FromDishka[GetQuestionUseCase],
+) -> QuestionDetailsResponse:
+    result = await use_case.execute(GetQuestionQuery(question_id=question_id))
+    return QuestionDetailsResponse.model_validate(result)
+
+
+@router.get(
+    "/tasks/{task_id}",
+    response_model=TaskDetailsResponse,
+    summary="Get task by ID",
+    description="Returns the content of a single task without author check configuration.",
+    responses={
+        404: {
+            "description": "Task was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_task(
+    task_id: UUID,
+    use_case: FromDishka[GetTaskUseCase],
+) -> TaskDetailsResponse:
+    result = await use_case.execute(GetTaskQuery(task_id=task_id))
+    return TaskDetailsResponse.model_validate(result)
+
+
+@router.get(
+    "/code-tasks/{code_task_id}",
+    response_model=CodeTaskDetailsResponse,
+    summary="Get code task by ID",
+    description=(
+        "Returns the content of a single code task and its editor configuration."
+    ),
+    responses={
+        404: {
+            "description": "Code task was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_code_task(
+    code_task_id: UUID,
+    use_case: FromDishka[GetCodeTaskUseCase],
+) -> CodeTaskDetailsResponse:
+    result = await use_case.execute(GetCodeTaskQuery(code_task_id=code_task_id))
+    return CodeTaskDetailsResponse.model_validate(result)
