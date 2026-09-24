@@ -23,7 +23,11 @@ class SubmitTaskAnswerCommand:
 
 
 class SubmitTaskAnswerUseCase:
-    def __init__(self, uow: UnitOfWork, task_checker: TaskChecker | None) -> None:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        task_checker: TaskChecker | None = None,
+    ) -> None:
         self.uow = uow
         self.task_checker = task_checker or SimpleTaskChecker()
 
