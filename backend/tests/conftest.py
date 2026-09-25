@@ -15,6 +15,8 @@ import app.presentation.api.dependencies as api_dependencies
 from app.infrastructure.database.models import (
     AnswerOptionModel,
     Base,
+    CodeSubmissionModel,
+    CodeTaskModel,
     CourseModel,
     LectureModel,
     ModuleModel,
@@ -22,6 +24,9 @@ from app.infrastructure.database.models import (
     QuestionAttemptModel,
     QuestionModel,
     SectionModel,
+    TaskAttemptModel,
+    TaskModel,
+    TestCaseModel,
     UserModel,
 )
 from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
@@ -62,6 +67,11 @@ async def clear_database(session_factory) -> None:
             QuestionAttemptModel,
             ProgressModel,
             QuestionModel,
+            TaskAttemptModel,
+            TestCaseModel,
+            CodeSubmissionModel,
+            TaskModel,
+            CodeTaskModel,
             LectureModel,
             SectionModel,
             ModuleModel,
