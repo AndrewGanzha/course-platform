@@ -77,7 +77,7 @@ from app.application.use_cases.test_cases.create_test_case import (
 from app.application.use_cases.test_cases.update_test_case import (
     UpdateTestCaseUseCase,
 )
-from app.bootstrap.runtime_objects import submission_queue
+from app.bootstrap.build_submission_queue import build_submission_queue
 from app.domain.entities.user import User
 from app.infrastructure.database import SessionFactory, SqlAlchemyUnitOfWork
 from app.infrastructure.security.jwt_token_service import (
@@ -107,7 +107,7 @@ class ApiProvider(Provider):
 
     @provide(scope=Scope.APP)
     def get_submission_queue(self) -> SubmissionQueue:
-        return submission_queue
+        return build_submission_queue()
 
     @provide
     def provide_get_courses_use_case(

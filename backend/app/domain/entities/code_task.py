@@ -13,6 +13,7 @@ from app.domain.exceptions import (
 
 class CodeTaskLanguage(StrEnum):
     PYTHON = "python"
+    JAVA = "java"
 
 
 @dataclass(slots=True)

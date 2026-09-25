@@ -4,6 +4,7 @@ from app.application.use_cases.code_submissions.complete_code_submission import 
 from app.application.use_cases.code_submissions.process_code_submission import (
     ProcessCodeSubmissionUseCase,
 )
+from app.bootstrap.build_submission_queue import build_submission_queue
 from app.domain.entities.code_task import CodeTaskLanguage
 from app.infrastructure.database.database import SessionFactory
 from app.infrastructure.database.unit_of_work import SqlAlchemyUnitOfWork
@@ -15,15 +16,17 @@ from app.infrastructure.execution.execution_profile_registry import (
     ExecutionProfile,
     ExecutionProfileRegistry,
 )
+from app.infrastructure.execution.java_submission_bundle_builder import (
+    JavaSubmissionBundleBuilder,
+)
 from app.infrastructure.execution.python_submission_bundle_builder import (
     PythonSubmissionBundleBuilder,
 )
-from app.infrastructure.queues.in_memory_submission_queue import InMemorySubmissionQueue
 from app.infrastructure.workers.code_submission_worker import CodeSubmissionWorker
 
 
 def build_code_submission_worker() -> CodeSubmissionWorker:
-    queue = InMemorySubmissionQueue()
+    queue = build_submission_queue()
     uow = SqlAlchemyUnitOfWork(session_factory=SessionFactory)
     runner = DockerRunner(
         config=DockerRunConfig(),
@@ -33,6 +36,10 @@ def build_code_submission_worker() -> CodeSubmissionWorker:
             CodeTaskLanguage.PYTHON: ExecutionProfile(
                 image="python:3.12-alpine",
                 bundle_builder=PythonSubmissionBundleBuilder(),
+            ),
+            CodeTaskLanguage.JAVA: ExecutionProfile(
+                image="eclipse-temurin:21-jdk-jammy",
+                bundle_builder=JavaSubmissionBundleBuilder(),
             ),
         }
     )
