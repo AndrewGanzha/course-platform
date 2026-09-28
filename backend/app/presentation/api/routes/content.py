@@ -28,6 +28,7 @@ from app.application.use_cases.questions.get_question import (
     GetQuestionUseCase,
 )
 from app.application.use_cases.tasks.get_task import GetTaskQuery, GetTaskUseCase
+from app.domain.entities.user import User
 from app.presentation.api.schemas import (
     CodeTaskDetailsResponse,
     CourseListItemResponse,
@@ -69,9 +70,12 @@ async def get_courses(
 )
 async def get_course(
     course_id: UUID,
+    current_user: FromDishka[User | None],
     use_case: FromDishka[GetCourseUseCase],
 ) -> CourseResponse:
-    result = await use_case.execute(GetCourseQuery(course_id=course_id))
+    result = await use_case.execute(
+        GetCourseQuery(course_id=course_id, actor=current_user)
+    )
     return CourseResponse.model_validate(result)
 
 
@@ -92,9 +96,12 @@ async def get_course(
 )
 async def get_course_structure(
     course_id: UUID,
+    current_user: FromDishka[User | None],
     use_case: FromDishka[GetCourseStructureUseCase],
 ) -> CourseStructureResponse:
-    result = await use_case.execute(GetCourseStructureQuery(course_id=course_id))
+    result = await use_case.execute(
+        GetCourseStructureQuery(course_id=course_id, actor=current_user)
+    )
     return CourseStructureResponse.model_validate(result)
 
 
@@ -112,9 +119,12 @@ async def get_course_structure(
 )
 async def get_lecture(
     lecture_id: UUID,
+    current_user: FromDishka[User | None],
     use_case: FromDishka[GetLectureUseCase],
 ) -> LectureResponse:
-    result = await use_case.execute(GetLectureQuery(lecture_id=lecture_id))
+    result = await use_case.execute(
+        GetLectureQuery(lecture_id=lecture_id, actor=current_user)
+    )
     return LectureResponse.model_validate(result)
 
 
@@ -132,9 +142,12 @@ async def get_lecture(
 )
 async def get_question(
     question_id: UUID,
+    current_user: FromDishka[User | None],
     use_case: FromDishka[GetQuestionUseCase],
 ) -> QuestionDetailsResponse:
-    result = await use_case.execute(GetQuestionQuery(question_id=question_id))
+    result = await use_case.execute(
+        GetQuestionQuery(question_id=question_id, actor=current_user)
+    )
     return QuestionDetailsResponse.model_validate(result)
 
 
@@ -152,9 +165,10 @@ async def get_question(
 )
 async def get_task(
     task_id: UUID,
+    current_user: FromDishka[User | None],
     use_case: FromDishka[GetTaskUseCase],
 ) -> TaskDetailsResponse:
-    result = await use_case.execute(GetTaskQuery(task_id=task_id))
+    result = await use_case.execute(GetTaskQuery(task_id=task_id, actor=current_user))
     return TaskDetailsResponse.model_validate(result)
 
 
@@ -174,7 +188,10 @@ async def get_task(
 )
 async def get_code_task(
     code_task_id: UUID,
+    current_user: FromDishka[User | None],
     use_case: FromDishka[GetCodeTaskUseCase],
 ) -> CodeTaskDetailsResponse:
-    result = await use_case.execute(GetCodeTaskQuery(code_task_id=code_task_id))
+    result = await use_case.execute(
+        GetCodeTaskQuery(code_task_id=code_task_id, actor=current_user)
+    )
     return CodeTaskDetailsResponse.model_validate(result)

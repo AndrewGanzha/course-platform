@@ -11,6 +11,9 @@ from app.application.dto.authenticated_user import (
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
 from app.application.interfaces.submission_queue import SubmissionQueue
+from app.application.services.course_content_access_service import (
+    CourseContentAccessService,
+)
 from app.application.use_cases.answer_options.create_answer_option import (
     CreateAnswerOptionUseCase,
 )
@@ -38,12 +41,14 @@ from app.application.use_cases.code_tasks.remove_code_task import (
 from app.application.use_cases.code_tasks.update_code_task import (
     UpdateCodeTaskUseCase,
 )
+from app.application.use_cases.courses.archive_course import ArchiveCourseUseCase
 from app.application.use_cases.courses.create_course import CreateCourseUseCase
 from app.application.use_cases.courses.get_course import GetCourseUseCase
 from app.application.use_cases.courses.get_course_structure import (
     GetCourseStructureUseCase,
 )
 from app.application.use_cases.courses.get_courses import GetCoursesUseCase
+from app.application.use_cases.courses.publish_course import PublishCourseUseCase
 from app.application.use_cases.courses.remove_course import RemoveCourseUseCase
 from app.application.use_cases.courses.update_course import UpdateCourseUseCase
 from app.application.use_cases.lectures.create_lecture import CreateLectureUseCase
@@ -112,6 +117,17 @@ class ApiProvider(Provider):
         async with SqlAlchemyUnitOfWork(session_factory=SessionFactory) as uow:
             yield uow
 
+    @provide
+    def get_course_content_access_service(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CourseContentAccessService:
+        return CourseContentAccessService(
+            course_repository=uow.courses,
+            module_repository=uow.modules,
+            section_repository=uow.sections,
+        )
+
     @provide(scope=Scope.APP)
     def get_submission_queue(self) -> SubmissionQueue:
         return build_submission_queue()
@@ -129,15 +145,18 @@ class ApiProvider(Provider):
     def provide_get_course_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        access_service: CourseContentAccessService,
     ) -> GetCourseUseCase:
         return GetCourseUseCase(
             course_repository=uow.courses,
+            access_service=access_service,
         )
 
     @provide
     def provide_get_course_structure_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        access_service: CourseContentAccessService,
     ) -> GetCourseStructureUseCase:
         return GetCourseStructureUseCase(
             course_repository=uow.courses,
@@ -146,6 +165,7 @@ class ApiProvider(Provider):
             lecture_repository=uow.lectures,
             task_repository=uow.tasks,
             code_task_repository=uow.code_tasks,
+            access_service=access_service,
         )
 
     @provide
@@ -168,6 +188,20 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> RemoveCourseUseCase:
         return RemoveCourseUseCase(uow=uow)
+
+    @provide
+    def get_publish_course_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> PublishCourseUseCase:
+        return PublishCourseUseCase(uow=uow)
+
+    @provide
+    def get_archive_course_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> ArchiveCourseUseCase:
+        return ArchiveCourseUseCase(uow=uow)
 
     @provide
     def get_create_module_use_case(
@@ -380,32 +414,46 @@ class ApiProvider(Provider):
     def provide_get_lecture_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        access_service: CourseContentAccessService,
     ) -> GetLectureUseCase:
-        return GetLectureUseCase(lecture_repository=uow.lectures)
+        return GetLectureUseCase(
+            lecture_repository=uow.lectures,
+            access_service=access_service,
+        )
 
     @provide
     def get_get_question_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        access_service: CourseContentAccessService,
     ) -> GetQuestionUseCase:
         return GetQuestionUseCase(
             question_repository=uow.questions,
             answer_option_repository=uow.answer_options,
+            access_service=access_service,
         )
 
     @provide
     def get_get_task_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        access_service: CourseContentAccessService,
     ) -> GetTaskUseCase:
-        return GetTaskUseCase(task_repository=uow.tasks)
+        return GetTaskUseCase(
+            task_repository=uow.tasks,
+            access_service=access_service,
+        )
 
     @provide
     def get_get_code_task_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        access_service: CourseContentAccessService,
     ) -> GetCodeTaskUseCase:
-        return GetCodeTaskUseCase(code_task_repository=uow.code_tasks)
+        return GetCodeTaskUseCase(
+            code_task_repository=uow.code_tasks,
+            access_service=access_service,
+        )
 
     @provide
     def get_password_hasher(self) -> PasswordHasher:
@@ -466,6 +514,30 @@ class ApiProvider(Provider):
             raise AuthenticationError("Authenticated user was not found")
 
         return AuthenticatedUser(user)
+
+    @provide
+    async def get_current_user_or_none(
+        self,
+        credentials: HTTPAuthorizationCredentials | None,
+        uow: SqlAlchemyUnitOfWork,
+        token_service: TokenService,
+    ) -> User | None:
+        if credentials is None:
+            return None
+
+        if credentials.scheme.lower() != "bearer":
+            raise AuthenticationError("Authentication scheme must be Bearer.")
+
+        try:
+            user_id = token_service.get_user_id(credentials.credentials)
+        except InvalidTokenError as exc:
+            raise AuthenticationError(str(exc)) from exc
+
+        user = await uow.users.get_by_id(user_id)
+        if user is None:
+            raise AuthenticationError("User from token was not found.")
+
+        return user
 
     @provide
     def get_current_admin(

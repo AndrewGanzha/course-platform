@@ -38,6 +38,13 @@ async def test_admin_can_remove_an_entire_course_tree_incrementally(
     assert control_course_response.status_code == 201
     control_course_id = control_course_response.json()["id"]
 
+    for publish_course_id in (course_id, control_course_id):
+        publish_response = await client.post(
+            f"/api/admin/courses/{publish_course_id}/publish",
+            headers=headers,
+        )
+        assert publish_response.status_code == 200
+
     module_response = await client.post(
         f"/api/admin/courses/{course_id}/modules",
         headers=headers,
