@@ -49,3 +49,10 @@ class SqlAlchemyTaskRepository(TaskRepository):
         model.max_attempts = task.max_attempts
         model.reward_points = task.reward_points
         await self.session.flush()
+
+    async def remove(self, task_id: UUID) -> None:
+        model = await self.session.get(TaskModel, str(task_id))
+        if model is None:
+            return
+        await self.session.delete(model)
+        await self.session.flush()

@@ -24,6 +24,7 @@ REVISION_CHAIN = [
     "9ce3331e8ef9",
     "a9e96d41816e",
     "2099d354cdbe",
+    "1170fbbaeccd",
 ]
 REVISION_CONTEXTS = [
     "identity",
@@ -39,9 +40,10 @@ REVISION_CONTEXTS = [
     "learning",
     "learning",
     "learning",
+    "learning",
 ]
 INITIAL_REVISION = "18473e67180b"
-HEAD_REVISION = "2099d354cdbe"
+HEAD_REVISION = "1170fbbaeccd"
 
 INITIAL_TABLES = {
     "courses",

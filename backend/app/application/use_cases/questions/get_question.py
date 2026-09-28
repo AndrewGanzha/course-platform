@@ -12,11 +12,16 @@ from app.application.interfaces.repositories.answer_option_repository import (
 from app.application.interfaces.repositories.question_repository import (
     QuestionRepository,
 )
+from app.application.services.course_content_access_service import (
+    CourseContentAccessService,
+)
+from app.domain.entities.user import User
 
 
 @dataclass(slots=True)
 class GetQuestionQuery:
     question_id: UUID
+    actor: User | None = None
 
 
 class GetQuestionUseCase:
@@ -24,13 +29,22 @@ class GetQuestionUseCase:
         self,
         question_repository: QuestionRepository,
         answer_option_repository: AnswerOptionRepository,
+        access_service: CourseContentAccessService,
     ) -> None:
         self.question_repository = question_repository
         self.answer_option_repository = answer_option_repository
+        self.access_service = access_service
 
     async def execute(self, query: GetQuestionQuery) -> QuestionDetailsDTO:
         question = await self.question_repository.get_by_id(query.question_id)
         if question is None:
+            raise QuestionNotFoundError("Question not found.")
+
+        can_view = await self.access_service.can_view_section_content(
+            section_id=question.section_id,
+            actor=query.actor,
+        )
+        if not can_view:
             raise QuestionNotFoundError("Question not found.")
 
         answer_options = await self.answer_option_repository.get_by_ids(

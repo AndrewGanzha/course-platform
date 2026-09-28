@@ -23,3 +23,5 @@ class CourseModel(Base):
         cascade="all, delete-orphan",
         order_by="ModuleModel.position",
     )
+
+    status: Mapped[str] = mapped_column(String(32), default="draft", index=True)

@@ -124,6 +124,12 @@ class Task:
 
         raise InvalidTaskError("Unsupported task check type.")
 
+    def ensure_can_be_removed(self, has_attempts: bool) -> None:
+        if has_attempts:
+            raise InvalidTaskError(
+                "Task already has student attempts and cannot be removed."
+            )
+
     def reconfigure(
         self,
         title: str,

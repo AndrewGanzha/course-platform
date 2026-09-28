@@ -14,4 +14,4 @@ class GetCoursesUseCase:
         self.course_repository = course_repository
 
     async def execute(self, query: GetCoursesQuery) -> list[Course]:
-        return await self.course_repository.list()
+        return await self.course_repository.list_published()

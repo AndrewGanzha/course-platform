@@ -113,6 +113,7 @@ async def seeded_course_tree(session_factory, seeded_admin_user):
             author_id=seeded_admin_user.id,
             title="FastAPI course",
             description="Clean architecture in practice.",
+            status="published",
         )
         module = ModuleModel(
             id=module_id,
@@ -229,6 +230,7 @@ async def seeded_interactive_tree(session_factory, seeded_author_user):
             author_id=seeded_author_user.id,
             title="Interactive FastAPI",
             description="Course with questions inside sections.",
+            status="published",
         )
         module = ModuleModel(
             id=module_id,

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.application.interfaces.repositories.course_repository import CourseRepository
-from app.domain.entities.course import Course
+from app.domain.entities.course import Course, CourseStatus  # New
 from app.infrastructure.database.mappers.course_mapper import CourseMapper
 from app.infrastructure.database.models.course_model import CourseModel
 
@@ -29,6 +29,15 @@ class SqlAlchemyCourseRepository(CourseRepository):
         result = await self.session.execute(stmt)
         return [CourseMapper.to_domain(model) for model in result.scalars().all()]
 
+    async def list_published(self) -> "list[Course]":
+        stmt = (
+            select(CourseModel)
+            .options(selectinload(CourseModel.modules))
+            .where(CourseModel.status == CourseStatus.PUBLISHED.value)
+        )
+        result = await self.session.execute(stmt)
+        return [CourseMapper.to_domain(model) for model in result.scalars().all()]
+
     async def add(self, course: Course) -> None:
         self.session.add(CourseMapper.to_model(course))
         await self.session.flush()
@@ -39,6 +48,7 @@ class SqlAlchemyCourseRepository(CourseRepository):
             return
         model.title = course.title
         model.description = course.description
+        model.status = str(course.status)
         await self.session.flush()
 
     async def remove(self, course_id: UUID) -> None:

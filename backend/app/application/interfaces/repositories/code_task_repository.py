@@ -20,3 +20,7 @@ class CodeTaskRepository(ABC):
     @abstractmethod
     async def update(self, code_task: CodeTask) -> None:
         raise NotImplementedError
+
+    @abstractmethod
+    async def remove(self, code_task_id: UUID) -> None:
+        raise NotImplementedError

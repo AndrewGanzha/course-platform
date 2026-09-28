@@ -1,11 +1,15 @@
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Response, status
 
 from app.application.use_cases.code_tasks.create_code_task import (
     CreateCodeTaskCommand,
     CreateCodeTaskUseCase,
+)
+from app.application.use_cases.code_tasks.remove_code_task import (
+    RemoveCodeTaskCommand,
+    RemoveCodeTaskUseCase,
 )
 from app.application.use_cases.code_tasks.update_code_task import (
     UpdateCodeTaskCommand,
@@ -15,6 +19,10 @@ from app.application.use_cases.tasks.create_task import (
     CreateTaskCommand,
     CreateTaskUseCase,
 )
+from app.application.use_cases.tasks.remove_task import (
+    RemoveTaskCommand,
+    RemoveTaskUseCase,
+)
 from app.application.use_cases.tasks.update_task import (
     UpdateTaskCommand,
     UpdateTaskUseCase,
@@ -22,6 +30,10 @@ from app.application.use_cases.tasks.update_task import (
 from app.application.use_cases.test_cases.create_test_case import (
     CreateTestCaseCommand,
     CreateTestCaseUseCase,
+)
+from app.application.use_cases.test_cases.remove_test_case import (
+    RemoveTestCaseCommand,
+    RemoveTestCaseUseCase,
 )
 from app.application.use_cases.test_cases.update_test_case import (
     UpdateTestCaseCommand,
@@ -117,6 +129,35 @@ async def update_task(
     return TaskResponse.model_validate(result)
 
 
+@router.delete(
+    "/tasks/{task_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    summary="Remove task",
+    description=(
+        "Removes a task if it was not used by students yet. "
+        "The task identifier is detached from its parent section."
+    ),
+    responses={
+        404: {
+            "description": "Task was not found.",
+            "model": ErrorResponse,
+        },
+        400: {
+            "description": "Task already has student attempts.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def remove_task(
+    task_id: UUID,
+    actor: FromDishka[User],
+    use_case: FromDishka[RemoveTaskUseCase],
+) -> Response:
+    await use_case.execute(RemoveTaskCommand(actor=actor, task_id=task_id))
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.post(
     "/sections/{section_id}/code-tasks",
     response_model=CodeTaskResponse,
@@ -176,6 +217,37 @@ async def update_code_task(
     return CodeTaskResponse.model_validate(result)
 
 
+@router.delete(
+    "/code-tasks/{code_task_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    summary="Remove code task",
+    description=(
+        "Removes a code task if it was not used by students yet. "
+        "The code task identifier is detached from its parent section."
+    ),
+    responses={
+        404: {
+            "description": "Code task was not found.",
+            "model": ErrorResponse,
+        },
+        400: {
+            "description": "Code task already has student submissions.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def remove_code_task(
+    code_task_id: UUID,
+    actor: FromDishka[User],
+    use_case: FromDishka[RemoveCodeTaskUseCase],
+) -> Response:
+    await use_case.execute(
+        RemoveCodeTaskCommand(actor=actor, code_task_id=code_task_id)
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.post(
     "/code-tasks/{code_task_id}/test-cases",
     response_model=TestCaseResponse,
@@ -225,3 +297,36 @@ async def update_test_case(
         )
     )
     return TestCaseResponse.model_validate(result)
+
+
+@router.delete(
+    "/test-cases/{test_case_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    summary="Remove test case",
+    description=(
+        "Removes a test case if its code task was not used by students yet "
+        "and remains valid after the removal."
+    ),
+    responses={
+        404: {
+            "description": "Test case was not found.",
+            "model": ErrorResponse,
+        },
+        400: {
+            "description": (
+                "Code task already has submissions or would become invalid."
+            ),
+            "model": ErrorResponse,
+        },
+    },
+)
+async def remove_test_case(
+    test_case_id: UUID,
+    actor: FromDishka[User],
+    use_case: FromDishka[RemoveTestCaseUseCase],
+) -> Response:
+    await use_case.execute(
+        RemoveTestCaseCommand(actor=actor, test_case_id=test_case_id)
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

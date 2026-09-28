@@ -3,9 +3,17 @@ from uuid import UUID
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Response, status
 
+from app.application.use_cases.courses.archive_course import (
+    ArchiveCourseCommand,
+    ArchiveCourseUseCase,
+)
 from app.application.use_cases.courses.create_course import (
     CreateCourseCommand,
     CreateCourseUseCase,
+)
+from app.application.use_cases.courses.publish_course import (
+    PublishCourseCommand,
+    PublishCourseUseCase,
 )
 from app.application.use_cases.courses.remove_course import (
     RemoveCourseCommand,
@@ -172,6 +180,66 @@ async def remove_course(
 ) -> Response:
     await use_case.execute(RemoveCourseCommand(actor=actor, course_id=course_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/courses/{course_id}/publish",
+    response_model=CourseResponse,
+    summary="Publish course",
+    description="Makes the course publicly visible for students.",
+    responses={
+        400: {
+            "description": "Domain or application validation error.",
+            "model": ErrorResponse,
+        },
+        404: {
+            "description": "Course was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def publish_course(
+    course_id: UUID,
+    actor: FromDishka[User],
+    use_case: FromDishka[PublishCourseUseCase],
+) -> CourseResponse:
+    result = await use_case.execute(
+        PublishCourseCommand(
+            actor=actor,
+            course_id=course_id,
+        )
+    )
+    return CourseResponse.model_validate(result)
+
+
+@router.post(
+    "/courses/{course_id}/archive",
+    response_model=CourseResponse,
+    summary="Archive course",
+    description="Removes the course from public visibility without deleting it.",
+    responses={
+        400: {
+            "description": "Domain or application validation error.",
+            "model": ErrorResponse,
+        },
+        404: {
+            "description": "Course was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def archive_course(
+    course_id: UUID,
+    actor: FromDishka[User],
+    use_case: FromDishka[ArchiveCourseUseCase],
+) -> CourseResponse:
+    result = await use_case.execute(
+        ArchiveCourseCommand(
+            actor=actor,
+            course_id=course_id,
+        )
+    )
+    return CourseResponse.model_validate(result)
 
 
 @router.post(

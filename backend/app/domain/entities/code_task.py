@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 from uuid import UUID, uuid4
@@ -155,6 +156,19 @@ class CodeTask:
 
     def has_test_cases(self) -> bool:
         return bool(self.test_case_ids)
+
+    def validate_test_cases_configuration(
+        self,
+        test_cases: Sequence[TestCase],
+    ) -> None:
+        if len(test_cases) < 1:
+            raise InvalidCodeTaskError("CodeTask must keep at least one test case.")
+
+    def ensure_can_be_removed(self, has_submissions: bool) -> None:
+        if has_submissions:
+            raise InvalidCodeTaskError(
+                "CodeTask already has submissions and cannot be removed."
+            )
 
     def create_test_case(
         self,
