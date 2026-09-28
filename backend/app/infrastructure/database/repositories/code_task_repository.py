@@ -49,3 +49,10 @@ class SqlAlchemyCodeTaskRepository(CodeTaskRepository):
         model.time_limit_seconds = code_task.time_limit_seconds
         model.memory_limit_mb = code_task.memory_limit_mb
         await self.session.flush()
+
+    async def remove(self, code_task_id: UUID) -> None:
+        model = await self.session.get(CodeTaskModel, str(code_task_id))
+        if model is None:
+            return
+        await self.session.delete(model)
+        await self.session.flush()

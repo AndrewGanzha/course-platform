@@ -41,3 +41,10 @@ class SqlAlchemyTestCaseRepository(TestCaseRepository):
         )
         result = await self.session.execute(stmt)
         return [TestCaseMapper.to_domain(model) for model in result.scalars().all()]
+
+    async def remove(self, test_case_id: UUID) -> None:
+        model = await self.session.get(TestCaseModel, str(test_case_id))
+        if model is None:
+            return
+        await self.session.delete(model)
+        await self.session.flush()

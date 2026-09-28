@@ -32,6 +32,9 @@ from app.application.use_cases.code_tasks.create_code_task import (
     CreateCodeTaskUseCase,
 )
 from app.application.use_cases.code_tasks.get_code_task import GetCodeTaskUseCase
+from app.application.use_cases.code_tasks.remove_code_task import (
+    RemoveCodeTaskUseCase,
+)
 from app.application.use_cases.code_tasks.update_code_task import (
     UpdateCodeTaskUseCase,
 )
@@ -70,9 +73,13 @@ from app.application.use_cases.task_attempts.submit_task_answer import (
 )
 from app.application.use_cases.tasks.create_task import CreateTaskUseCase
 from app.application.use_cases.tasks.get_task import GetTaskUseCase
+from app.application.use_cases.tasks.remove_task import RemoveTaskUseCase
 from app.application.use_cases.tasks.update_task import UpdateTaskUseCase
 from app.application.use_cases.test_cases.create_test_case import (
     CreateTestCaseUseCase,
+)
+from app.application.use_cases.test_cases.remove_test_case import (
+    RemoveTestCaseUseCase,
 )
 from app.application.use_cases.test_cases.update_test_case import (
     UpdateTestCaseUseCase,
@@ -240,6 +247,13 @@ class ApiProvider(Provider):
         return UpdateTaskUseCase(uow=uow)
 
     @provide
+    def get_remove_task_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> RemoveTaskUseCase:
+        return RemoveTaskUseCase(uow=uow)
+
+    @provide
     def get_create_code_task_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
@@ -254,6 +268,13 @@ class ApiProvider(Provider):
         return UpdateCodeTaskUseCase(uow=uow)
 
     @provide
+    def get_remove_code_task_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> RemoveCodeTaskUseCase:
+        return RemoveCodeTaskUseCase(uow=uow)
+
+    @provide
     def get_create_test_case_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
@@ -266,6 +287,13 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> UpdateTestCaseUseCase:
         return UpdateTestCaseUseCase(uow=uow)
+
+    @provide
+    def get_remove_test_case_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> RemoveTestCaseUseCase:
+        return RemoveTestCaseUseCase(uow=uow)
 
     @provide
     def get_submit_task_answer_use_case(

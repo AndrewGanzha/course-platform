@@ -84,3 +84,16 @@ def test_task_rejects_attempt_after_limit() -> None:
             existing_attempts_count=2,
             has_correct_attempt=False,
         )
+
+
+def test_task_can_be_removed_when_it_has_no_attempts() -> None:
+    task = build_exact_task()
+
+    task.ensure_can_be_removed(has_attempts=False)
+
+
+def test_task_rejects_removal_when_it_has_attempts() -> None:
+    task = build_exact_task()
+
+    with pytest.raises(InvalidTaskError):
+        task.ensure_can_be_removed(has_attempts=True)
