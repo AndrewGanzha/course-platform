@@ -7,6 +7,7 @@ from app.application.exceptions import (
     CodeSubmissionNotFoundError,
     CodeTaskNotFoundError,
     CourseNotFoundError,
+    CoursePublicationNotReadyError,
     LectureNotFoundError,
     ModuleNotFoundError,
     QuestionAttemptNotFoundError,
@@ -19,7 +20,11 @@ from app.application.exceptions import (
     PermissionDeniedError as ApplicationPermissionDeniedError,
 )
 from app.domain.exceptions import DomainError
-from app.presentation.api.schemas import ErrorResponse
+from app.presentation.api.schemas import (
+    CoursePublicationErrorResponse,
+    CoursePublicationReadinessResponse,
+    ErrorResponse,
+)
 from app.presentation.exceptions import (
     AuthenticationError,
 )
@@ -41,6 +46,10 @@ def register_exception_handlers(app: FastAPI) -> None:
         presentation_permission_denied_handler,
     )
     app.add_exception_handler(CourseNotFoundError, course_not_found_handler)
+    app.add_exception_handler(
+        CoursePublicationNotReadyError,
+        course_publication_not_ready_handler,
+    )
     app.add_exception_handler(ModuleNotFoundError, module_not_found_handler)
     app.add_exception_handler(SectionNotFoundError, section_not_found_handler)
     app.add_exception_handler(LectureNotFoundError, lecture_not_found_handler)
@@ -85,6 +94,24 @@ async def course_not_found_handler(request: Request, exc: Exception) -> JSONResp
         error="course_not_found",
         message=str(exc),
         status_code=status.HTTP_404_NOT_FOUND,
+    )
+
+
+async def course_publication_not_ready_handler(
+    request: Request,
+    exc: Exception,
+) -> JSONResponse:
+    readiness = CoursePublicationReadinessResponse.model_validate(
+        exc.readiness,
+    )
+    payload = CoursePublicationErrorResponse(
+        error="course_not_ready",
+        message=str(exc),
+        readiness=readiness,
+    )
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=payload.model_dump(mode="json"),
     )
 
 

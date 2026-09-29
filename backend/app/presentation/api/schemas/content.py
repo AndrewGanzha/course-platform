@@ -2,6 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from app.application.dto.course_publication import CoursePublicationIssueCode
 from app.domain.entities.course import CourseStatus
 from app.domain.entities.question import QuestionType
 
@@ -21,6 +22,28 @@ class CourseListItemResponse(CourseBaseResponse):
 
 class CourseResponse(CourseBaseResponse):
     pass
+
+
+class CoursePublicationIssueResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    code: CoursePublicationIssueCode
+    message: str
+    entity_id: UUID | None = None
+
+
+class CoursePublicationReadinessResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    course_id: UUID
+    is_ready: bool
+    issues: list[CoursePublicationIssueResponse]
+
+
+class CoursePublicationErrorResponse(BaseModel):
+    error: str
+    message: str
+    readiness: CoursePublicationReadinessResponse
 
 
 class LectureBaseResponse(BaseModel):

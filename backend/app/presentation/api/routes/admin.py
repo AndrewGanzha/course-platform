@@ -11,6 +11,10 @@ from app.application.use_cases.courses.create_course import (
     CreateCourseCommand,
     CreateCourseUseCase,
 )
+from app.application.use_cases.courses.get_course_publication_readiness import (
+    GetCoursePublicationReadinessQuery,
+    GetCoursePublicationReadinessUseCase,
+)
 from app.application.use_cases.courses.publish_course import (
     PublishCourseCommand,
     PublishCourseUseCase,
@@ -61,6 +65,8 @@ from app.application.use_cases.sections.update_section import (
 )
 from app.domain.entities.user import User
 from app.presentation.api.schemas import (
+    CoursePublicationErrorResponse,
+    CoursePublicationReadinessResponse,
     CourseResponse,
     CreateCourseRequest,
     CreateLectureRequest,
@@ -182,15 +188,43 @@ async def remove_course(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+@router.get(
+    "/courses/{course_id}/publication-readiness",
+    response_model=CoursePublicationReadinessResponse,
+    summary="Get course publication readiness",
+    description=(
+        "Returns diagnostics that explain whether the course can be published."
+    ),
+    responses={
+        404: {
+            "description": "Course was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_course_publication_readiness(
+    course_id: UUID,
+    actor: FromDishka[User],
+    use_case: FromDishka[GetCoursePublicationReadinessUseCase],
+) -> CoursePublicationReadinessResponse:
+    result = await use_case.execute(
+        GetCoursePublicationReadinessQuery(
+            actor=actor,
+            course_id=course_id,
+        )
+    )
+    return CoursePublicationReadinessResponse.model_validate(result)
+
+
 @router.post(
     "/courses/{course_id}/publish",
     response_model=CourseResponse,
     summary="Publish course",
-    description="Makes the course publicly visible for students.",
+    description=("Publishes the course if it is complete and ready for students."),
     responses={
         400: {
-            "description": "Domain or application validation error.",
-            "model": ErrorResponse,
+            "description": "Course is not ready for publication.",
+            "model": CoursePublicationErrorResponse,
         },
         404: {
             "description": "Course was not found.",

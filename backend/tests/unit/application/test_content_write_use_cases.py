@@ -186,12 +186,21 @@ class FakeLectureRepository:
         self.items.pop(lecture_id, None)
 
 
+class FakeEmptyRepository:
+    async def get_by_ids(self, entity_ids):
+        return []
+
+
 class FakeUnitOfWork(UnitOfWork):
     def __init__(self) -> None:
         self.courses = FakeCourseRepository()
         self.modules = FakeModuleRepository()
         self.sections = FakeSectionRepository()
         self.lectures = FakeLectureRepository()
+        self.questions = FakeEmptyRepository()
+        self.answer_options = FakeEmptyRepository()
+        self.code_tasks = FakeEmptyRepository()
+        self.test_cases = FakeEmptyRepository()
         self.users = None
         self.committed = False
         self.commit_count = 0
@@ -828,7 +837,34 @@ async def test_publish_course_changes_status_to_published() -> None:
     uow = FakeUnitOfWork()
     actor = make_author()
     course = make_owned_course(actor)
+    module = Module(
+        id=uuid4(),
+        course_id=course.id,
+        title="Module",
+        description="Module description",
+        position=1,
+    )
+    section = Section(
+        id=uuid4(),
+        module_id=module.id,
+        title="Section",
+        description="Section description",
+        position=1,
+    )
+    lecture = Lecture(
+        id=uuid4(),
+        section_id=section.id,
+        title="Lecture",
+        content="Lecture content",
+        position=1,
+    )
+    course.add_module(module.id)
+    module.add_section(section.id)
+    section.add_lecture(lecture.id)
     await uow.courses.add(course)
+    await uow.modules.add(module)
+    await uow.sections.add(section)
+    await uow.lectures.add(lecture)
 
     use_case = PublishCourseUseCase(uow=uow)
     result = await use_case.execute(

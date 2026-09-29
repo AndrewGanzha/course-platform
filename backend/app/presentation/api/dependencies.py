@@ -44,6 +44,9 @@ from app.application.use_cases.code_tasks.update_code_task import (
 from app.application.use_cases.courses.archive_course import ArchiveCourseUseCase
 from app.application.use_cases.courses.create_course import CreateCourseUseCase
 from app.application.use_cases.courses.get_course import GetCourseUseCase
+from app.application.use_cases.courses.get_course_publication_readiness import (
+    GetCoursePublicationReadinessUseCase,
+)
 from app.application.use_cases.courses.get_course_structure import (
     GetCourseStructureUseCase,
 )
@@ -195,6 +198,13 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> PublishCourseUseCase:
         return PublishCourseUseCase(uow=uow)
+
+    @provide
+    def get_get_course_publication_readiness_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetCoursePublicationReadinessUseCase:
+        return GetCoursePublicationReadinessUseCase(uow=uow)
 
     @provide
     def get_archive_course_use_case(
