@@ -43,7 +43,8 @@ class CoursePublicationReadinessResponse(BaseModel):
 class CoursePublicationErrorResponse(BaseModel):
     error: str
     message: str
-    readiness: CoursePublicationReadinessResponse
+    course_id: UUID
+    issues: list[CoursePublicationIssueResponse]
 
 
 class LectureBaseResponse(BaseModel):

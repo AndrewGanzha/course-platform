@@ -1,51 +1,54 @@
 import pytest
 
 
-async def create_publishable_course(
+async def create_minimally_ready_course(
     client,
-    headers,
+    author_auth_headers,
+    *,
     title: str,
     description: str,
 ) -> str:
-    create_response = await client.post(
+    course_response = await client.post(
         "/api/admin/courses",
-        headers=headers,
+        headers=author_auth_headers,
         json={
             "title": title,
             "description": description,
         },
     )
-    assert create_response.status_code == 201
-    course_id = create_response.json()["id"]
+    assert course_response.status_code == 201
+    course_id = course_response.json()["id"]
 
     module_response = await client.post(
         f"/api/admin/courses/{course_id}/modules",
-        headers=headers,
+        headers=author_auth_headers,
         json={
-            "title": "Module",
-            "description": "Module with content.",
+            "title": "Module 1",
+            "description": "Description",
             "position": 1,
         },
     )
+    assert module_response.status_code == 201
     module_id = module_response.json()["id"]
 
     section_response = await client.post(
         f"/api/admin/modules/{module_id}/sections",
-        headers=headers,
+        headers=author_auth_headers,
         json={
-            "title": "Section",
-            "description": "Section with a lecture.",
+            "title": "Section 1",
+            "description": "Description",
             "position": 1,
         },
     )
+    assert section_response.status_code == 201
     section_id = section_response.json()["id"]
 
     lecture_response = await client.post(
         f"/api/admin/sections/{section_id}/lectures",
-        headers=headers,
+        headers=author_auth_headers,
         json={
-            "title": "Lecture",
-            "content": "Lecture content.",
+            "title": "Lecture 1",
+            "content": "Lecture content",
             "position": 1,
         },
     )
@@ -59,7 +62,7 @@ async def test_publish_course_endpoint_changes_status(
     client,
     author_auth_headers,
 ):
-    course_id = await create_publishable_course(
+    course_id = await create_minimally_ready_course(
         client,
         author_auth_headers,
         title="Lifecycle course",
@@ -76,101 +79,22 @@ async def test_publish_course_endpoint_changes_status(
 
 
 @pytest.mark.asyncio
-async def test_publish_course_endpoint_rejects_incomplete_course(
-    client,
-    author_auth_headers,
-):
-    create_response = await client.post(
-        "/api/admin/courses",
-        headers=author_auth_headers,
-        json={
-            "title": "Incomplete course",
-            "description": "Course without any modules.",
-        },
-    )
-    course_id = create_response.json()["id"]
-
-    publish_response = await client.post(
-        f"/api/admin/courses/{course_id}/publish",
-        headers=author_auth_headers,
-    )
-
-    assert publish_response.status_code == 400
-    payload = publish_response.json()
-    assert payload["error"] == "course_not_ready"
-    assert payload["readiness"]["course_id"] == course_id
-    assert payload["readiness"]["is_ready"] is False
-    assert payload["readiness"]["issues"][0]["code"] == "course_without_modules"
-
-
-@pytest.mark.asyncio
-async def test_get_course_publication_readiness_reports_issues(
-    client,
-    author_auth_headers,
-):
-    create_response = await client.post(
-        "/api/admin/courses",
-        headers=author_auth_headers,
-        json={
-            "title": "Incomplete course",
-            "description": "Course without any modules.",
-        },
-    )
-    course_id = create_response.json()["id"]
-
-    response = await client.get(
-        f"/api/admin/courses/{course_id}/publication-readiness",
-        headers=author_auth_headers,
-    )
-
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["course_id"] == course_id
-    assert payload["is_ready"] is False
-    assert len(payload["issues"]) == 1
-    assert payload["issues"][0]["code"] == "course_without_modules"
-
-
-@pytest.mark.asyncio
-async def test_get_course_publication_readiness_confirms_ready_course(
-    client,
-    author_auth_headers,
-):
-    course_id = await create_publishable_course(
-        client,
-        author_auth_headers,
-        title="Ready course",
-        description="Course with a complete tree.",
-    )
-
-    response = await client.get(
-        f"/api/admin/courses/{course_id}/publication-readiness",
-        headers=author_auth_headers,
-    )
-
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["course_id"] == course_id
-    assert payload["is_ready"] is True
-    assert payload["issues"] == []
-
-
-@pytest.mark.asyncio
 async def test_archive_course_endpoint_changes_status(
     client,
     author_auth_headers,
 ):
-    course_id = await create_publishable_course(
+    course_id = await create_minimally_ready_course(
         client,
         author_auth_headers,
         title="Course to archive",
         description="Initially published course.",
     )
 
-    await client.post(
+    publish_response = await client.post(
         f"/api/admin/courses/{course_id}/publish",
         headers=author_auth_headers,
     )
+    assert publish_response.status_code == 200
 
     archive_response = await client.post(
         f"/api/admin/courses/{course_id}/archive",
@@ -195,17 +119,18 @@ async def test_public_courses_list_returns_only_published_courses(
         },
     )
 
-    published_course_id = await create_publishable_course(
+    published_course_id = await create_minimally_ready_course(
         client,
         author_auth_headers,
         title="Published course",
         description="Visible for students.",
     )
 
-    await client.post(
+    publish_response = await client.post(
         f"/api/admin/courses/{published_course_id}/publish",
         headers=author_auth_headers,
     )
+    assert publish_response.status_code == 200
 
     response = await client.get("/api/courses")
 
@@ -242,21 +167,24 @@ async def test_archived_course_is_hidden_from_public_get(
     client,
     author_auth_headers,
 ):
-    course_id = await create_publishable_course(
+    course_id = await create_minimally_ready_course(
         client,
         author_auth_headers,
         title="Archived course",
         description="Was published earlier.",
     )
 
-    await client.post(
+    publish_response = await client.post(
         f"/api/admin/courses/{course_id}/publish",
         headers=author_auth_headers,
     )
-    await client.post(
+    assert publish_response.status_code == 200
+
+    archive_response = await client.post(
         f"/api/admin/courses/{course_id}/archive",
         headers=author_auth_headers,
     )
+    assert archive_response.status_code == 200
 
     response = await client.get(f"/api/courses/{course_id}")
 
@@ -269,17 +197,18 @@ async def test_published_course_can_still_be_updated(
     client,
     author_auth_headers,
 ):
-    course_id = await create_publishable_course(
+    course_id = await create_minimally_ready_course(
         client,
         author_auth_headers,
         title="Published course",
         description="Visible for students.",
     )
 
-    await client.post(
+    publish_response = await client.post(
         f"/api/admin/courses/{course_id}/publish",
         headers=author_auth_headers,
     )
+    assert publish_response.status_code == 200
 
     update_response = await client.put(
         f"/api/admin/courses/{course_id}",

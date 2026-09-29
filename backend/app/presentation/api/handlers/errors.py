@@ -22,7 +22,7 @@ from app.application.exceptions import (
 from app.domain.exceptions import DomainError
 from app.presentation.api.schemas import (
     CoursePublicationErrorResponse,
-    CoursePublicationReadinessResponse,
+    CoursePublicationIssueResponse,
     ErrorResponse,
 )
 from app.presentation.exceptions import (
@@ -101,13 +101,14 @@ async def course_publication_not_ready_handler(
     request: Request,
     exc: Exception,
 ) -> JSONResponse:
-    readiness = CoursePublicationReadinessResponse.model_validate(
-        exc.readiness,
-    )
     payload = CoursePublicationErrorResponse(
-        error="course_not_ready",
+        error="course_publication_not_ready",
         message=str(exc),
-        readiness=readiness,
+        course_id=exc.readiness.course_id,
+        issues=[
+            CoursePublicationIssueResponse.model_validate(issue)
+            for issue in exc.readiness.issues
+        ],
     )
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
