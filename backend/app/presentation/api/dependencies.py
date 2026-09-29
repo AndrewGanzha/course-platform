@@ -11,6 +11,9 @@ from app.application.dto.authenticated_user import (
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
 from app.application.interfaces.submission_queue import SubmissionQueue
+from app.application.services.course_catalog_read_service import (
+    CourseCatalogReadService,
+)
 from app.application.services.course_content_access_service import (
     CourseContentAccessService,
 )
@@ -131,6 +134,20 @@ class ApiProvider(Provider):
             section_repository=uow.sections,
         )
 
+    @provide
+    def get_course_catalog_read_service(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CourseCatalogReadService:
+        return CourseCatalogReadService(
+            module_repository=uow.modules,
+            section_repository=uow.sections,
+            lecture_repository=uow.lectures,
+            question_repository=uow.questions,
+            task_repository=uow.tasks,
+            code_task_repository=uow.code_tasks,
+        )
+
     @provide(scope=Scope.APP)
     def get_submission_queue(self) -> SubmissionQueue:
         return build_submission_queue()
@@ -139,9 +156,11 @@ class ApiProvider(Provider):
     def provide_get_courses_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        catalog_read_service: CourseCatalogReadService,
     ) -> GetCoursesUseCase:
         return GetCoursesUseCase(
             course_repository=uow.courses,
+            catalog_read_service=catalog_read_service,
         )
 
     @provide
@@ -149,10 +168,12 @@ class ApiProvider(Provider):
         self,
         uow: SqlAlchemyUnitOfWork,
         access_service: CourseContentAccessService,
+        catalog_read_service: CourseCatalogReadService,
     ) -> GetCourseUseCase:
         return GetCourseUseCase(
             course_repository=uow.courses,
             access_service=access_service,
+            catalog_read_service=catalog_read_service,
         )
 
     @provide
