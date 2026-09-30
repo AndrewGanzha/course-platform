@@ -131,11 +131,6 @@ async def create_course(
             title=request.title,
             description=request.description,
             short_description=request.short_description,
-            cover_image_url=(
-                str(request.cover_image_url)
-                if request.cover_image_url is not None
-                else None
-            ),
             difficulty=request.difficulty,
             tag_names=list(request.tag_names),
         )
@@ -175,11 +170,6 @@ async def update_course(
             title=request.title,
             description=request.description,
             short_description=request.short_description,
-            cover_image_url=(
-                str(request.cover_image_url)
-                if request.cover_image_url is not None
-                else None
-            ),
             difficulty=request.difficulty,
             tag_names=list(request.tag_names),
         )

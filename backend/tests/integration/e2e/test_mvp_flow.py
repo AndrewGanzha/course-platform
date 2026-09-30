@@ -1,5 +1,7 @@
 import pytest
 
+PNG_BYTES = b"\x89PNG\r\n\x1a\ncover-image-payload"
+
 
 @pytest.mark.asyncio
 async def test_mvp_flow_from_login_to_public_read(client, seeded_admin_user):
@@ -21,13 +23,20 @@ async def test_mvp_flow_from_login_to_public_read(client, seeded_admin_user):
             "title": "FastAPI course",
             "description": "Clean architecture in practice.",
             "short_description": "Build a production-ready learning backend.",
-            "cover_image_url": "https://example.com/fastapi-course-cover.png",
             "difficulty": "intermediate",
             "tag_names": ["fastapi", "backend", "architecture"],
         },
     )
     assert course_response.status_code == 201
     course_id = course_response.json()["id"]
+
+    cover_response = await client.post(
+        f"/api/admin/courses/{course_id}/cover",
+        headers=headers,
+        files={"file": ("cover.png", PNG_BYTES, "image/png")},
+    )
+    assert cover_response.status_code == 200
+    cover_url = cover_response.json()["cover_image_url"]
 
     module_response = await client.post(
         f"/api/admin/courses/{course_id}/modules",
@@ -79,10 +88,7 @@ async def test_mvp_flow_from_login_to_public_read(client, seeded_admin_user):
         courses_payload[0]["short_description"]
         == "Build a production-ready learning backend."
     )
-    assert (
-        courses_payload[0]["cover_image_url"]
-        == "https://example.com/fastapi-course-cover.png"
-    )
+    assert courses_payload[0]["cover_image_url"] == cover_url
     assert courses_payload[0]["difficulty"] == "intermediate"
     assert courses_payload[0]["tag_names"] == ["fastapi", "backend", "architecture"]
     assert courses_payload[0]["counters"]["module_count"] == 1
@@ -97,10 +103,7 @@ async def test_mvp_flow_from_login_to_public_read(client, seeded_admin_user):
         course_card_payload["short_description"]
         == "Build a production-ready learning backend."
     )
-    assert (
-        course_card_payload["cover_image_url"]
-        == "https://example.com/fastapi-course-cover.png"
-    )
+    assert course_card_payload["cover_image_url"] == cover_url
     assert course_card_payload["difficulty"] == "intermediate"
     assert course_card_payload["tag_names"] == ["fastapi", "backend", "architecture"]
     assert course_card_payload["counters"]["module_count"] == 1

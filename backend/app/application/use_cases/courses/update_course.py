@@ -14,7 +14,6 @@ class UpdateCourseCommand:
     title: str
     description: str
     short_description: str = ""
-    cover_image_url: str | None = None
     difficulty: CourseDifficulty = CourseDifficulty.BEGINNER
     tag_names: list[str] | None = None
 
@@ -36,7 +35,6 @@ class UpdateCourseUseCase:
 
             course.update(title=command.title, description=command.description)
             course.update_metadata(
-                cover_image_url=command.cover_image_url,
                 short_description=command.short_description,
                 difficulty=command.difficulty,
                 tag_names=list(command.tag_names or []),
