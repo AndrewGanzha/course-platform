@@ -1,7 +1,8 @@
+from typing import Annotated
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, File, Response, UploadFile, status
 
 from app.application.use_cases.courses.archive_course import (
     ArchiveCourseCommand,
@@ -26,6 +27,10 @@ from app.application.use_cases.courses.remove_course import (
 from app.application.use_cases.courses.update_course import (
     UpdateCourseCommand,
     UpdateCourseUseCase,
+)
+from app.application.use_cases.courses.upload_course_cover import (
+    UploadCourseCoverCommand,
+    UploadCourseCoverUseCase,
 )
 from app.application.use_cases.lectures.create_lecture import (
     CreateLectureCommand,
@@ -177,6 +182,44 @@ async def update_course(
             ),
             difficulty=request.difficulty,
             tag_names=list(request.tag_names),
+        )
+    )
+    return CourseResponse.model_validate(result)
+
+
+@router.post(
+    "/courses/{course_id}/cover",
+    response_model=CourseResponse,
+    summary="Upload course cover image",
+    description=(
+        "Stores an uploaded cover image for the course and updates its "
+        "cover_image_url. Only the course owner or an administrator can upload."
+    ),
+    responses={
+        400: {
+            "description": "The uploaded file is not a valid image.",
+            "model": ErrorResponse,
+        },
+        404: {
+            "description": "Course was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def upload_course_cover(
+    course_id: UUID,
+    actor: FromDishka[User],
+    use_case: FromDishka[UploadCourseCoverUseCase],
+    file: Annotated[UploadFile, File()],
+) -> CourseResponse:
+    content = await file.read()
+    result = await use_case.execute(
+        UploadCourseCoverCommand(
+            actor=actor,
+            course_id=course_id,
+            filename=file.filename or "",
+            content_type=file.content_type,
+            content=content,
         )
     )
     return CourseResponse.model_validate(result)

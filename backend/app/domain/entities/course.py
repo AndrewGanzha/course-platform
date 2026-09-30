@@ -90,6 +90,10 @@ class Course:
         self.tag_names = self._normalize_tag_names(tag_names)
         self._validate()
 
+    def change_cover_image(self, cover_image_url: str) -> None:
+        self.cover_image_url = cover_image_url
+        self._validate()
+
     def preview_description(self) -> str:
         return self.short_description or self.description
 
