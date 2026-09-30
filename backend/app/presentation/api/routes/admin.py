@@ -125,6 +125,14 @@ async def create_course(
             actor=actor,
             title=request.title,
             description=request.description,
+            short_description=request.short_description,
+            cover_image_url=(
+                str(request.cover_image_url)
+                if request.cover_image_url is not None
+                else None
+            ),
+            difficulty=request.difficulty,
+            tag_names=list(request.tag_names),
         )
     )
     return CourseResponse.model_validate(result)
@@ -161,6 +169,14 @@ async def update_course(
             course_id=course_id,
             title=request.title,
             description=request.description,
+            short_description=request.short_description,
+            cover_image_url=(
+                str(request.cover_image_url)
+                if request.cover_image_url is not None
+                else None
+            ),
+            difficulty=request.difficulty,
+            tag_names=list(request.tag_names),
         )
     )
     return CourseResponse.model_validate(result)

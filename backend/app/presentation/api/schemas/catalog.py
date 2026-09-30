@@ -24,6 +24,7 @@ class CourseCatalogItemResponse(BaseModel):
     short_description: str
     cover_image_url: str | None
     difficulty: CourseDifficulty
+    tag_names: list[str]
     status: CourseStatus
     counters: CourseCatalogCountersResponse
 
@@ -55,6 +56,7 @@ class CourseCatalogCardResponse(BaseModel):
     short_description: str
     cover_image_url: str | None
     difficulty: CourseDifficulty
+    tag_names: list[str]
     status: CourseStatus
     counters: CourseCatalogCountersResponse
     modules: list[CourseCatalogModulePreviewResponse]

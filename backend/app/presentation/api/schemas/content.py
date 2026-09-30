@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
 from app.application.dto.course_publication import CoursePublicationIssueCode
-from app.domain.entities.course import CourseStatus
+from app.domain.entities.course import CourseDifficulty, CourseStatus
 from app.domain.entities.question import QuestionType
 
 
@@ -14,6 +14,10 @@ class CourseBaseResponse(BaseModel):
     title: str
     description: str
     status: CourseStatus
+    short_description: str
+    cover_image_url: str | None
+    difficulty: CourseDifficulty
+    tag_names: list[str]
 
 
 class CourseListItemResponse(CourseBaseResponse):

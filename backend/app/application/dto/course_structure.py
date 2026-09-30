@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from app.domain.entities.course import CourseStatus
+from app.domain.entities.course import CourseDifficulty, CourseStatus
 
 
 @dataclass(slots=True)
@@ -55,4 +55,8 @@ class CourseStructureDTO:
     title: str
     description: str
     status: CourseStatus
+    short_description: str
+    cover_image_url: str | None
+    difficulty: CourseDifficulty
+    tag_names: list[str] = field(default_factory=list)
     modules: list[ModuleStructureDTO] = field(default_factory=list)

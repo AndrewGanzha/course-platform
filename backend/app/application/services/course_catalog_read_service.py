@@ -43,6 +43,7 @@ class CourseCatalogReadService:
             short_description=course.preview_description(),
             cover_image_url=course.cover_image_url,
             difficulty=course.difficulty,
+            tag_names=list(course.tag_names),
             status=course.status,
             counters=counters,
         )
@@ -79,6 +80,7 @@ class CourseCatalogReadService:
             short_description=course.preview_description(),
             cover_image_url=course.cover_image_url,
             difficulty=course.difficulty,
+            tag_names=list(course.tag_names),
             status=course.status,
             counters=counters,
             modules=module_dtos,

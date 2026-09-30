@@ -15,6 +15,10 @@ async def test_get_courses_returns_public_catalog(client, seeded_course_tree):
     assert item["id"] == seeded_course_tree.course_id
     assert item["title"] == seeded_course_tree.course_title
     assert item["status"] == "published"
+    assert item["short_description"] == seeded_course_tree.course_short_description
+    assert item["cover_image_url"] == seeded_course_tree.course_cover_image_url
+    assert item["difficulty"] == seeded_course_tree.course_difficulty
+    assert item["tag_names"] == seeded_course_tree.course_tag_names
     assert item["counters"]["module_count"] == 1
     assert item["counters"]["section_count"] == 1
     assert item["counters"]["lecture_count"] == 1
@@ -32,6 +36,10 @@ async def test_get_course_returns_course_card(client, seeded_course_tree):
     assert payload["id"] == seeded_course_tree.course_id
     assert payload["title"] == seeded_course_tree.course_title
     assert payload["status"] == "published"
+    assert payload["short_description"] == seeded_course_tree.course_short_description
+    assert payload["cover_image_url"] == seeded_course_tree.course_cover_image_url
+    assert payload["difficulty"] == seeded_course_tree.course_difficulty
+    assert payload["tag_names"] == seeded_course_tree.course_tag_names
     assert payload["counters"]["module_count"] == 1
     assert payload["counters"]["section_count"] == 1
     assert payload["counters"]["lecture_count"] == 1

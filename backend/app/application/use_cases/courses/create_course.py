@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from app.application.exceptions import PermissionDeniedError
 from app.application.interfaces.unit_of_work import UnitOfWork
-from app.domain.entities.course import Course
+from app.domain.entities.course import Course, CourseDifficulty
 from app.domain.entities.user import User
 
 
@@ -12,6 +12,10 @@ class CreateCourseCommand:
     actor: User
     title: str
     description: str
+    short_description: str = ""
+    cover_image_url: str | None = None
+    difficulty: CourseDifficulty = CourseDifficulty.BEGINNER
+    tag_names: list[str] | None = None
 
 
 class CreateCourseUseCase:
@@ -28,6 +32,10 @@ class CreateCourseUseCase:
                 author_id=command.actor.id,
                 title=command.title,
                 description=command.description,
+                short_description=command.short_description,
+                cover_image_url=command.cover_image_url,
+                difficulty=command.difficulty,
+                tag_names=list(command.tag_names or []),
             )
             await self.uow.courses.add(course)
             await self.uow.commit()

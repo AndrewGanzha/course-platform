@@ -113,6 +113,10 @@ async def seeded_course_tree(session_factory, seeded_admin_user):
             author_id=seeded_admin_user.id,
             title="FastAPI course",
             description="Clean architecture in practice.",
+            short_description="Build a production-ready learning backend.",
+            cover_image_url="https://example.com/fastapi-course-cover.png",
+            difficulty="intermediate",
+            tag_names=["fastapi", "backend", "architecture"],
             status="published",
         )
         module = ModuleModel(
@@ -146,6 +150,10 @@ async def seeded_course_tree(session_factory, seeded_admin_user):
         section_id=section_id,
         lecture_id=lecture_id,
         course_title="FastAPI course",
+        course_short_description="Build a production-ready learning backend.",
+        course_cover_image_url="https://example.com/fastapi-course-cover.png",
+        course_difficulty="intermediate",
+        course_tag_names=["fastapi", "backend", "architecture"],
         lecture_content="Lecture content",
     )
 
