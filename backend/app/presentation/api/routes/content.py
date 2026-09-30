@@ -28,6 +28,7 @@ from app.application.use_cases.questions.get_question import (
     GetQuestionUseCase,
 )
 from app.application.use_cases.tasks.get_task import GetTaskQuery, GetTaskUseCase
+from app.domain.entities.course import CourseDifficulty
 from app.domain.entities.user import User
 from app.presentation.api.schemas import (
     CodeTaskDetailsResponse,
@@ -52,8 +53,16 @@ router = APIRouter(tags=["Content"], route_class=DishkaRoute)
 async def get_courses(
     use_case: FromDishka[GetCoursesUseCase],
     search: str = Query(default=""),
+    difficulty: CourseDifficulty | None = Query(default=None),
+    tag: list[str] = Query(default=[]),
 ) -> list[CourseCatalogItemResponse]:
-    result = await use_case.execute(GetCoursesQuery(search=search))
+    result = await use_case.execute(
+        GetCoursesQuery(
+            search=search,
+            difficulty=difficulty,
+            tag_names=list(tag),
+        )
+    )
     return [CourseCatalogItemResponse.model_validate(course) for course in result]
 
 
