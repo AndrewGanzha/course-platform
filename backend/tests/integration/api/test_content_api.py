@@ -4,23 +4,41 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_get_courses_returns_public_list(client, seeded_course_tree):
+async def test_get_courses_returns_public_catalog(client, seeded_course_tree):
     response = await client.get("/api/courses")
 
     assert response.status_code == 200
     payload = response.json()
     assert len(payload) == 1
-    assert payload[0]["title"] == seeded_course_tree.course_title
+
+    item = payload[0]
+    assert item["id"] == seeded_course_tree.course_id
+    assert item["title"] == seeded_course_tree.course_title
+    assert item["status"] == "published"
+    assert item["counters"]["module_count"] == 1
+    assert item["counters"]["section_count"] == 1
+    assert item["counters"]["lecture_count"] == 1
+    assert item["counters"]["question_count"] == 0
+    assert item["counters"]["task_count"] == 0
+    assert item["counters"]["code_task_count"] == 0
 
 
 @pytest.mark.asyncio
-async def test_get_course_returns_single_course(client, seeded_course_tree):
+async def test_get_course_returns_course_card(client, seeded_course_tree):
     response = await client.get(f"/api/courses/{seeded_course_tree.course_id}")
 
     assert response.status_code == 200
     payload = response.json()
     assert payload["id"] == seeded_course_tree.course_id
     assert payload["title"] == seeded_course_tree.course_title
+    assert payload["status"] == "published"
+    assert payload["counters"]["module_count"] == 1
+    assert payload["counters"]["section_count"] == 1
+    assert payload["counters"]["lecture_count"] == 1
+    assert len(payload["modules"]) == 1
+    assert payload["modules"][0]["title"] == "MVP stage"
+    assert len(payload["modules"][0]["sections"]) == 1
+    assert payload["modules"][0]["sections"][0]["title"] == "Auth section"
 
 
 @pytest.mark.asyncio
@@ -34,7 +52,8 @@ async def test_get_course_returns_404_when_course_is_missing(client):
 
 @pytest.mark.asyncio
 async def test_get_course_structure_returns_modules_sections_and_lectures(
-    client, seeded_course_tree
+    client,
+    seeded_course_tree,
 ):
     response = await client.get(
         f"/api/courses/{seeded_course_tree.course_id}/structure"

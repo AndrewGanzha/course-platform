@@ -68,7 +68,21 @@ async def test_mvp_flow_from_login_to_public_read(client, seeded_admin_user):
 
     courses_response = await client.get("/api/courses")
     assert courses_response.status_code == 200
-    assert len(courses_response.json()) == 1
+    courses_payload = courses_response.json()
+    assert len(courses_payload) == 1
+    assert courses_payload[0]["title"] == "FastAPI course"
+    assert courses_payload[0]["counters"]["module_count"] == 1
+    assert courses_payload[0]["counters"]["section_count"] == 1
+    assert courses_payload[0]["counters"]["lecture_count"] == 1
+
+    course_card_response = await client.get(f"/api/courses/{course_id}")
+    assert course_card_response.status_code == 200
+    course_card_payload = course_card_response.json()
+    assert course_card_payload["title"] == "FastAPI course"
+    assert course_card_payload["counters"]["module_count"] == 1
+    assert len(course_card_payload["modules"]) == 1
+    assert course_card_payload["modules"][0]["title"] == "MVP stage"
+    assert len(course_card_payload["modules"][0]["sections"]) == 1
 
     structure_response = await client.get(f"/api/courses/{course_id}/structure")
     assert structure_response.status_code == 200

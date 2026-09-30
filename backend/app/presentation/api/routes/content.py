@@ -31,8 +31,8 @@ from app.application.use_cases.tasks.get_task import GetTaskQuery, GetTaskUseCas
 from app.domain.entities.user import User
 from app.presentation.api.schemas import (
     CodeTaskDetailsResponse,
-    CourseListItemResponse,
-    CourseResponse,
+    CourseCatalogCardResponse,
+    CourseCatalogItemResponse,
     CourseStructureResponse,
     LectureResponse,
     QuestionDetailsResponse,
@@ -45,22 +45,22 @@ router = APIRouter(tags=["Content"], route_class=DishkaRoute)
 
 @router.get(
     "/courses",
-    response_model=list[CourseListItemResponse],
-    summary="List available courses",
-    description="Returns a public list of courses available in the system.",
+    response_model=list[CourseCatalogItemResponse],
+    summary="Get public course catalog",
+    description="Returns published courses formatted for catalog listing.",
 )
 async def get_courses(
     use_case: FromDishka[GetCoursesUseCase],
-) -> list[CourseListItemResponse]:
+) -> list[CourseCatalogItemResponse]:
     result = await use_case.execute(GetCoursesQuery())
-    return [CourseListItemResponse.model_validate(course) for course in result]
+    return [CourseCatalogItemResponse.model_validate(course) for course in result]
 
 
 @router.get(
     "/courses/{course_id}",
-    response_model=CourseResponse,
-    summary="Get course by ID",
-    description="Returns a single course by its identifier.",
+    response_model=CourseCatalogCardResponse,
+    summary="Get public course page",
+    description="Returns a detailed course card for the catalog page.",
     responses={
         404: {
             "description": "Course was not found.",
@@ -72,11 +72,11 @@ async def get_course(
     course_id: UUID,
     current_user: FromDishka[User | None],
     use_case: FromDishka[GetCourseUseCase],
-) -> CourseResponse:
+) -> CourseCatalogCardResponse:
     result = await use_case.execute(
         GetCourseQuery(course_id=course_id, actor=current_user)
     )
-    return CourseResponse.model_validate(result)
+    return CourseCatalogCardResponse.model_validate(result)
 
 
 @router.get(

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from app.domain.entities.course import CourseStatus
+from app.domain.entities.course import CourseDifficulty, CourseStatus
 
 
 @dataclass(slots=True)
@@ -18,7 +18,9 @@ class CourseCatalogCountersDTO:
 class CourseCatalogItemDTO:
     id: UUID
     title: str
-    description: str
+    short_description: str
+    cover_image_url: str | None
+    difficulty: CourseDifficulty
     status: CourseStatus
     counters: CourseCatalogCountersDTO
 
@@ -44,6 +46,9 @@ class CourseCatalogCardDTO:
     id: UUID
     title: str
     description: str
+    short_description: str
+    cover_image_url: str | None
+    difficulty: CourseDifficulty
     status: CourseStatus
     counters: CourseCatalogCountersDTO
     modules: list[CourseCatalogModulePreviewDTO] = field(default_factory=list)
