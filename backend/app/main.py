@@ -49,6 +49,10 @@ def create_app() -> FastAPI:
                 "name": "Learning",
                 "description": "Authenticated endpoints for question attempts, answer submission and learning results.",
             },
+            {
+                "name": "Profile",
+                "description": "Authenticated endpoints for reading and updating the current user profile.",
+            },
         ],
     )
     register_exception_handlers(app)

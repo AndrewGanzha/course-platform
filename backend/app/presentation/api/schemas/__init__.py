@@ -53,6 +53,10 @@ from app.presentation.api.schemas.modules import (
     ModuleResponse,
     UpdateModuleRequest,
 )
+from app.presentation.api.schemas.profile import (
+    UpdateMyProfileRequest,
+    UserProfileResponse,
+)
 from app.presentation.api.schemas.question_attempts import (
     QuestionAttemptResultResponse,
     StartQuestionAttemptResponse,
@@ -146,4 +150,6 @@ __all__ = [
     "TaskAttemptResponse",
     "CodeSubmissionResponse",
     "SubmitCodeSubmissionRequest",
+    "UserProfileResponse",
+    "UpdateMyProfileRequest",
 ]

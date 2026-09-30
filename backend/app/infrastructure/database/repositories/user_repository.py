@@ -26,3 +26,16 @@ class SqlAlchemyUserRepository(UserRepository):
     async def add(self, user: User) -> None:
         self.session.add(UserMapper.to_model(user))
         await self.session.flush()
+
+    async def update(self, user: User) -> None:
+        model = await self.session.get(UserModel, str(user.id))
+        if model is None:
+            return
+
+        model.email = user.email
+        model.hashed_password = user.hashed_password
+        model.role = str(user.role)
+        model.full_name = user.full_name
+        model.bio = user.bio
+        model.avatar_url = user.avatar_url
+        await self.session.flush()

@@ -17,6 +17,9 @@ class User:
     email: str
     hashed_password: str
     role: UserRole
+    full_name: str = ""
+    bio: str = ""
+    avatar_url: str | None = None
 
     def __post_init__(self) -> None:
         self._validate()
@@ -26,6 +29,26 @@ class User:
             raise InvalidUserError("User email is invalid.")
         if not self.hashed_password or not self.hashed_password.strip():
             raise InvalidUserError("User hashed password cannot be empty.")
+        if len(self.full_name) > 120:
+            raise InvalidUserError(
+                "User full name cannot be longer than 120 characters."
+            )
+        if len(self.bio) > 500:
+            raise InvalidUserError("User bio cannot be longer than 500 characters.")
+        if self.avatar_url is not None and not self.avatar_url.strip():
+            raise InvalidUserError("User avatar URL cannot be empty when provided.")
+
+    def update_profile(
+        self,
+        *,
+        full_name: str,
+        bio: str,
+        avatar_url: str | None,
+    ) -> None:
+        self.full_name = full_name
+        self.bio = bio
+        self.avatar_url = avatar_url
+        self._validate()
 
     def is_admin(self) -> bool:
         return self.role is UserRole.ADMIN
