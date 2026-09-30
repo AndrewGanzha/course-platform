@@ -20,6 +20,7 @@ dependencies = [
     "pytest-asyncio>=1.4.0",
     "httpx>=0.28.1",
     "redis>=8.1.0",
+    "python-multipart>=0.0.32",
 ]
 
 [tool.ruff]

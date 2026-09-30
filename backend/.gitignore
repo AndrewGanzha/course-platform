@@ -43,6 +43,9 @@ dist/
 *.sqlite
 *.sqlite3
 
+# Locally uploaded media
+media/
+
 # IDE and operating system files
 .idea/
 .vscode/

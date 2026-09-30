@@ -41,6 +41,9 @@ cp .env.example .env
 | `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Время жизни access-токена |
 | `REDIS_URL` | `redis://localhost:6379/0` | Подключение к Redis |
 | `SUBMISSION_QUEUE_NAME` | `code-submissions` | Имя очереди отправок кода |
+| `MEDIA_ROOT` | `./media` | Каталог локального хранения загруженных файлов |
+| `MEDIA_URL_PREFIX` | `/media` | HTTP-префикс для отдачи загруженных файлов |
+| `MAX_COVER_IMAGE_BYTES` | `5242880` | Максимальный размер обложки курса в байтах |
 
 ## Миграции базы данных
 

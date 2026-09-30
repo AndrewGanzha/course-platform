@@ -79,15 +79,17 @@ class Course:
     def update_metadata(
         self,
         *,
-        cover_image_url: str | None,
         short_description: str,
         difficulty: CourseDifficulty,
         tag_names: list[str],
     ) -> None:
-        self.cover_image_url = cover_image_url
         self.short_description = short_description
         self.difficulty = difficulty
         self.tag_names = self._normalize_tag_names(tag_names)
+        self._validate()
+
+    def change_cover_image(self, cover_image_url: str) -> None:
+        self.cover_image_url = cover_image_url
         self._validate()
 
     def preview_description(self) -> str:

@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import NullPool
 
 import app.presentation.api.dependencies as api_dependencies
+from app.infrastructure.config import get_settings
 from app.infrastructure.database.models import (
     AnswerOptionModel,
     Base,
@@ -31,6 +32,15 @@ from app.infrastructure.database.models import (
 )
 from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
 from app.main import create_app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def media_root(tmp_path_factory) -> Path:
+    root = tmp_path_factory.mktemp("media")
+    os.environ["MEDIA_ROOT"] = str(root)
+    os.environ["MAX_COVER_IMAGE_BYTES"] = str(1024 * 1024)
+    get_settings.cache_clear()
+    return root
 
 
 @pytest_asyncio.fixture(scope="session")

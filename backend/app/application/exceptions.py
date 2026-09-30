@@ -37,6 +37,10 @@ class PermissionDeniedError(ApplicationError):
     pass
 
 
+class InvalidCoverImageError(ApplicationError):
+    pass
+
+
 class AnswerOptionNotFoundError(ApplicationError):
     pass
 

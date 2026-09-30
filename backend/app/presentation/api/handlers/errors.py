@@ -8,6 +8,7 @@ from app.application.exceptions import (
     CodeTaskNotFoundError,
     CourseNotFoundError,
     CoursePublicationNotReadyError,
+    InvalidCoverImageError,
     LectureNotFoundError,
     ModuleNotFoundError,
     QuestionAttemptNotFoundError,
@@ -46,6 +47,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         presentation_permission_denied_handler,
     )
     app.add_exception_handler(CourseNotFoundError, course_not_found_handler)
+    app.add_exception_handler(InvalidCoverImageError, invalid_cover_image_handler)
     app.add_exception_handler(
         CoursePublicationNotReadyError,
         course_publication_not_ready_handler,
@@ -94,6 +96,17 @@ async def course_not_found_handler(request: Request, exc: Exception) -> JSONResp
         error="course_not_found",
         message=str(exc),
         status_code=status.HTTP_404_NOT_FOUND,
+    )
+
+
+async def invalid_cover_image_handler(
+    request: Request,
+    exc: Exception,
+) -> JSONResponse:
+    return build_error_response(
+        error="invalid_cover_image",
+        message=str(exc),
+        status_code=status.HTTP_400_BAD_REQUEST,
     )
 
 

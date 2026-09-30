@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator
+from pathlib import Path
 
 from dishka import Provider, Scope, provide
 from fastapi import Request
@@ -10,6 +11,7 @@ from app.application.dto.authenticated_user import (
 )
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
+from app.application.interfaces.storage.image_storage import ImageStorage
 from app.application.interfaces.submission_queue import SubmissionQueue
 from app.application.services.course_catalog_read_service import (
     CourseCatalogReadService,
@@ -17,6 +19,7 @@ from app.application.services.course_catalog_read_service import (
 from app.application.services.course_content_access_service import (
     CourseContentAccessService,
 )
+from app.application.services.cover_image_policy import CoverImagePolicy
 from app.application.use_cases.answer_options.create_answer_option import (
     CreateAnswerOptionUseCase,
 )
@@ -57,6 +60,9 @@ from app.application.use_cases.courses.get_courses import GetCoursesUseCase
 from app.application.use_cases.courses.publish_course import PublishCourseUseCase
 from app.application.use_cases.courses.remove_course import RemoveCourseUseCase
 from app.application.use_cases.courses.update_course import UpdateCourseUseCase
+from app.application.use_cases.courses.upload_course_cover import (
+    UploadCourseCoverUseCase,
+)
 from app.application.use_cases.lectures.create_lecture import CreateLectureUseCase
 from app.application.use_cases.lectures.get_lecture import GetLectureUseCase
 from app.application.use_cases.lectures.remove_lecture import RemoveLectureUseCase
@@ -97,12 +103,14 @@ from app.application.use_cases.test_cases.update_test_case import (
 )
 from app.bootstrap.build_submission_queue import build_submission_queue
 from app.domain.entities.user import User
+from app.infrastructure.config import get_settings
 from app.infrastructure.database import SessionFactory, SqlAlchemyUnitOfWork
 from app.infrastructure.security.jwt_token_service import (
     InvalidTokenError,
     JwtTokenService,
 )
 from app.infrastructure.security.password_hasher import PwdlibPasswordHasher
+from app.infrastructure.storage.local_image_storage import LocalImageStorage
 from app.presentation.exceptions import AuthenticationError, PermissionDeniedError
 
 http_bearer = HTTPBearer(
@@ -205,6 +213,34 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> UpdateCourseUseCase:
         return UpdateCourseUseCase(uow=uow)
+
+    @provide
+    def get_cover_image_policy(self) -> CoverImagePolicy:
+        settings = get_settings()
+        return CoverImagePolicy(
+            max_size_bytes=settings.media.max_cover_image_bytes,
+        )
+
+    @provide
+    def get_image_storage(self) -> ImageStorage:
+        settings = get_settings()
+        return LocalImageStorage(
+            root=Path(settings.media.root),
+            url_prefix=settings.media.url_prefix,
+        )
+
+    @provide
+    def get_upload_course_cover_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+        image_storage: ImageStorage,
+        cover_image_policy: CoverImagePolicy,
+    ) -> UploadCourseCoverUseCase:
+        return UploadCourseCoverUseCase(
+            uow=uow,
+            image_storage=image_storage,
+            cover_image_policy=cover_image_policy,
+        )
 
     @provide
     def get_remove_course_use_case(

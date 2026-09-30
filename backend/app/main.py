@@ -1,9 +1,11 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dishka import make_async_container
 from dishka.integrations.fastapi import FastapiProvider, setup_dishka
 from fastapi import FastAPI, Security
+from fastapi.staticfiles import StaticFiles
 
 from app.infrastructure.config import get_settings
 from app.presentation.api.dependencies import ApiProvider, http_bearer
@@ -50,6 +52,15 @@ def create_app() -> FastAPI:
         ],
     )
     register_exception_handlers(app)
+
+    media_root = Path(settings.media.root)
+    media_root.mkdir(parents=True, exist_ok=True)
+    app.mount(
+        settings.media.url_prefix,
+        StaticFiles(directory=media_root),
+        name="media",
+    )
+
     app.include_router(api_router)
     container = make_async_container(ApiProvider(), FastapiProvider())
     setup_dishka(container=container, app=app)

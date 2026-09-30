@@ -21,6 +21,12 @@ class JwtSettings(BaseModel):
     access_token_expire_minutes: int
 
 
+class MediaSettings(BaseModel):
+    root: str
+    url_prefix: str
+    max_cover_image_bytes: int
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -51,6 +57,15 @@ class Settings(BaseSettings):
         default="code-submissions",
         validation_alias="SUBMISSION_QUEUE_NAME",
     )
+    media_root: str = Field(default="./media", validation_alias="MEDIA_ROOT")
+    media_url_prefix: str = Field(
+        default="/media",
+        validation_alias="MEDIA_URL_PREFIX",
+    )
+    max_cover_image_bytes: int = Field(
+        default=5 * 1024 * 1024,
+        validation_alias="MAX_COVER_IMAGE_BYTES",
+    )
 
     @property
     def api(self) -> ApiSettings:
@@ -73,6 +88,14 @@ class Settings(BaseSettings):
             secret_key=self.jwt_secret_key,
             algorithm=self.jwt_algorithm,
             access_token_expire_minutes=self.jwt_access_token_expire_minutes,
+        )
+
+    @property
+    def media(self) -> MediaSettings:
+        return MediaSettings(
+            root=self.media_root,
+            url_prefix=self.media_url_prefix,
+            max_cover_image_bytes=self.max_cover_image_bytes,
         )
 
 

@@ -1,11 +1,11 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.application.interfaces.repositories.course_repository import CourseRepository
-from app.domain.entities.course import Course, CourseStatus  # New
+from app.domain.entities.course import Course, CourseDifficulty, CourseStatus
 from app.infrastructure.database.mappers.course_mapper import CourseMapper
 from app.infrastructure.database.models.course_model import CourseModel
 
@@ -24,7 +24,7 @@ class SqlAlchemyCourseRepository(CourseRepository):
         model = result.scalar_one_or_none()
         return None if model is None else CourseMapper.to_domain(model)
 
-    async def list(self) -> list[Course]:
+    async def list(self) -> "list[Course]":
         stmt = select(CourseModel).options(selectinload(CourseModel.modules))
         result = await self.session.execute(stmt)
         return [CourseMapper.to_domain(model) for model in result.scalars().all()]
@@ -35,6 +35,34 @@ class SqlAlchemyCourseRepository(CourseRepository):
             .options(selectinload(CourseModel.modules))
             .where(CourseModel.status == CourseStatus.PUBLISHED.value)
         )
+        result = await self.session.execute(stmt)
+        return [CourseMapper.to_domain(model) for model in result.scalars().all()]
+
+    async def find_published_catalog_courses(
+        self,
+        *,
+        search: str = "",
+        difficulty: CourseDifficulty | None = None,
+    ) -> list[Course]:
+        stmt = (
+            select(CourseModel)
+            .options(selectinload(CourseModel.modules))
+            .where(CourseModel.status == CourseStatus.PUBLISHED.value)
+        )
+
+        if search:
+            pattern = f"%{search}%"
+            stmt = stmt.where(
+                or_(
+                    CourseModel.title.ilike(pattern),
+                    CourseModel.description.ilike(pattern),
+                    CourseModel.short_description.ilike(pattern),
+                )
+            )
+
+        if difficulty is not None:
+            stmt = stmt.where(CourseModel.difficulty == difficulty.value)
+
         result = await self.session.execute(stmt)
         return [CourseMapper.to_domain(model) for model in result.scalars().all()]
 
