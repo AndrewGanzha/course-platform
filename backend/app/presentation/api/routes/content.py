@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from app.application.use_cases.code_tasks.get_code_task import (
     GetCodeTaskQuery,
@@ -51,8 +51,9 @@ router = APIRouter(tags=["Content"], route_class=DishkaRoute)
 )
 async def get_courses(
     use_case: FromDishka[GetCoursesUseCase],
+    search: str = Query(default=""),
 ) -> list[CourseCatalogItemResponse]:
-    result = await use_case.execute(GetCoursesQuery())
+    result = await use_case.execute(GetCoursesQuery(search=search))
     return [CourseCatalogItemResponse.model_validate(course) for course in result]
 
 
