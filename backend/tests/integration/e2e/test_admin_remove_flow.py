@@ -38,13 +38,6 @@ async def test_admin_can_remove_an_entire_course_tree_incrementally(
     assert control_course_response.status_code == 201
     control_course_id = control_course_response.json()["id"]
 
-    for publish_course_id in (course_id, control_course_id):
-        publish_response = await client.post(
-            f"/api/admin/courses/{publish_course_id}/publish",
-            headers=headers,
-        )
-        assert publish_response.status_code == 200
-
     module_response = await client.post(
         f"/api/admin/courses/{course_id}/modules",
         headers=headers,
@@ -80,6 +73,48 @@ async def test_admin_can_remove_an_entire_course_tree_incrementally(
     )
     assert lecture_response.status_code == 201
     lecture_id = lecture_response.json()["id"]
+
+    control_module_response = await client.post(
+        f"/api/admin/courses/{control_course_id}/modules",
+        headers=headers,
+        json={
+            "title": "Control module",
+            "description": "Keeps the control course publishable.",
+            "position": 1,
+        },
+    )
+    assert control_module_response.status_code == 201
+    control_module_id = control_module_response.json()["id"]
+
+    control_section_response = await client.post(
+        f"/api/admin/modules/{control_module_id}/sections",
+        headers=headers,
+        json={
+            "title": "Control section",
+            "description": "Keeps the control course publishable.",
+            "position": 1,
+        },
+    )
+    assert control_section_response.status_code == 201
+    control_section_id = control_section_response.json()["id"]
+
+    control_lecture_response = await client.post(
+        f"/api/admin/sections/{control_section_id}/lectures",
+        headers=headers,
+        json={
+            "title": "Control lecture",
+            "content": "Control content.",
+            "position": 1,
+        },
+    )
+    assert control_lecture_response.status_code == 201
+
+    for publish_course_id in (course_id, control_course_id):
+        publish_response = await client.post(
+            f"/api/admin/courses/{publish_course_id}/publish",
+            headers=headers,
+        )
+        assert publish_response.status_code == 200
 
     courses_response = await client.get("/api/courses")
     assert courses_response.status_code == 200

@@ -53,6 +53,10 @@ from app.presentation.api.schemas.modules import (
     ModuleResponse,
     UpdateModuleRequest,
 )
+from app.presentation.api.schemas.profile import (
+    UpdateMyProfileRequest,
+    UserProfileResponse,
+)
 from app.presentation.api.schemas.question_attempts import (
     QuestionAttemptResultResponse,
     StartQuestionAttemptResponse,
@@ -70,6 +74,12 @@ from app.presentation.api.schemas.sections import (
     CreateSectionRequest,
     SectionResponse,
     UpdateSectionRequest,
+)
+from app.presentation.api.schemas.student_analytics import (
+    StudentCourseAnalyticsResponse,
+    StudentModuleAnalyticsResponse,
+    StudentWeakQuestionResponse,
+    StudentWeakTaskResponse,
 )
 from app.presentation.api.schemas.task_attempts import (
     SubmitTaskAnswerRequest,
@@ -146,4 +156,10 @@ __all__ = [
     "TaskAttemptResponse",
     "CodeSubmissionResponse",
     "SubmitCodeSubmissionRequest",
+    "UserProfileResponse",
+    "UpdateMyProfileRequest",
+    "StudentCourseAnalyticsResponse",
+    "StudentModuleAnalyticsResponse",
+    "StudentWeakQuestionResponse",
+    "StudentWeakTaskResponse",
 ]

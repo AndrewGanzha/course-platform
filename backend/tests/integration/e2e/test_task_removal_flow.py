@@ -50,6 +50,13 @@ async def create_authoring_tree(client, headers) -> dict:
     assert section_response.status_code == 201
     section_id = section_response.json()["id"]
 
+    lecture_response = await client.post(
+        f"/api/admin/sections/{section_id}/lectures",
+        headers=headers,
+        json={"title": "Lecture", "content": "Lecture content.", "position": 1},
+    )
+    assert lecture_response.status_code == 201
+
     publish_response = await client.post(
         f"/api/admin/courses/{course_id}/publish",
         headers=headers,

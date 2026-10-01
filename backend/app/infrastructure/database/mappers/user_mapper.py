@@ -12,13 +12,19 @@ class UserMapper:
             email=model.email,
             hashed_password=model.hashed_password,
             role=UserRole(model.role),
+            full_name=model.full_name,
+            bio=model.bio,
+            avatar_url=model.avatar_url,
         )
 
     @staticmethod
-    def to_model(entity: User) -> UserModel:
+    def to_model(user: User) -> UserModel:
         return UserModel(
-            id=str(entity.id),
-            email=entity.email,
-            hashed_password=entity.hashed_password,
-            role=str(entity.role),
+            id=str(user.id),
+            email=user.email,
+            hashed_password=user.hashed_password,
+            role=user.role.value,
+            full_name=user.full_name,
+            bio=user.bio,
+            avatar_url=user.avatar_url,
         )
