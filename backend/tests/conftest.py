@@ -1,5 +1,6 @@
 import os
 from collections.abc import AsyncIterator
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4
@@ -443,3 +444,265 @@ async def other_author_auth_headers(client, seeded_other_author_user):
     )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture
+async def seeded_author_analytics_tree(
+    session_factory,
+    seeded_author_user,
+    seeded_student_user,
+):
+    course_id = str(uuid4())
+    module_id = str(uuid4())
+    section_id = str(uuid4())
+    question_id = str(uuid4())
+    wrong_option_id = str(uuid4())
+    correct_option_id = str(uuid4())
+    task_id = str(uuid4())
+    code_task_id = str(uuid4())
+    second_student_id = str(uuid4())
+    now = datetime.now(UTC)
+
+    hasher = PwdlibPasswordHasher()
+    second_student = UserModel(
+        id=second_student_id,
+        email="analytics-student@example.com",
+        hashed_password=hasher.hash("strongpassword123"),
+        role="student",
+    )
+
+    course = CourseModel(
+        id=course_id,
+        author_id=seeded_author_user.id,
+        title="Author analytics course",
+        description="Course prepared for author analytics tests.",
+        status="published",
+    )
+    module = ModuleModel(
+        id=module_id,
+        course_id=course_id,
+        title="Analytics module",
+        description="Module with all learning activity types.",
+        position=1,
+    )
+    section = SectionModel(
+        id=section_id,
+        module_id=module_id,
+        title="Analytics section",
+        description="Section for aggregated analytics.",
+        position=1,
+    )
+    question = QuestionModel(
+        id=question_id,
+        section_id=section_id,
+        text="Which HTTP method reads a resource?",
+        position=1,
+        question_type="single_choice",
+        max_attempts=3,
+        reward_points=5,
+    )
+    wrong_option = AnswerOptionModel(
+        id=wrong_option_id,
+        question_id=question_id,
+        text="POST",
+        position=1,
+        is_correct=False,
+    )
+    correct_option = AnswerOptionModel(
+        id=correct_option_id,
+        question_id=question_id,
+        text="GET",
+        position=2,
+        is_correct=True,
+    )
+    task = TaskModel(
+        id=task_id,
+        section_id=section_id,
+        title="HTTP method",
+        statement="Enter GET.",
+        position=1,
+        check_type="exact_match",
+        expected_answer="GET",
+        accepted_answers=[],
+        answer_pattern="",
+        max_attempts=3,
+        reward_points=3,
+    )
+    code_task = CodeTaskModel(
+        id=code_task_id,
+        section_id=section_id,
+        title="Sum numbers",
+        statement="Read two integers and print their sum.",
+        position=2,
+        language="python",
+        starter_code="a, b = map(int, input().split())",
+        max_attempts=3,
+        reward_points=5,
+        time_limit_seconds=2,
+        memory_limit_mb=128,
+    )
+
+    first_student_question_attempts = [
+        QuestionAttemptModel(
+            id=str(uuid4()),
+            question_id=question_id,
+            student_id=seeded_student_user.id,
+            attempt_number=1,
+            selected_option_ids=[wrong_option_id],
+            result_status="incorrect",
+            awarded_points=0,
+            checked_at=now,
+            created_at=now,
+        ),
+        QuestionAttemptModel(
+            id=str(uuid4()),
+            question_id=question_id,
+            student_id=seeded_student_user.id,
+            attempt_number=2,
+            selected_option_ids=[correct_option_id],
+            result_status="correct",
+            awarded_points=5,
+            checked_at=now,
+            created_at=now,
+        ),
+    ]
+    second_student_question_attempt = QuestionAttemptModel(
+        id=str(uuid4()),
+        question_id=question_id,
+        student_id=second_student_id,
+        attempt_number=1,
+        selected_option_ids=[correct_option_id],
+        result_status="correct",
+        awarded_points=5,
+        checked_at=now,
+        created_at=now,
+    )
+
+    first_student_task_attempts = [
+        TaskAttemptModel(
+            id=str(uuid4()),
+            task_id=task_id,
+            student_id=seeded_student_user.id,
+            submitted_answer="POST",
+            attempt_number=1,
+            status="incorrect",
+            awarded_points=0,
+            checked_at=now,
+            created_at=now,
+        ),
+        TaskAttemptModel(
+            id=str(uuid4()),
+            task_id=task_id,
+            student_id=seeded_student_user.id,
+            submitted_answer="GET",
+            attempt_number=2,
+            status="correct",
+            awarded_points=3,
+            checked_at=now,
+            created_at=now,
+        ),
+    ]
+    second_student_task_attempt = TaskAttemptModel(
+        id=str(uuid4()),
+        task_id=task_id,
+        student_id=second_student_id,
+        submitted_answer="GET",
+        attempt_number=1,
+        status="correct",
+        awarded_points=3,
+        checked_at=now,
+        created_at=now,
+    )
+
+    first_student_submissions = [
+        CodeSubmissionModel(
+            id=str(uuid4()),
+            code_task_id=code_task_id,
+            student_id=seeded_student_user.id,
+            source_code="print(0)",
+            attempt_number=1,
+            status="failed",
+            created_at=now,
+            started_at=now,
+            finished_at=now,
+        ),
+        CodeSubmissionModel(
+            id=str(uuid4()),
+            code_task_id=code_task_id,
+            student_id=seeded_student_user.id,
+            source_code="a, b = map(int, input().split()); print(a + b)",
+            attempt_number=2,
+            status="passed",
+            created_at=now,
+            started_at=now,
+            finished_at=now,
+        ),
+    ]
+    second_student_submission = CodeSubmissionModel(
+        id=str(uuid4()),
+        code_task_id=code_task_id,
+        student_id=second_student_id,
+        source_code="print(0)",
+        attempt_number=1,
+        status="failed",
+        created_at=now,
+        started_at=now,
+        finished_at=now,
+    )
+
+    completed_progress = ProgressModel(
+        id=str(uuid4()),
+        student_id=seeded_student_user.id,
+        course_id=course_id,
+        completed_question_ids=[question_id],
+        completed_task_ids=[task_id],
+        completed_code_task_ids=[code_task_id],
+        completed_section_ids=[section_id],
+        completed_module_ids=[module_id],
+        total_points=13,
+    )
+    partial_progress = ProgressModel(
+        id=str(uuid4()),
+        student_id=second_student_id,
+        course_id=course_id,
+        completed_question_ids=[question_id],
+        completed_task_ids=[task_id],
+        completed_code_task_ids=[],
+        completed_section_ids=[],
+        completed_module_ids=[],
+        total_points=8,
+    )
+
+    async with session_factory() as session:
+        session.add_all(
+            [
+                second_student,
+                course,
+                module,
+                section,
+                question,
+                wrong_option,
+                correct_option,
+                task,
+                code_task,
+                *first_student_question_attempts,
+                second_student_question_attempt,
+                *first_student_task_attempts,
+                second_student_task_attempt,
+                *first_student_submissions,
+                second_student_submission,
+                completed_progress,
+                partial_progress,
+            ]
+        )
+        await session.commit()
+
+    return SimpleNamespace(
+        course_id=course_id,
+        course_title="Author analytics course",
+        module_id=module_id,
+        section_id=section_id,
+        question_id=question_id,
+        task_id=task_id,
+        code_task_id=code_task_id,
+    )
