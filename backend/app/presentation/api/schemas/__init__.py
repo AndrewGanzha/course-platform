@@ -75,6 +75,12 @@ from app.presentation.api.schemas.sections import (
     SectionResponse,
     UpdateSectionRequest,
 )
+from app.presentation.api.schemas.student_analytics import (
+    StudentCourseAnalyticsResponse,
+    StudentModuleAnalyticsResponse,
+    StudentWeakQuestionResponse,
+    StudentWeakTaskResponse,
+)
 from app.presentation.api.schemas.task_attempts import (
     SubmitTaskAnswerRequest,
     TaskAttemptResponse,
@@ -152,4 +158,8 @@ __all__ = [
     "SubmitCodeSubmissionRequest",
     "UserProfileResponse",
     "UpdateMyProfileRequest",
+    "StudentCourseAnalyticsResponse",
+    "StudentModuleAnalyticsResponse",
+    "StudentWeakQuestionResponse",
+    "StudentWeakTaskResponse",
 ]

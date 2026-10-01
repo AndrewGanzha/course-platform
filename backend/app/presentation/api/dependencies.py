@@ -70,6 +70,9 @@ from app.application.use_cases.lectures.update_lecture import UpdateLectureUseCa
 from app.application.use_cases.modules.create_module import CreateModuleUseCase
 from app.application.use_cases.modules.remove_module import RemoveModuleUseCase
 from app.application.use_cases.modules.update_module import UpdateModuleUseCase
+from app.application.use_cases.profile.get_my_course_analytics import (
+    GetMyCourseAnalyticsUseCase,
+)
 from app.application.use_cases.profile.get_my_profile import GetMyProfileUseCase
 from app.application.use_cases.profile.update_my_profile import (
     UpdateMyProfileUseCase,
@@ -529,6 +532,13 @@ class ApiProvider(Provider):
     @provide
     def get_get_my_profile_use_case(self) -> GetMyProfileUseCase:
         return GetMyProfileUseCase()
+
+    @provide
+    def get_get_my_course_analytics_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetMyCourseAnalyticsUseCase:
+        return GetMyCourseAnalyticsUseCase(uow=uow)
 
     @provide
     def get_update_my_profile_use_case(
