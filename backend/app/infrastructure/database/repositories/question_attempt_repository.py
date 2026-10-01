@@ -57,3 +57,17 @@ class SqlAlchemyQuestionAttemptRepository(QuestionAttemptRepository):
     async def add(self, attempt: QuestionAttempt) -> None:
         self.session.add(QuestionAttemptMapper.to_model(attempt))
         await self.session.flush()
+
+    async def list_by_question_id(self, question_id: UUID) -> list[QuestionAttempt]:
+        stmt = (
+            select(QuestionAttemptModel)
+            .where(QuestionAttemptModel.question_id == str(question_id))
+            .order_by(
+                QuestionAttemptModel.student_id,
+                QuestionAttemptModel.attempt_number,
+            )
+        )
+        result = await self.session.execute(stmt)
+        return [
+            QuestionAttemptMapper.to_domain(model) for model in result.scalars().all()
+        ]

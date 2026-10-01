@@ -5,6 +5,13 @@ from app.presentation.api.schemas.auth import (
     RegisterUserRequest,
     TokenResponse,
 )
+from app.presentation.api.schemas.author_course_analytics import (
+    AuthorCourseAnalyticsResponse,
+    AuthorModuleAnalyticsResponse,
+    DifficultQuestionAnalyticsResponse,
+    DifficultTaskAnalyticsResponse,
+    ProblematicCodeTaskAnalyticsResponse,
+)
 from app.presentation.api.schemas.catalog import (
     CourseCatalogCardResponse,
     CourseCatalogCountersResponse,
@@ -164,4 +171,9 @@ __all__ = [
     "StudentWeakQuestionResponse",
     "StudentWeakTaskResponse",
     "StudentWeakCodeTaskResponse",
+    "AuthorCourseAnalyticsResponse",
+    "AuthorModuleAnalyticsResponse",
+    "DifficultQuestionAnalyticsResponse",
+    "DifficultTaskAnalyticsResponse",
+    "ProblematicCodeTaskAnalyticsResponse",
 ]

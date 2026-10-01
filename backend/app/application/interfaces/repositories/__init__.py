@@ -8,6 +8,9 @@ from app.application.interfaces.repositories.code_task_repository import (
     CodeTaskRepository,
 )
 from app.application.interfaces.repositories.course_repository import CourseRepository
+from app.application.interfaces.repositories.course_review_repository import (
+    CourseReviewRepository,
+)
 from app.application.interfaces.repositories.lecture_repository import LectureRepository
 from app.application.interfaces.repositories.module_repository import ModuleRepository
 from app.application.interfaces.repositories.progress_repository import (
@@ -44,4 +47,5 @@ __all__ = [
     "CodeTaskRepository",
     "TestCaseRepository",
     "CodeSubmissionRepository",
+    "CourseReviewRepository",
 ]

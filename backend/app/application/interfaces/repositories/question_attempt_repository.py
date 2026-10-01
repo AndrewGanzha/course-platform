@@ -18,6 +18,10 @@ class QuestionAttemptRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def list_by_question_id(self, question_id: UUID) -> list[QuestionAttempt]:
+        raise NotImplementedError
+
+    @abstractmethod
     async def exists_by_question_id(self, question_id: UUID) -> bool:
         raise NotImplementedError
 

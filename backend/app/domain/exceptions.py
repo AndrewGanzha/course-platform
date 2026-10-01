@@ -116,3 +116,7 @@ class InvalidExecutionResultError(DomainError):
 
 class InvalidCourseStatusTransitionError(DomainError):
     pass
+
+
+class InvalidCourseReviewError(DomainError):
+    pass
