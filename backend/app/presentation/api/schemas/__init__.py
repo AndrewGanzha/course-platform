@@ -78,6 +78,7 @@ from app.presentation.api.schemas.sections import (
 from app.presentation.api.schemas.student_analytics import (
     StudentCourseAnalyticsResponse,
     StudentModuleAnalyticsResponse,
+    StudentWeakCodeTaskResponse,
     StudentWeakQuestionResponse,
     StudentWeakTaskResponse,
 )
@@ -162,4 +163,5 @@ __all__ = [
     "StudentModuleAnalyticsResponse",
     "StudentWeakQuestionResponse",
     "StudentWeakTaskResponse",
+    "StudentWeakCodeTaskResponse",
 ]

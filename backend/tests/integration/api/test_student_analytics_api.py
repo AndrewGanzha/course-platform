@@ -1,5 +1,32 @@
 import pytest
 
+import app.presentation.api.dependencies as api_dependencies
+from app.application.use_cases.code_submissions.complete_code_submission import (
+    CompleteCodeSubmissionCommand,
+    CompleteCodeSubmissionUseCase,
+)
+from app.domain.entities.execution_result import ExecutionStatus
+from app.infrastructure.database.unit_of_work import SqlAlchemyUnitOfWork
+
+
+class FakeSubmissionQueue:
+    def __init__(self) -> None:
+        self.items = []
+
+    async def enqueue(self, submission_id) -> None:
+        self.items.append(submission_id)
+
+
+@pytest.fixture
+def fake_submission_queue(monkeypatch):
+    queue = FakeSubmissionQueue()
+    monkeypatch.setattr(
+        api_dependencies,
+        "build_submission_queue",
+        lambda: queue,
+    )
+    return queue
+
 
 @pytest.mark.asyncio
 async def test_student_analytics_returns_empty_progress_for_not_started_course(
@@ -107,3 +134,95 @@ async def test_student_analytics_forbidden_for_non_student_user(
 
     assert response.status_code == 403
     assert response.json()["error"] == "permission_denied"
+
+
+@pytest.mark.asyncio
+async def test_student_analytics_returns_empty_weak_code_tasks_without_submissions(
+    client,
+    student_auth_headers,
+    seeded_code_task_tree,
+):
+    response = await client.get(
+        f"/api/profile/me/courses/{seeded_code_task_tree.course_id}/analytics",
+        headers=student_auth_headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["weak_code_tasks"] == []
+
+
+@pytest.mark.asyncio
+async def test_student_analytics_includes_weak_code_task_after_multiple_attempts(
+    client,
+    student_auth_headers,
+    seeded_code_task_tree,
+    fake_submission_queue,
+):
+    first_submission = await client.post(
+        f"/api/learning/code-tasks/{seeded_code_task_tree.code_task_id}/submissions",
+        headers=student_auth_headers,
+        json={"source_code": "print(1)"},
+    )
+    assert first_submission.status_code == 202
+
+    second_submission = await client.post(
+        f"/api/learning/code-tasks/{seeded_code_task_tree.code_task_id}/submissions",
+        headers=student_auth_headers,
+        json={"source_code": "a, b = map(int, input().split())\nprint(a + b)"},
+    )
+    assert second_submission.status_code == 202
+
+    analytics_response = await client.get(
+        f"/api/profile/me/courses/{seeded_code_task_tree.course_id}/analytics",
+        headers=student_auth_headers,
+    )
+    assert analytics_response.status_code == 200
+    payload = analytics_response.json()
+    assert len(payload["weak_code_tasks"]) == 1
+    assert (
+        payload["weak_code_tasks"][0]["code_task_id"]
+        == seeded_code_task_tree.code_task_id
+    )
+    assert (
+        payload["weak_code_tasks"][0]["section_id"] == seeded_code_task_tree.section_id
+    )
+    assert payload["weak_code_tasks"][0]["attempts_count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_student_analytics_includes_weak_code_task_after_failed_run(
+    client,
+    student_auth_headers,
+    session_factory,
+    fake_submission_queue,
+    seeded_code_task_tree,
+):
+    submission_response = await client.post(
+        f"/api/learning/code-tasks/{seeded_code_task_tree.code_task_id}/submissions",
+        headers=student_auth_headers,
+        json={"source_code": "print(1)"},
+    )
+    assert submission_response.status_code == 202
+    submission_id = submission_response.json()["id"]
+
+    uow = SqlAlchemyUnitOfWork(session_factory=session_factory)
+    complete_use_case = CompleteCodeSubmissionUseCase(uow=uow)
+    await complete_use_case.execute(
+        CompleteCodeSubmissionCommand(
+            submission_id=submission_id,
+            status=ExecutionStatus.FAILED,
+        )
+    )
+
+    analytics_response = await client.get(
+        f"/api/profile/me/courses/{seeded_code_task_tree.course_id}/analytics",
+        headers=student_auth_headers,
+    )
+    assert analytics_response.status_code == 200
+    payload = analytics_response.json()
+    assert len(payload["weak_code_tasks"]) == 1
+    assert (
+        payload["weak_code_tasks"][0]["code_task_id"]
+        == seeded_code_task_tree.code_task_id
+    )
+    assert payload["weak_code_tasks"][0]["attempts_count"] == 1

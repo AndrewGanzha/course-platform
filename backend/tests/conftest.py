@@ -320,6 +320,80 @@ async def seeded_interactive_tree(session_factory, seeded_author_user):
 
 
 @pytest_asyncio.fixture
+async def seeded_code_task_tree(session_factory, seeded_author_user):
+    course_id = str(uuid4())
+    module_id = str(uuid4())
+    section_id = str(uuid4())
+    lecture_id = str(uuid4())
+    code_task_id = str(uuid4())
+    test_case_id = str(uuid4())
+
+    async with session_factory() as session:
+        course = CourseModel(
+            id=course_id,
+            author_id=seeded_author_user.id,
+            title="Code task course",
+            description="Course with a code task inside.",
+            status="published",
+        )
+        module = ModuleModel(
+            id=module_id,
+            course_id=course_id,
+            title="Practice",
+            description="Coding practice",
+            position=1,
+        )
+        section = SectionModel(
+            id=section_id,
+            module_id=module_id,
+            title="Basics",
+            description="Intro section",
+            position=1,
+        )
+        lecture = LectureModel(
+            id=lecture_id,
+            section_id=section_id,
+            title="Warm up",
+            content="Lecture content",
+            position=1,
+        )
+        code_task = CodeTaskModel(
+            id=code_task_id,
+            section_id=section_id,
+            title="Sum numbers",
+            statement="Read two integers and print their sum.",
+            position=1,
+            language="python",
+            starter_code="a, b = map(int, input().split())",
+            max_attempts=3,
+            reward_points=5,
+            time_limit_seconds=20,
+            memory_limit_mb=128,
+        )
+        test_case = TestCaseModel(
+            id=test_case_id,
+            code_task_id=code_task_id,
+            position=1,
+            input_data="2 3",
+            expected_output="5",
+            is_hidden=False,
+            explanation="basic case",
+        )
+
+        session.add_all([course, module, section, lecture, code_task, test_case])
+        await session.commit()
+
+    return SimpleNamespace(
+        course_id=course_id,
+        module_id=module_id,
+        section_id=section_id,
+        lecture_id=lecture_id,
+        code_task_id=code_task_id,
+        test_case_id=test_case_id,
+    )
+
+
+@pytest_asyncio.fixture
 async def student_auth_headers(client, seeded_student_user):
     response = await client.post(
         "/api/auth/login",

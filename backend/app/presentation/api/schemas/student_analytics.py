@@ -29,6 +29,14 @@ class StudentWeakTaskResponse(BaseModel):
     attempts_count: int
 
 
+class StudentWeakCodeTaskResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    code_task_id: UUID
+    section_id: UUID
+    attempts_count: int
+
+
 class StudentCourseAnalyticsResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -44,3 +52,4 @@ class StudentCourseAnalyticsResponse(BaseModel):
     modules: list[StudentModuleAnalyticsResponse]
     weak_questions: list[StudentWeakQuestionResponse]
     weak_tasks: list[StudentWeakTaskResponse]
+    weak_code_tasks: list[StudentWeakCodeTaskResponse]
