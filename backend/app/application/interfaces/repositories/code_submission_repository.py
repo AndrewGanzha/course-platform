@@ -22,5 +22,13 @@ class CodeSubmissionRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def get_by_student_and_code_task(
+        self,
+        student_id: UUID,
+        code_task_id: UUID,
+    ) -> list[CodeSubmission]:
+        raise NotImplementedError
+
+    @abstractmethod
     async def exists_by_code_task_id(self, code_task_id: UUID) -> bool:
         raise NotImplementedError

@@ -1,5 +1,6 @@
 from app.infrastructure.database.mappers.answer_option_mapper import AnswerOptionMapper
 from app.infrastructure.database.mappers.course_mapper import CourseMapper
+from app.infrastructure.database.mappers.course_review_mapper import CourseReviewMapper
 from app.infrastructure.database.mappers.lecture_mapper import LectureMapper
 from app.infrastructure.database.mappers.module_mapper import ModuleMapper
 from app.infrastructure.database.mappers.progress_mapper import ProgressMapper
@@ -24,4 +25,5 @@ __all__ = [
     "TaskMapper",
     "TaskAttemptMapper",
     "ProgressMapper",
+    "CourseReviewMapper",
 ]

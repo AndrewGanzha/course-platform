@@ -52,3 +52,8 @@ class SqlAlchemyProgressRepository(ProgressRepository):
         ]
         model.total_points = progress.total_points
         await self.session.flush()
+
+    async def list_by_course_id(self, course_id: UUID) -> list[Progress]:
+        stmt = select(ProgressModel).where(ProgressModel.course_id == str(course_id))
+        result = await self.session.execute(stmt)
+        return [ProgressMapper.to_domain(model) for model in result.scalars().all()]

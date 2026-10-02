@@ -4,6 +4,7 @@ from uuid import UUID
 from app.application.dto.student_course_analytics import (
     StudentCourseAnalyticsDTO,
     StudentModuleAnalyticsDTO,
+    StudentWeakCodeTaskDTO,
     StudentWeakQuestionDTO,
     StudentWeakTaskDTO,
 )
@@ -43,6 +44,7 @@ class GetMyCourseAnalyticsUseCase:
             module_dtos: list[StudentModuleAnalyticsDTO] = []
             weak_question_dtos: list[StudentWeakQuestionDTO] = []
             weak_task_dtos: list[StudentWeakTaskDTO] = []
+            weak_code_task_dtos: list[StudentWeakCodeTaskDTO] = []
             completed_module_ids = set(
                 progress.completed_module_ids if progress else []
             )
@@ -87,6 +89,20 @@ class GetMyCourseAnalyticsUseCase:
                                 )
                             )
 
+                    for code_task_id in section.code_task_ids:
+                        submissions = await self.uow.code_submissions.get_by_student_and_code_task(
+                            student_id=query.actor.id,
+                            code_task_id=code_task_id,
+                        )
+                        if self._is_weak_code_task(submissions):
+                            weak_code_task_dtos.append(
+                                StudentWeakCodeTaskDTO(
+                                    code_task_id=code_task_id,
+                                    section_id=section.id,
+                                    attempts_count=len(submissions),
+                                )
+                            )
+
                 module_dtos.append(
                     StudentModuleAnalyticsDTO(
                         module_id=module.id,
@@ -128,4 +144,11 @@ class GetMyCourseAnalyticsUseCase:
                 modules=module_dtos,
                 weak_questions=weak_question_dtos,
                 weak_tasks=weak_task_dtos,
+                weak_code_tasks=weak_code_task_dtos,
             )
+
+    @staticmethod
+    def _is_weak_code_task(submissions: list) -> bool:
+        if len(submissions) > 1:
+            return True
+        return any(submission.status.value == "failed" for submission in submissions)

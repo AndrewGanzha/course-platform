@@ -15,6 +15,7 @@ from app.application.interfaces.repositories.question_repository import (
 )
 from app.application.interfaces.repositories.section_repository import SectionRepository
 from app.application.interfaces.repositories.task_repository import TaskRepository
+from app.application.services.course_rating_read_service import CourseRatingReadService
 from app.domain.entities.course import Course
 
 
@@ -27,6 +28,7 @@ class CourseCatalogReadService:
         question_repository: QuestionRepository,
         task_repository: TaskRepository,
         code_task_repository: CodeTaskRepository,
+        rating_read_service: CourseRatingReadService,
     ) -> None:
         self.module_repository = module_repository
         self.section_repository = section_repository
@@ -34,9 +36,11 @@ class CourseCatalogReadService:
         self.question_repository = question_repository
         self.task_repository = task_repository
         self.code_task_repository = code_task_repository
+        self.rating_read_service = rating_read_service
 
     async def build_catalog_item(self, course: Course) -> CourseCatalogItemDTO:
         counters = await self._build_counters(course)
+        rating = await self.rating_read_service.build_summary(course.id)
         return CourseCatalogItemDTO(
             id=course.id,
             title=course.title,
@@ -46,6 +50,7 @@ class CourseCatalogReadService:
             tag_names=list(course.tag_names),
             status=course.status,
             counters=counters,
+            rating=rating,
         )
 
     async def build_course_card(self, course: Course) -> CourseCatalogCardDTO:
@@ -83,6 +88,7 @@ class CourseCatalogReadService:
             tag_names=list(course.tag_names),
             status=course.status,
             counters=counters,
+            rating=await self.rating_read_service.build_summary(course.id),
             modules=module_dtos,
         )
 

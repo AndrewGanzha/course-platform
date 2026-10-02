@@ -44,6 +44,24 @@ class SqlAlchemyCodeSubmissionRepository(CodeSubmissionRepository):
             CodeSubmissionMapper.to_domain(model) for model in result.scalars().all()
         ]
 
+    async def get_by_student_and_code_task(
+        self,
+        student_id: UUID,
+        code_task_id: UUID,
+    ) -> list[CodeSubmission]:
+        stmt = (
+            select(CodeSubmissionModel)
+            .where(
+                CodeSubmissionModel.student_id == str(student_id),
+                CodeSubmissionModel.code_task_id == str(code_task_id),
+            )
+            .order_by(CodeSubmissionModel.attempt_number)
+        )
+        result = await self.session.execute(stmt)
+        return [
+            CodeSubmissionMapper.to_domain(model) for model in result.scalars().all()
+        ]
+
     async def exists_by_code_task_id(self, code_task_id: UUID) -> bool:
         stmt = (
             select(CodeSubmissionModel.id)

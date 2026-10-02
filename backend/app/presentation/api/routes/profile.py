@@ -12,11 +12,16 @@ from app.application.use_cases.profile.get_my_profile import (
     GetMyProfileQuery,
     GetMyProfileUseCase,
 )
+from app.application.use_cases.profile.get_my_teaching_course_analytics import (
+    GetMyTeachingCourseAnalyticsQuery,
+    GetMyTeachingCourseAnalyticsUseCase,
+)
 from app.application.use_cases.profile.update_my_profile import (
     UpdateMyProfileCommand,
     UpdateMyProfileUseCase,
 )
 from app.presentation.api.schemas import (
+    AuthorCourseAnalyticsResponse,
     ErrorResponse,
     StudentCourseAnalyticsResponse,
     UpdateMyProfileRequest,
@@ -107,3 +112,36 @@ async def get_my_course_analytics(
         GetMyCourseAnalyticsQuery(actor=actor, course_id=course_id)
     )
     return StudentCourseAnalyticsResponse.model_validate(result)
+
+
+@router.get(
+    "/me/teaching/courses/{course_id}/analytics",
+    response_model=AuthorCourseAnalyticsResponse,
+    summary="Get teaching analytics for my course",
+    description=(
+        "Returns aggregated teaching analytics for a course owned by the current author."
+    ),
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "User cannot view teaching analytics for this course.",
+            "model": ErrorResponse,
+        },
+        404: {
+            "description": "Course was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_my_teaching_course_analytics(
+    course_id: UUID,
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[GetMyTeachingCourseAnalyticsUseCase],
+) -> AuthorCourseAnalyticsResponse:
+    result = await use_case.execute(
+        GetMyTeachingCourseAnalyticsQuery(actor=actor, course_id=course_id)
+    )
+    return AuthorCourseAnalyticsResponse.model_validate(result)
