@@ -29,6 +29,12 @@ class CourseCatalogItemDTO:
 
 
 @dataclass(slots=True)
+class CourseCatalogMetricsDTO:
+    counters: CourseCatalogCountersDTO
+    rating: CourseRatingSummaryDTO
+
+
+@dataclass(slots=True)
 class CourseCatalogSectionPreviewDTO:
     id: UUID
     title: str

@@ -36,8 +36,10 @@ class SqlAlchemyCodeSubmissionRepository(CodeSubmissionRepository):
         await self.session.flush()
 
     async def list_by_code_task_id(self, code_task_id: UUID) -> list[CodeSubmission]:
-        stmt = select(CodeSubmissionModel).where(
-            CodeSubmissionModel.code_task_id == str(code_task_id)
+        stmt = (
+            select(CodeSubmissionModel)
+            .where(CodeSubmissionModel.code_task_id == str(code_task_id))
+            .order_by(CodeSubmissionModel.attempt_number)
         )
         result = await self.session.execute(stmt)
         return [

@@ -54,8 +54,4 @@ class GetCoursesUseCase:
                 if all(tag in course.tag_names for tag in tag_names)
             ]
 
-        items: list[CourseCatalogItemDTO] = []
-        for course in courses:
-            items.append(await self.catalog_read_service.build_catalog_item(course))
-
-        return items
+        return await self.catalog_read_service.build_catalog_items(courses)

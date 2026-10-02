@@ -7,6 +7,9 @@ from app.application.interfaces.repositories.code_submission_repository import (
 from app.application.interfaces.repositories.code_task_repository import (
     CodeTaskRepository,
 )
+from app.application.interfaces.repositories.course_catalog_metrics_repository import (
+    CourseCatalogMetricsRepository,
+)
 from app.application.interfaces.repositories.course_repository import CourseRepository
 from app.application.interfaces.repositories.course_review_repository import (
     CourseReviewRepository,
@@ -40,6 +43,7 @@ from app.application.interfaces.repositories.user_repository import UserReposito
 
 __all__ = [
     "CourseRepository",
+    "CourseCatalogMetricsRepository",
     "ModuleRepository",
     "SectionRepository",
     "LectureRepository",

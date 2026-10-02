@@ -4,6 +4,7 @@ from app.application.interfaces.repositories import (
     AnswerOptionRepository,
     CodeSubmissionRepository,
     CodeTaskRepository,
+    CourseCatalogMetricsRepository,
     CourseRepository,
     CourseReviewRepository,
     LectureCommentRepository,
@@ -39,6 +40,7 @@ class UnitOfWork(ABC):
     course_reviews: CourseReviewRepository
     lecture_comments: LectureCommentRepository
     student_activities: StudentActivityRepository
+    course_catalog_metrics: CourseCatalogMetricsRepository
 
     @abstractmethod
     async def __aenter__(self) -> "UnitOfWork":

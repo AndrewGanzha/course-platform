@@ -19,9 +19,6 @@ from app.application.services.course_catalog_read_service import (
 from app.application.services.course_content_access_service import (
     CourseContentAccessService,
 )
-from app.application.services.course_rating_read_service import (
-    CourseRatingReadService,
-)
 from app.application.services.cover_image_policy import CoverImagePolicy
 from app.application.services.lecture_course_resolver import LectureCourseResolver
 from app.application.use_cases.answer_options.create_answer_option import (
@@ -184,28 +181,14 @@ class ApiProvider(Provider):
         )
 
     @provide
-    def get_course_rating_read_service(
-        self,
-        uow: SqlAlchemyUnitOfWork,
-    ) -> CourseRatingReadService:
-        return CourseRatingReadService(
-            review_repository=uow.course_reviews,
-        )
-
-    @provide
     def get_course_catalog_read_service(
         self,
         uow: SqlAlchemyUnitOfWork,
-        rating_read_service: CourseRatingReadService,
     ) -> CourseCatalogReadService:
         return CourseCatalogReadService(
+            metrics_repository=uow.course_catalog_metrics,
             module_repository=uow.modules,
             section_repository=uow.sections,
-            lecture_repository=uow.lectures,
-            question_repository=uow.questions,
-            task_repository=uow.tasks,
-            code_task_repository=uow.code_tasks,
-            rating_read_service=rating_read_service,
         )
 
     @provide(scope=Scope.APP)

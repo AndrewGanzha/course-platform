@@ -1,4 +1,4 @@
-from sqlalchemy import JSON, ForeignKey, String
+from sqlalchemy import JSON, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database.models.base import Base
@@ -6,6 +6,13 @@ from app.infrastructure.database.models.base import Base
 
 class CourseModel(Base):
     __tablename__ = "courses"
+    __table_args__ = (
+        Index(
+            "ix_courses_status_difficulty",
+            "status",
+            "difficulty",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     author_id: Mapped[str] = mapped_column(

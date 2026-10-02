@@ -1,4 +1,4 @@
-from sqlalchemy import JSON, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import JSON, ForeignKey, Index, Integer, String, UniqueConstraint
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -9,6 +9,7 @@ class ProgressModel(Base):
     __tablename__ = "progress"
     __table_args__ = (
         UniqueConstraint("student_id", "course_id", name="uq_progress_student_course"),
+        Index("ix_progress_course_id", "course_id"),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
