@@ -5,6 +5,7 @@ from app.application.interfaces.repositories import (
     CodeSubmissionRepository,
     CodeTaskRepository,
     CourseRepository,
+    CourseReviewRepository,
     LectureRepository,
     ModuleRepository,
     ProgressRepository,
@@ -33,6 +34,7 @@ class UnitOfWork(ABC):
     code_tasks: CodeTaskRepository
     test_cases: TestCaseRepository
     code_submissions: CodeSubmissionRepository
+    course_reviews: CourseReviewRepository
 
     @abstractmethod
     async def __aenter__(self) -> "UnitOfWork":
