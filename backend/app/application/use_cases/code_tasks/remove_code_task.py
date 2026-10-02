@@ -5,6 +5,7 @@ from app.application.exceptions import (
     CodeTaskAlreadyUsedError,
     CodeTaskNotFoundError,
 )
+from app.application.interfaces.content_cache import ContentCache
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.application.services.course_access_service import CourseAccessService
 from app.domain.entities.user import User
@@ -18,11 +19,17 @@ class RemoveCodeTaskCommand:
 
 
 class RemoveCodeTaskUseCase:
-    def __init__(self, uow: UnitOfWork) -> None:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        content_cache: ContentCache | None = None,
+    ) -> None:
         self.uow = uow
         self.course_access_service = CourseAccessService(uow)
+        self.content_cache = content_cache
 
     async def execute(self, command: RemoveCodeTaskCommand) -> None:
+        course_id: UUID | None = None
         async with self.uow:
             code_task = await self.uow.code_tasks.get_by_id(command.code_task_id)
             if code_task is None:
@@ -45,3 +52,9 @@ class RemoveCodeTaskUseCase:
             await self.uow.sections.update(section)
             await self.uow.code_tasks.remove(code_task.id)
             await self.uow.commit()
+            course_id = await self.course_access_service.resolve_course_id_for_section(
+                section.id
+            )
+
+        if self.content_cache is not None and course_id is not None:
+            await self.content_cache.invalidate_course(course_id)

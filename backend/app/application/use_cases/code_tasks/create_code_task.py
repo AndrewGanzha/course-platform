@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID, uuid4
 
+from app.application.interfaces.content_cache import ContentCache
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.application.services.course_access_service import CourseAccessService
 from app.domain.entities.code_task import CodeTask, CodeTaskLanguage
@@ -23,11 +24,17 @@ class CreateCodeTaskCommand:
 
 
 class CreateCodeTaskUseCase:
-    def __init__(self, uow: UnitOfWork) -> None:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        content_cache: ContentCache | None = None,
+    ) -> None:
         self.uow = uow
         self.course_access_service = CourseAccessService(uow)
+        self.content_cache = content_cache
 
     async def execute(self, command: CreateCodeTaskCommand) -> CodeTask:
+        course_id: UUID | None = None
         async with self.uow:
             section = await self.course_access_service.ensure_can_manage_section(
                 actor=command.actor,
@@ -52,4 +59,11 @@ class CreateCodeTaskUseCase:
             await self.uow.code_tasks.add(code_task)
             await self.uow.sections.update(section)
             await self.uow.commit()
-            return code_task
+            course_id = await self.course_access_service.resolve_course_id_for_section(
+                section.id
+            )
+
+        if self.content_cache is not None and course_id is not None:
+            await self.content_cache.invalidate_course(course_id)
+
+        return code_task

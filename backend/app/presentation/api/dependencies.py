@@ -9,9 +9,13 @@ from app.application.dto.authenticated_user import (
     AuthenticatedAdmin,
     AuthenticatedUser,
 )
+from app.application.interfaces.content_cache import ContentCache
 from app.application.interfaces.services.password_hasher import PasswordHasher
 from app.application.interfaces.services.token_service import TokenService
 from app.application.interfaces.storage.image_storage import ImageStorage
+from app.application.interfaces.student_analytics_cache import (
+    StudentAnalyticsCache,
+)
 from app.application.interfaces.submission_queue import SubmissionQueue
 from app.application.services.course_catalog_read_service import (
     CourseCatalogReadService,
@@ -139,6 +143,10 @@ from app.application.use_cases.test_cases.remove_test_case import (
 from app.application.use_cases.test_cases.update_test_case import (
     UpdateTestCaseUseCase,
 )
+from app.bootstrap.build_content_cache import build_content_cache
+from app.bootstrap.build_student_analytics_cache import (
+    build_student_analytics_cache,
+)
 from app.bootstrap.build_submission_queue import build_submission_queue
 from app.domain.entities.user import User
 from app.infrastructure.config import get_settings
@@ -192,18 +200,36 @@ class ApiProvider(Provider):
         )
 
     @provide(scope=Scope.APP)
-    def get_submission_queue(self) -> SubmissionQueue:
-        return build_submission_queue()
+    async def get_submission_queue(self) -> AsyncIterator[SubmissionQueue]:
+        queue = build_submission_queue()
+        yield queue
+        await queue.client.aclose()
+
+    @provide(scope=Scope.APP)
+    async def get_student_analytics_cache(
+        self,
+    ) -> AsyncIterator[StudentAnalyticsCache]:
+        cache = build_student_analytics_cache()
+        yield cache
+        await cache.client.aclose()
+
+    @provide(scope=Scope.APP)
+    async def get_content_cache(self) -> AsyncIterator[ContentCache]:
+        cache = build_content_cache()
+        yield cache
+        await cache.client.aclose()
 
     @provide
     def provide_get_courses_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
         catalog_read_service: CourseCatalogReadService,
+        content_cache: ContentCache,
     ) -> GetCoursesUseCase:
         return GetCoursesUseCase(
             course_repository=uow.courses,
             catalog_read_service=catalog_read_service,
+            content_cache=content_cache,
         )
 
     @provide
@@ -212,11 +238,13 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
         access_service: CourseContentAccessService,
         catalog_read_service: CourseCatalogReadService,
+        content_cache: ContentCache,
     ) -> GetCourseUseCase:
         return GetCourseUseCase(
             course_repository=uow.courses,
             access_service=access_service,
             catalog_read_service=catalog_read_service,
+            content_cache=content_cache,
         )
 
     @provide
@@ -286,6 +314,7 @@ class ApiProvider(Provider):
         self,
         uow: SqlAlchemyUnitOfWork,
         access_service: CourseContentAccessService,
+        content_cache: ContentCache,
     ) -> GetCourseStructureUseCase:
         return GetCourseStructureUseCase(
             course_repository=uow.courses,
@@ -295,6 +324,7 @@ class ApiProvider(Provider):
             task_repository=uow.tasks,
             code_task_repository=uow.code_tasks,
             access_service=access_service,
+            content_cache=content_cache,
         )
 
     @provide
@@ -308,8 +338,9 @@ class ApiProvider(Provider):
     def get_update_course_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> UpdateCourseUseCase:
-        return UpdateCourseUseCase(uow=uow)
+        return UpdateCourseUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_cover_image_policy(self) -> CoverImagePolicy:
@@ -332,26 +363,30 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
         image_storage: ImageStorage,
         cover_image_policy: CoverImagePolicy,
+        content_cache: ContentCache,
     ) -> UploadCourseCoverUseCase:
         return UploadCourseCoverUseCase(
             uow=uow,
             image_storage=image_storage,
             cover_image_policy=cover_image_policy,
+            content_cache=content_cache,
         )
 
     @provide
     def get_remove_course_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> RemoveCourseUseCase:
-        return RemoveCourseUseCase(uow=uow)
+        return RemoveCourseUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_publish_course_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> PublishCourseUseCase:
-        return PublishCourseUseCase(uow=uow)
+        return PublishCourseUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_get_course_publication_readiness_use_case(
@@ -364,113 +399,129 @@ class ApiProvider(Provider):
     def get_archive_course_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> ArchiveCourseUseCase:
-        return ArchiveCourseUseCase(uow=uow)
+        return ArchiveCourseUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_create_module_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> CreateModuleUseCase:
-        return CreateModuleUseCase(uow=uow)
+        return CreateModuleUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_update_module_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> UpdateModuleUseCase:
-        return UpdateModuleUseCase(uow=uow)
+        return UpdateModuleUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_remove_module_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> RemoveModuleUseCase:
-        return RemoveModuleUseCase(uow=uow)
+        return RemoveModuleUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_create_section_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> CreateSectionUseCase:
-        return CreateSectionUseCase(uow=uow)
+        return CreateSectionUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_update_section_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> UpdateSectionUseCase:
-        return UpdateSectionUseCase(uow=uow)
+        return UpdateSectionUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_remove_section_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> RemoveSectionUseCase:
-        return RemoveSectionUseCase(uow=uow)
+        return RemoveSectionUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_create_lecture_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> CreateLectureUseCase:
-        return CreateLectureUseCase(uow=uow)
+        return CreateLectureUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_update_lecture_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> UpdateLectureUseCase:
-        return UpdateLectureUseCase(uow=uow)
+        return UpdateLectureUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_remove_lecture_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> RemoveLectureUseCase:
-        return RemoveLectureUseCase(uow=uow)
+        return RemoveLectureUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_create_task_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> CreateTaskUseCase:
-        return CreateTaskUseCase(uow=uow)
+        return CreateTaskUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_update_task_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> UpdateTaskUseCase:
-        return UpdateTaskUseCase(uow=uow)
+        return UpdateTaskUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_remove_task_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> RemoveTaskUseCase:
-        return RemoveTaskUseCase(uow=uow)
+        return RemoveTaskUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_create_code_task_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> CreateCodeTaskUseCase:
-        return CreateCodeTaskUseCase(uow=uow)
+        return CreateCodeTaskUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_update_code_task_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> UpdateCodeTaskUseCase:
-        return UpdateCodeTaskUseCase(uow=uow)
+        return UpdateCodeTaskUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_remove_code_task_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> RemoveCodeTaskUseCase:
-        return RemoveCodeTaskUseCase(uow=uow)
+        return RemoveCodeTaskUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_create_test_case_use_case(
@@ -497,8 +548,12 @@ class ApiProvider(Provider):
     def get_submit_task_answer_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        analytics_cache: StudentAnalyticsCache,
     ) -> SubmitTaskAnswerUseCase:
-        return SubmitTaskAnswerUseCase(uow=uow)
+        return SubmitTaskAnswerUseCase(
+            uow=uow,
+            analytics_cache=analytics_cache,
+        )
 
     @provide
     def get_submit_code_submission_use_case(
@@ -529,29 +584,33 @@ class ApiProvider(Provider):
     def get_create_question_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> CreateQuestionUseCase:
-        return CreateQuestionUseCase(uow=uow)
+        return CreateQuestionUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_update_question_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> UpdateQuestionUseCase:
-        return UpdateQuestionUseCase(uow=uow)
+        return UpdateQuestionUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_create_answer_option_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> CreateAnswerOptionUseCase:
-        return CreateAnswerOptionUseCase(uow=uow)
+        return CreateAnswerOptionUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_update_answer_option_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> UpdateAnswerOptionUseCase:
-        return UpdateAnswerOptionUseCase(uow=uow)
+        return UpdateAnswerOptionUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_start_question_attempt_use_case(
@@ -564,8 +623,12 @@ class ApiProvider(Provider):
     def get_submit_question_answer_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        analytics_cache: StudentAnalyticsCache,
     ) -> SubmitQuestionAnswerUseCase:
-        return SubmitQuestionAnswerUseCase(uow=uow)
+        return SubmitQuestionAnswerUseCase(
+            uow=uow,
+            analytics_cache=analytics_cache,
+        )
 
     @provide
     def get_get_question_attempt_result_use_case(
@@ -627,8 +690,12 @@ class ApiProvider(Provider):
     def get_get_my_course_analytics_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        analytics_cache: StudentAnalyticsCache,
     ) -> GetMyCourseAnalyticsUseCase:
-        return GetMyCourseAnalyticsUseCase(uow=uow)
+        return GetMyCourseAnalyticsUseCase(
+            uow=uow,
+            analytics_cache=analytics_cache,
+        )
 
     @provide
     def get_get_my_activities_use_case(

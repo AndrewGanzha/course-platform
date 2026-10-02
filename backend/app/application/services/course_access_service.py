@@ -85,3 +85,21 @@ class CourseAccessService:
             return question
 
         raise PermissionDeniedError("User cannot view question results.")
+
+    async def resolve_course_id_for_section(self, section_id: UUID) -> UUID | None:
+        section = await self.uow.sections.get_by_id(section_id)
+        if section is None:
+            return None
+
+        module = await self.uow.modules.get_by_id(section.module_id)
+        if module is None:
+            return None
+
+        return module.course_id
+
+    async def resolve_course_id_for_module(self, module_id: UUID) -> UUID | None:
+        module = await self.uow.modules.get_by_id(module_id)
+        if module is None:
+            return None
+
+        return module.course_id
