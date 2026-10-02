@@ -57,6 +57,10 @@ class Settings(BaseSettings):
         default="code-submissions",
         validation_alias="SUBMISSION_QUEUE_NAME",
     )
+    content_cache_ttl_seconds: int = Field(
+        default=300,
+        validation_alias="CONTENT_CACHE_TTL_SECONDS",
+    )
     media_root: str = Field(default="./media", validation_alias="MEDIA_ROOT")
     media_url_prefix: str = Field(
         default="/media",
