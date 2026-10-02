@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, File, Response, UploadFile, status
+from fastapi import APIRouter, File, Query, Response, UploadFile, status
 
 from app.application.use_cases.courses.archive_course import (
     ArchiveCourseCommand,
@@ -56,6 +56,10 @@ from app.application.use_cases.modules.update_module import (
     UpdateModuleCommand,
     UpdateModuleUseCase,
 )
+from app.application.use_cases.profile.get_platform_activities import (
+    GetPlatformActivitiesQuery,
+    GetPlatformActivitiesUseCase,
+)
 from app.application.use_cases.sections.create_section import (
     CreateSectionCommand,
     CreateSectionUseCase,
@@ -68,6 +72,7 @@ from app.application.use_cases.sections.update_section import (
     UpdateSectionCommand,
     UpdateSectionUseCase,
 )
+from app.domain.entities.student_activity import StudentActivityType
 from app.domain.entities.user import User
 from app.presentation.api.schemas import (
     CoursePublicationErrorResponse,
@@ -81,6 +86,7 @@ from app.presentation.api.schemas import (
     LectureResponse,
     ModuleResponse,
     SectionResponse,
+    StudentActivityPageResponse,
     UpdateCourseRequest,
     UpdateLectureRequest,
     UpdateModuleRequest,
@@ -618,3 +624,44 @@ async def remove_lecture(
 ) -> Response:
     await use_case.execute(RemoveLectureCommand(actor=actor, lecture_id=lecture_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get(
+    "/activities",
+    response_model=StudentActivityPageResponse,
+    summary="Get platform activity history",
+    description=(
+        "Returns the platform-wide student activity history in reverse "
+        "chronological order. Available only to administrators."
+    ),
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "Admin access is required.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_platform_activities(
+    actor: FromDishka[User],
+    use_case: FromDishka[GetPlatformActivitiesUseCase],
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    student_id: UUID | None = Query(default=None),
+    course_id: UUID | None = Query(default=None),
+    activity_type: StudentActivityType | None = Query(default=None),
+) -> StudentActivityPageResponse:
+    result = await use_case.execute(
+        GetPlatformActivitiesQuery(
+            actor=actor,
+            limit=limit,
+            offset=offset,
+            student_id=student_id,
+            course_id=course_id,
+            activity_type=activity_type,
+        )
+    )
+    return StudentActivityPageResponse.model_validate(result)

@@ -4,6 +4,9 @@ from app.application.use_cases.code_submissions.complete_code_submission import 
 from app.application.use_cases.code_submissions.process_code_submission import (
     ProcessCodeSubmissionUseCase,
 )
+from app.bootstrap.build_student_analytics_cache import (
+    build_student_analytics_cache,
+)
 from app.bootstrap.build_submission_queue import build_submission_queue
 from app.domain.entities.code_task import CodeTaskLanguage
 from app.infrastructure.database.database import SessionFactory
@@ -47,7 +50,10 @@ def build_code_submission_worker() -> CodeSubmissionWorker:
         runner=runner,
         profile_registry=profile_registry,
     )
-    complete_use_case = CompleteCodeSubmissionUseCase(uow=uow)
+    complete_use_case = CompleteCodeSubmissionUseCase(
+        uow=uow,
+        analytics_cache=build_student_analytics_cache(),
+    )
     process_use_case = ProcessCodeSubmissionUseCase(
         uow=uow,
         execution_gateway=execution_gateway,

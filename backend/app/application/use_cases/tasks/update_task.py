@@ -5,6 +5,7 @@ from app.application.exceptions import (
     TaskAlreadyUsedError,
     TaskNotFoundError,
 )
+from app.application.interfaces.content_cache import ContentCache
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.application.services.course_access_service import CourseAccessService
 from app.domain.entities.task import Task, TaskCheckType
@@ -27,11 +28,17 @@ class UpdateTaskCommand:
 
 
 class UpdateTaskUseCase:
-    def __init__(self, uow: UnitOfWork) -> None:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        content_cache: ContentCache | None = None,
+    ) -> None:
         self.uow = uow
         self.course_access_service = CourseAccessService(uow)
+        self.content_cache = content_cache
 
     async def execute(self, command: UpdateTaskCommand) -> Task:
+        course_id: UUID | None = None
         async with self.uow:
             task = await self.uow.tasks.get_by_id(command.task_id)
             if task is None:
@@ -82,5 +89,11 @@ class UpdateTaskUseCase:
 
             await self.uow.tasks.update(task)
             await self.uow.commit()
+            course_id = await self.course_access_service.resolve_course_id_for_section(
+                task.section_id
+            )
 
-            return task
+        if self.content_cache is not None and course_id is not None:
+            await self.content_cache.invalidate_course(course_id)
+
+        return task

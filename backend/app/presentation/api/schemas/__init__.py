@@ -18,6 +18,7 @@ from app.presentation.api.schemas.catalog import (
     CourseCatalogItemResponse,
     CourseCatalogModulePreviewResponse,
     CourseCatalogSectionPreviewResponse,
+    CourseRatingSummaryResponse,
 )
 from app.presentation.api.schemas.code_submissions import (
     CodeSubmissionResponse,
@@ -46,11 +47,20 @@ from app.presentation.api.schemas.content import (
     TaskDetailsResponse,
     TaskStructureResponse,
 )
+from app.presentation.api.schemas.course_reviews import (
+    CourseReviewResponse,
+    UpsertCourseReviewRequest,
+)
 from app.presentation.api.schemas.courses import (
     CreateCourseRequest,
     UpdateCourseRequest,
 )
 from app.presentation.api.schemas.errors import ErrorResponse
+from app.presentation.api.schemas.lecture_comments import (
+    CreateLectureCommentRequest,
+    LectureCommentResponse,
+    UpdateLectureCommentRequest,
+)
 from app.presentation.api.schemas.lectures import (
     CreateLectureRequest,
     UpdateLectureRequest,
@@ -81,6 +91,10 @@ from app.presentation.api.schemas.sections import (
     CreateSectionRequest,
     SectionResponse,
     UpdateSectionRequest,
+)
+from app.presentation.api.schemas.student_activities import (
+    StudentActivityPageResponse,
+    StudentActivityResponse,
 )
 from app.presentation.api.schemas.student_analytics import (
     StudentCourseAnalyticsResponse,
@@ -113,6 +127,9 @@ __all__ = [
     "CourseCatalogItemResponse",
     "CourseCatalogModulePreviewResponse",
     "CourseCatalogSectionPreviewResponse",
+    "CourseRatingSummaryResponse",
+    "CourseReviewResponse",
+    "UpsertCourseReviewRequest",
     "CourseListItemResponse",
     "CourseResponse",
     "CoursePublicationIssueResponse",
@@ -136,6 +153,9 @@ __all__ = [
     "SectionResponse",
     "CreateLectureRequest",
     "UpdateLectureRequest",
+    "CreateLectureCommentRequest",
+    "UpdateLectureCommentRequest",
+    "LectureCommentResponse",
     "ErrorResponse",
     "RegisterUserRequest",
     "RegisteredUserResponse",
@@ -171,6 +191,8 @@ __all__ = [
     "StudentWeakQuestionResponse",
     "StudentWeakTaskResponse",
     "StudentWeakCodeTaskResponse",
+    "StudentActivityPageResponse",
+    "StudentActivityResponse",
     "AuthorCourseAnalyticsResponse",
     "AuthorModuleAnalyticsResponse",
     "DifficultQuestionAnalyticsResponse",

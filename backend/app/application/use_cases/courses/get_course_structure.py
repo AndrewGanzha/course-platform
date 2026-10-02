@@ -10,6 +10,7 @@ from app.application.dto.course_structure import (
     TaskStructureDTO,
 )
 from app.application.exceptions import CourseNotFoundError
+from app.application.interfaces.content_cache import ContentCache
 from app.application.interfaces.repositories.code_task_repository import (
     CodeTaskRepository,
 )
@@ -40,6 +41,7 @@ class GetCourseStructureUseCase:
         task_repository: TaskRepository,
         code_task_repository: CodeTaskRepository,
         access_service: CourseContentAccessService,
+        content_cache: ContentCache | None = None,
     ) -> None:
         self.course_repository = course_repository
         self.module_repository = module_repository
@@ -48,6 +50,7 @@ class GetCourseStructureUseCase:
         self.task_repository = task_repository
         self.code_task_repository = code_task_repository
         self.access_service = access_service
+        self.content_cache = content_cache
 
     async def execute(self, query: GetCourseStructureQuery) -> CourseStructureDTO:
         course = await self.course_repository.get_by_id(query.course_id)
@@ -60,6 +63,17 @@ class GetCourseStructureUseCase:
         )
         if not can_view:
             raise CourseNotFoundError("Course not found.")
+
+        can_use_public_cache = (
+            query.actor is None
+            and course.is_publicly_visible()
+            and self.content_cache is not None
+        )
+
+        if can_use_public_cache:
+            cached = await self.content_cache.get_course_structure(course.id)
+            if cached is not None:
+                return cached
 
         modules = await self.module_repository.get_by_ids(course.module_ids)
         module_dtos: list[ModuleStructureDTO] = []
@@ -128,7 +142,7 @@ class GetCourseStructureUseCase:
                 )
             )
 
-        return CourseStructureDTO(
+        result = CourseStructureDTO(
             id=course.id,
             title=course.title,
             description=course.description,
@@ -139,3 +153,8 @@ class GetCourseStructureUseCase:
             tag_names=list(course.tag_names),
             modules=module_dtos,
         )
+
+        if can_use_public_cache:
+            await self.content_cache.set_course_structure(course.id, result)
+
+        return result

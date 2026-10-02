@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.database.models.base import Base
@@ -8,6 +8,13 @@ from app.infrastructure.database.models.base import Base
 
 class CodeSubmissionModel(Base):
     __tablename__ = "code_submissions"
+    __table_args__ = (
+        Index(
+            "ix_code_submissions_task_number",
+            "code_task_id",
+            "attempt_number",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     code_task_id: Mapped[str] = mapped_column(

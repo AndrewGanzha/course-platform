@@ -9,6 +9,9 @@ from app.application.dto.student_course_analytics import (
     StudentWeakTaskDTO,
 )
 from app.application.exceptions import CourseNotFoundError, PermissionDeniedError
+from app.application.interfaces.student_analytics_cache import (
+    StudentAnalyticsCache,
+)
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.domain.entities.user import User
 
@@ -20,8 +23,13 @@ class GetMyCourseAnalyticsQuery:
 
 
 class GetMyCourseAnalyticsUseCase:
-    def __init__(self, uow: UnitOfWork) -> None:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        analytics_cache: StudentAnalyticsCache | None = None,
+    ) -> None:
         self.uow = uow
+        self.analytics_cache = analytics_cache
 
     async def execute(
         self, query: GetMyCourseAnalyticsQuery
@@ -29,6 +37,28 @@ class GetMyCourseAnalyticsUseCase:
         if not query.actor.can_view_own_learning_results():
             raise PermissionDeniedError("User cannot view own learning analytics.")
 
+        if self.analytics_cache is not None:
+            cached = await self.analytics_cache.get(
+                student_id=query.actor.id,
+                course_id=query.course_id,
+            )
+            if cached is not None:
+                return cached
+
+        result = await self._build_analytics(query)
+
+        if self.analytics_cache is not None:
+            await self.analytics_cache.set(
+                student_id=query.actor.id,
+                course_id=query.course_id,
+                value=result,
+            )
+
+        return result
+
+    async def _build_analytics(
+        self, query: GetMyCourseAnalyticsQuery
+    ) -> StudentCourseAnalyticsDTO:
         async with self.uow:
             course = await self.uow.courses.get_by_id(query.course_id)
             if course is None:

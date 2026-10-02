@@ -3,8 +3,13 @@ from uuid import UUID, uuid4
 
 from app.application.dto.course_reviews import CourseReviewDTO
 from app.application.exceptions import CourseNotFoundError, PermissionDeniedError
+from app.application.interfaces.content_cache import ContentCache
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.domain.entities.course_review import CourseReview
+from app.domain.entities.student_activity import (
+    StudentActivity,
+    StudentActivityType,
+)
 from app.domain.entities.user import User
 
 
@@ -17,8 +22,13 @@ class UpsertCourseReviewCommand:
 
 
 class UpsertCourseReviewUseCase:
-    def __init__(self, uow: UnitOfWork) -> None:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        content_cache: ContentCache | None = None,
+    ) -> None:
         self.uow = uow
+        self.content_cache = content_cache
 
     async def execute(self, command: UpsertCourseReviewCommand) -> CourseReviewDTO:
         if not command.actor.is_student():
@@ -64,11 +74,29 @@ class UpsertCourseReviewUseCase:
                     text=command.text,
                 )
                 await self.uow.course_reviews.add(review)
+                activity_type = StudentActivityType.COURSE_REVIEW_CREATED
             else:
                 review.update(rating=command.rating, text=command.text)
                 await self.uow.course_reviews.update(review)
+                activity_type = StudentActivityType.COURSE_REVIEW_UPDATED
+
+            await self.uow.student_activities.add(
+                StudentActivity(
+                    id=uuid4(),
+                    student_id=command.actor.id,
+                    course_id=course.id,
+                    activity_type=activity_type,
+                    entity_id=review.id,
+                    title=course.title,
+                    details={"rating": review.rating},
+                )
+            )
 
             await self.uow.commit()
+
+            if self.content_cache is not None:
+                await self.content_cache.invalidate_course(course.id)
+
             return CourseReviewDTO(
                 id=review.id,
                 course_id=review.course_id,

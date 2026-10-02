@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database.models.base import Base
@@ -6,6 +6,13 @@ from app.infrastructure.database.models.base import Base
 
 class SectionModel(Base):
     __tablename__ = "sections"
+    __table_args__ = (
+        Index(
+            "ix_sections_module_position",
+            "module_id",
+            "position",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     module_id: Mapped[str] = mapped_column(ForeignKey("modules.id", ondelete="CASCADE"))

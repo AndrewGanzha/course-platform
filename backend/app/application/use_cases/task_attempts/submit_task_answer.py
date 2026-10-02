@@ -8,9 +8,16 @@ from app.application.exceptions import (
     TaskNotFoundError,
 )
 from app.application.interfaces.services.task_checker import TaskChecker
+from app.application.interfaces.student_analytics_cache import (
+    StudentAnalyticsCache,
+)
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.application.services.simple_task_checker import SimpleTaskChecker
 from app.domain.entities.progress import Progress
+from app.domain.entities.student_activity import (
+    StudentActivity,
+    StudentActivityType,
+)
 from app.domain.entities.task_attempt import TaskAttempt
 from app.domain.entities.user import User
 
@@ -27,9 +34,11 @@ class SubmitTaskAnswerUseCase:
         self,
         uow: UnitOfWork,
         task_checker: TaskChecker | None = None,
+        analytics_cache: StudentAnalyticsCache | None = None,
     ) -> None:
         self.uow = uow
         self.task_checker = task_checker or SimpleTaskChecker()
+        self.analytics_cache = analytics_cache
 
     async def execute(self, command: SubmitTaskAnswerCommand) -> TaskAttempt:
         if not command.actor.can_submit_task_solutions():
@@ -67,6 +76,7 @@ class SubmitTaskAnswerUseCase:
 
             await self.uow.task_attempts.add(attempt)
 
+            affected_course_id = None
             if attempt.is_correct():
                 section = await self.uow.sections.get_by_id(task.section_id)
                 if section is None:
@@ -76,6 +86,7 @@ class SubmitTaskAnswerUseCase:
                 if module is None:
                     raise ModuleNotFoundError("Module not found.")
 
+                affected_course_id = module.course_id
                 progress = await self.uow.progress.get_by_student_and_course(
                     student_id=command.actor.id,
                     course_id=module.course_id,
@@ -91,13 +102,54 @@ class SubmitTaskAnswerUseCase:
 
                 progress_changed = progress.apply_correct_task_attempt(attempt)
                 if progress_changed:
-                    progress.sync_section_completion(section)
-                    progress.sync_module_completion(module)
+                    section_completed = progress.sync_section_completion(section)
+                    module_completed = progress.sync_module_completion(module)
 
                     if progress_is_new:
                         await self.uow.progress.add(progress)
                     else:
                         await self.uow.progress.update(progress)
 
+                    await self.uow.student_activities.add(
+                        StudentActivity(
+                            id=uuid4(),
+                            student_id=command.actor.id,
+                            course_id=module.course_id,
+                            activity_type=StudentActivityType.TASK_COMPLETED,
+                            entity_id=task.id,
+                            title=task.title,
+                            details={"awarded_points": attempt.awarded_points},
+                        )
+                    )
+
+                    if section_completed:
+                        await self.uow.student_activities.add(
+                            StudentActivity(
+                                id=uuid4(),
+                                student_id=command.actor.id,
+                                course_id=module.course_id,
+                                activity_type=StudentActivityType.SECTION_COMPLETED,
+                                entity_id=section.id,
+                                title=section.title,
+                            )
+                        )
+
+                    if module_completed:
+                        await self.uow.student_activities.add(
+                            StudentActivity(
+                                id=uuid4(),
+                                student_id=command.actor.id,
+                                course_id=module.course_id,
+                                activity_type=StudentActivityType.MODULE_COMPLETED,
+                                entity_id=module.id,
+                                title=module.title,
+                            )
+                        )
+
             await self.uow.commit()
+            if self.analytics_cache is not None and affected_course_id is not None:
+                await self.analytics_cache.invalidate_student_course(
+                    student_id=command.actor.id,
+                    course_id=affected_course_id,
+                )
             return attempt

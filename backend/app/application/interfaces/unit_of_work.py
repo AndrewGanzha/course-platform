@@ -4,14 +4,17 @@ from app.application.interfaces.repositories import (
     AnswerOptionRepository,
     CodeSubmissionRepository,
     CodeTaskRepository,
+    CourseCatalogMetricsRepository,
     CourseRepository,
     CourseReviewRepository,
+    LectureCommentRepository,
     LectureRepository,
     ModuleRepository,
     ProgressRepository,
     QuestionAttemptRepository,
     QuestionRepository,
     SectionRepository,
+    StudentActivityRepository,
     TaskAttemptRepository,
     TaskRepository,
     TestCaseRepository,
@@ -35,6 +38,9 @@ class UnitOfWork(ABC):
     test_cases: TestCaseRepository
     code_submissions: CodeSubmissionRepository
     course_reviews: CourseReviewRepository
+    lecture_comments: LectureCommentRepository
+    student_activities: StudentActivityRepository
+    course_catalog_metrics: CourseCatalogMetricsRepository
 
     @abstractmethod
     async def __aenter__(self) -> "UnitOfWork":

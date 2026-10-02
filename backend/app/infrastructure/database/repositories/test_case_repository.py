@@ -36,8 +36,10 @@ class SqlAlchemyTestCaseRepository(TestCaseRepository):
         await self.session.flush()
 
     async def list_by_code_task_id(self, code_task_id: UUID) -> list[TestCase]:
-        stmt = select(TestCaseModel).where(
-            TestCaseModel.code_task_id == str(code_task_id)
+        stmt = (
+            select(TestCaseModel)
+            .where(TestCaseModel.code_task_id == str(code_task_id))
+            .order_by(TestCaseModel.position)
         )
         result = await self.session.execute(stmt)
         return [TestCaseMapper.to_domain(model) for model in result.scalars().all()]

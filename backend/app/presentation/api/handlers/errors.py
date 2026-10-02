@@ -9,6 +9,7 @@ from app.application.exceptions import (
     CourseNotFoundError,
     CoursePublicationNotReadyError,
     InvalidCoverImageError,
+    LectureCommentNotFoundError,
     LectureNotFoundError,
     ModuleNotFoundError,
     QuestionAttemptNotFoundError,
@@ -55,6 +56,9 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(ModuleNotFoundError, module_not_found_handler)
     app.add_exception_handler(SectionNotFoundError, section_not_found_handler)
     app.add_exception_handler(LectureNotFoundError, lecture_not_found_handler)
+    app.add_exception_handler(
+        LectureCommentNotFoundError, lecture_comment_not_found_handler
+    )
     app.add_exception_handler(QuestionNotFoundError, question_not_found_handler)
     app.add_exception_handler(
         AnswerOptionNotFoundError, answer_option_not_found_handler
@@ -148,6 +152,17 @@ async def section_not_found_handler(request: Request, exc: Exception) -> JSONRes
 async def lecture_not_found_handler(request: Request, exc: Exception) -> JSONResponse:
     return build_error_response(
         error="lecture_not_found",
+        message=str(exc),
+        status_code=status.HTTP_404_NOT_FOUND,
+    )
+
+
+async def lecture_comment_not_found_handler(
+    request: Request,
+    exc: Exception,
+) -> JSONResponse:
+    return build_error_response(
+        error="lecture_comment_not_found",
         message=str(exc),
         status_code=status.HTTP_404_NOT_FOUND,
     )

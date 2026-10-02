@@ -16,6 +16,13 @@ class CourseCatalogCountersResponse(BaseModel):
     code_task_count: int
 
 
+class CourseRatingSummaryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    average_rating: float
+    reviews_count: int
+
+
 class CourseCatalogItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -27,6 +34,7 @@ class CourseCatalogItemResponse(BaseModel):
     tag_names: list[str]
     status: CourseStatus
     counters: CourseCatalogCountersResponse
+    rating: CourseRatingSummaryResponse
 
 
 class CourseCatalogSectionPreviewResponse(BaseModel):
@@ -59,4 +67,5 @@ class CourseCatalogCardResponse(BaseModel):
     tag_names: list[str]
     status: CourseStatus
     counters: CourseCatalogCountersResponse
+    rating: CourseRatingSummaryResponse
     modules: list[CourseCatalogModulePreviewResponse]

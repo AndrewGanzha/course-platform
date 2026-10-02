@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 from app.application.exceptions import CourseNotFoundError, PermissionDeniedError
+from app.application.interfaces.content_cache import ContentCache
 from app.application.interfaces.storage.image_storage import ImageStorage
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.application.services.cover_image_policy import CoverImagePolicy
@@ -24,10 +25,12 @@ class UploadCourseCoverUseCase:
         uow: UnitOfWork,
         image_storage: ImageStorage,
         cover_image_policy: CoverImagePolicy,
+        content_cache: ContentCache | None = None,
     ) -> None:
         self.uow = uow
         self.image_storage = image_storage
         self.cover_image_policy = cover_image_policy
+        self.content_cache = content_cache
 
     async def execute(self, command: UploadCourseCoverCommand) -> Course:
         async with self.uow:
@@ -54,4 +57,8 @@ class UploadCourseCoverUseCase:
             course.change_cover_image(cover_image_url)
             await self.uow.courses.update(course)
             await self.uow.commit()
-            return course
+
+        if self.content_cache is not None:
+            await self.content_cache.invalidate_course(command.course_id)
+
+        return course

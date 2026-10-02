@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -9,6 +9,20 @@ from app.infrastructure.database.models.base import Base
 
 class QuestionAttemptModel(Base):
     __tablename__ = "question_attempts"
+    __table_args__ = (
+        Index(
+            "ix_question_attempts_student_question_number",
+            "student_id",
+            "question_id",
+            "attempt_number",
+        ),
+        Index(
+            "ix_question_attempts_question_student_number",
+            "question_id",
+            "student_id",
+            "attempt_number",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     question_id: Mapped[str] = mapped_column(

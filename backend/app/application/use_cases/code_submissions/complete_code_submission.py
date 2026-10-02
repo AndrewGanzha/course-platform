@@ -7,9 +7,16 @@ from app.application.exceptions import (
     ModuleNotFoundError,
     SectionNotFoundError,
 )
+from app.application.interfaces.student_analytics_cache import (
+    StudentAnalyticsCache,
+)
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.domain.entities.execution_result import ExecutionResult, ExecutionStatus
 from app.domain.entities.progress import Progress
+from app.domain.entities.student_activity import (
+    StudentActivity,
+    StudentActivityType,
+)
 
 
 @dataclass(slots=True)
@@ -25,8 +32,13 @@ class CompleteCodeSubmissionCommand:
 
 
 class CompleteCodeSubmissionUseCase:
-    def __init__(self, uow: UnitOfWork) -> None:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        analytics_cache: StudentAnalyticsCache | None = None,
+    ) -> None:
         self.uow = uow
+        self.analytics_cache = analytics_cache
 
     async def execute(self, command: CompleteCodeSubmissionCommand):
         async with self.uow:
@@ -53,6 +65,7 @@ class CompleteCodeSubmissionUseCase:
             submission.apply_execution_result(result)
             await self.uow.code_submissions.update(submission)
 
+            affected_course_id = None
             if result.status.value == "passed":
                 code_task = await self.uow.code_tasks.get_by_id(submission.code_task_id)
                 if code_task is None:
@@ -66,6 +79,7 @@ class CompleteCodeSubmissionUseCase:
                 if module is None:
                     raise ModuleNotFoundError("Module not found.")
 
+                affected_course_id = module.course_id
                 progress = await self.uow.progress.get_by_student_and_course(
                     student_id=submission.student_id,
                     course_id=module.course_id,
@@ -78,10 +92,54 @@ class CompleteCodeSubmissionUseCase:
                     )
                     await self.uow.progress.add(progress)
 
-                progress.complete_code_task(code_task.id, code_task.reward_points)
-                progress.sync_section_completion(section)
-                progress.sync_module_completion(module)
+                code_task_completed = progress.complete_code_task(
+                    code_task.id, code_task.reward_points
+                )
+                section_completed = progress.sync_section_completion(section)
+                module_completed = progress.sync_module_completion(module)
                 await self.uow.progress.update(progress)
 
+                if code_task_completed:
+                    await self.uow.student_activities.add(
+                        StudentActivity(
+                            id=uuid4(),
+                            student_id=submission.student_id,
+                            course_id=module.course_id,
+                            activity_type=(StudentActivityType.CODE_TASK_COMPLETED),
+                            entity_id=code_task.id,
+                            title=code_task.title,
+                            details={"awarded_points": code_task.reward_points},
+                        )
+                    )
+
+                if section_completed:
+                    await self.uow.student_activities.add(
+                        StudentActivity(
+                            id=uuid4(),
+                            student_id=submission.student_id,
+                            course_id=module.course_id,
+                            activity_type=StudentActivityType.SECTION_COMPLETED,
+                            entity_id=section.id,
+                            title=section.title,
+                        )
+                    )
+
+                if module_completed:
+                    await self.uow.student_activities.add(
+                        StudentActivity(
+                            id=uuid4(),
+                            student_id=submission.student_id,
+                            course_id=module.course_id,
+                            activity_type=StudentActivityType.MODULE_COMPLETED,
+                            entity_id=module.id,
+                            title=module.title,
+                        )
+                    )
+
             await self.uow.commit()
+            if self.analytics_cache is not None and affected_course_id is not None:
+                await self.analytics_cache.invalidate_student_course(
+                    student_id=submission.student_id,
+                    course_id=affected_course_id,
+                )
             return submission

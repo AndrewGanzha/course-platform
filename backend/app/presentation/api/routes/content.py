@@ -1,11 +1,20 @@
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Response, status
 
+from app.application.dto.authenticated_user import AuthenticatedUser
 from app.application.use_cases.code_tasks.get_code_task import (
     GetCodeTaskQuery,
     GetCodeTaskUseCase,
+)
+from app.application.use_cases.course_reviews.get_course_reviews import (
+    GetCourseReviewsQuery,
+    GetCourseReviewsUseCase,
+)
+from app.application.use_cases.course_reviews.upsert_course_review import (
+    UpsertCourseReviewCommand,
+    UpsertCourseReviewUseCase,
 )
 from app.application.use_cases.courses.get_course import (
     GetCourseQuery,
@@ -18,6 +27,22 @@ from app.application.use_cases.courses.get_course_structure import (
 from app.application.use_cases.courses.get_courses import (
     GetCoursesQuery,
     GetCoursesUseCase,
+)
+from app.application.use_cases.lecture_comments.create_lecture_comment import (
+    CreateLectureCommentCommand,
+    CreateLectureCommentUseCase,
+)
+from app.application.use_cases.lecture_comments.delete_lecture_comment import (
+    DeleteLectureCommentCommand,
+    DeleteLectureCommentUseCase,
+)
+from app.application.use_cases.lecture_comments.get_lecture_comments import (
+    GetLectureCommentsQuery,
+    GetLectureCommentsUseCase,
+)
+from app.application.use_cases.lecture_comments.update_lecture_comment import (
+    UpdateLectureCommentCommand,
+    UpdateLectureCommentUseCase,
 )
 from app.application.use_cases.lectures.get_lecture import (
     GetLectureQuery,
@@ -34,10 +59,15 @@ from app.presentation.api.schemas import (
     CodeTaskDetailsResponse,
     CourseCatalogCardResponse,
     CourseCatalogItemResponse,
+    CourseReviewResponse,
     CourseStructureResponse,
+    CreateLectureCommentRequest,
+    LectureCommentResponse,
     LectureResponse,
     QuestionDetailsResponse,
     TaskDetailsResponse,
+    UpdateLectureCommentRequest,
+    UpsertCourseReviewRequest,
 )
 from app.presentation.api.schemas.errors import ErrorResponse
 
@@ -205,3 +235,205 @@ async def get_code_task(
         GetCodeTaskQuery(code_task_id=code_task_id, actor=current_user)
     )
     return CodeTaskDetailsResponse.model_validate(result)
+
+
+@router.get(
+    "/courses/{course_id}/reviews",
+    response_model=list[CourseReviewResponse],
+    summary="Get course reviews",
+    description="Returns public reviews for a published course.",
+    responses={
+        404: {
+            "description": "Course was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_course_reviews(
+    course_id: UUID,
+    use_case: FromDishka[GetCourseReviewsUseCase],
+) -> list[CourseReviewResponse]:
+    result = await use_case.execute(GetCourseReviewsQuery(course_id=course_id))
+    return [CourseReviewResponse.model_validate(review) for review in result]
+
+
+@router.put(
+    "/courses/{course_id}/reviews/me",
+    response_model=CourseReviewResponse,
+    summary="Create or update my course review",
+    description=(
+        "Creates or updates the current student review after at least "
+        "80% of the course sections have been completed."
+    ),
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": (
+                "Only a student who completed at least 80% of the course "
+                "can create or update a review."
+            ),
+            "model": ErrorResponse,
+        },
+        404: {
+            "description": "Course was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def upsert_my_course_review(
+    course_id: UUID,
+    request: UpsertCourseReviewRequest,
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[UpsertCourseReviewUseCase],
+) -> CourseReviewResponse:
+    result = await use_case.execute(
+        UpsertCourseReviewCommand(
+            actor=actor,
+            course_id=course_id,
+            rating=request.rating,
+            text=request.text,
+        )
+    )
+    return CourseReviewResponse.model_validate(result)
+
+
+@router.get(
+    "/lectures/{lecture_id}/comments",
+    response_model=list[LectureCommentResponse],
+    summary="Get lecture comments",
+    description="Returns discussion comments for a lecture visible to the user.",
+    responses={
+        404: {
+            "description": "Lecture was not found.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "User cannot view comments of this lecture.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_lecture_comments(
+    lecture_id: UUID,
+    current_user: FromDishka[User | None],
+    use_case: FromDishka[GetLectureCommentsUseCase],
+) -> list[LectureCommentResponse]:
+    result = await use_case.execute(
+        GetLectureCommentsQuery(lecture_id=lecture_id, actor=current_user)
+    )
+    return [LectureCommentResponse.model_validate(comment) for comment in result]
+
+
+@router.post(
+    "/lectures/{lecture_id}/comments",
+    response_model=LectureCommentResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create lecture comment",
+    description=(
+        "Creates a comment under a lecture accessible to the current student."
+    ),
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": (
+                "Only a student who can access the lecture can leave a comment."
+            ),
+            "model": ErrorResponse,
+        },
+        404: {
+            "description": "Lecture was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def create_lecture_comment(
+    lecture_id: UUID,
+    request: CreateLectureCommentRequest,
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[CreateLectureCommentUseCase],
+) -> LectureCommentResponse:
+    result = await use_case.execute(
+        CreateLectureCommentCommand(
+            actor=actor,
+            lecture_id=lecture_id,
+            text=request.text,
+        )
+    )
+    return LectureCommentResponse.model_validate(result)
+
+
+@router.patch(
+    "/comments/{comment_id}",
+    response_model=LectureCommentResponse,
+    summary="Update my lecture comment",
+    description="Updates the text of a comment authored by the current user.",
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "Only the comment author can edit this comment.",
+            "model": ErrorResponse,
+        },
+        404: {
+            "description": "Lecture comment was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def update_lecture_comment(
+    comment_id: UUID,
+    request: UpdateLectureCommentRequest,
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[UpdateLectureCommentUseCase],
+) -> LectureCommentResponse:
+    result = await use_case.execute(
+        UpdateLectureCommentCommand(
+            actor=actor,
+            comment_id=comment_id,
+            text=request.text,
+        )
+    )
+    return LectureCommentResponse.model_validate(result)
+
+
+@router.delete(
+    "/comments/{comment_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    summary="Delete lecture comment",
+    description=(
+        "Deletes a comment. Allowed for its author, the author of the "
+        "owning course, or a platform administrator."
+    ),
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "User cannot delete this lecture comment.",
+            "model": ErrorResponse,
+        },
+        404: {
+            "description": "Lecture comment was not found.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def delete_lecture_comment(
+    comment_id: UUID,
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[DeleteLectureCommentUseCase],
+) -> Response:
+    await use_case.execute(
+        DeleteLectureCommentCommand(actor=actor, comment_id=comment_id)
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

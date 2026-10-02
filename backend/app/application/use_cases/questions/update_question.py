@@ -5,6 +5,7 @@ from app.application.exceptions import (
     QuestionAlreadyUsedError,
     QuestionNotFoundError,
 )
+from app.application.interfaces.content_cache import ContentCache
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.application.services.course_access_service import CourseAccessService
 from app.domain.entities.question import Question, QuestionType
@@ -23,11 +24,17 @@ class UpdateQuestionCommand:
 
 
 class UpdateQuestionUseCase:
-    def __init__(self, uow: UnitOfWork) -> None:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        content_cache: ContentCache | None = None,
+    ) -> None:
         self.uow = uow
         self.course_access_service = CourseAccessService(uow)
+        self.content_cache = content_cache
 
     async def execute(self, command: UpdateQuestionCommand) -> Question:
+        course_id: UUID | None = None
         async with self.uow:
             question = await self.uow.questions.get_by_id(command.question_id)
             if question is None:
@@ -55,4 +62,11 @@ class UpdateQuestionUseCase:
             )
             await self.uow.questions.update(question)
             await self.uow.commit()
-            return question
+            course_id = await self.course_access_service.resolve_course_id_for_section(
+                question.section_id
+            )
+
+        if self.content_cache is not None and course_id is not None:
+            await self.content_cache.invalidate_course(course_id)
+
+        return question

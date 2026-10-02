@@ -7,9 +7,15 @@ from app.application.interfaces.repositories.code_submission_repository import (
 from app.application.interfaces.repositories.code_task_repository import (
     CodeTaskRepository,
 )
+from app.application.interfaces.repositories.course_catalog_metrics_repository import (
+    CourseCatalogMetricsRepository,
+)
 from app.application.interfaces.repositories.course_repository import CourseRepository
 from app.application.interfaces.repositories.course_review_repository import (
     CourseReviewRepository,
+)
+from app.application.interfaces.repositories.lecture_comment_repository import (
+    LectureCommentRepository,
 )
 from app.application.interfaces.repositories.lecture_repository import LectureRepository
 from app.application.interfaces.repositories.module_repository import ModuleRepository
@@ -23,6 +29,9 @@ from app.application.interfaces.repositories.question_repository import (
     QuestionRepository,
 )
 from app.application.interfaces.repositories.section_repository import SectionRepository
+from app.application.interfaces.repositories.student_activity_repository import (
+    StudentActivityRepository,
+)
 from app.application.interfaces.repositories.task_attempt_repository import (
     TaskAttemptRepository,
 )
@@ -34,9 +43,11 @@ from app.application.interfaces.repositories.user_repository import UserReposito
 
 __all__ = [
     "CourseRepository",
+    "CourseCatalogMetricsRepository",
     "ModuleRepository",
     "SectionRepository",
     "LectureRepository",
+    "LectureCommentRepository",
     "QuestionRepository",
     "AnswerOptionRepository",
     "UserRepository",
@@ -48,4 +59,5 @@ __all__ = [
     "TestCaseRepository",
     "CodeSubmissionRepository",
     "CourseReviewRepository",
+    "StudentActivityRepository",
 ]
