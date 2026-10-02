@@ -8,6 +8,9 @@ from app.application.exceptions import (
     TaskNotFoundError,
 )
 from app.application.interfaces.services.task_checker import TaskChecker
+from app.application.interfaces.student_analytics_cache import (
+    StudentAnalyticsCache,
+)
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.application.services.simple_task_checker import SimpleTaskChecker
 from app.domain.entities.progress import Progress
@@ -31,9 +34,11 @@ class SubmitTaskAnswerUseCase:
         self,
         uow: UnitOfWork,
         task_checker: TaskChecker | None = None,
+        analytics_cache: StudentAnalyticsCache | None = None,
     ) -> None:
         self.uow = uow
         self.task_checker = task_checker or SimpleTaskChecker()
+        self.analytics_cache = analytics_cache
 
     async def execute(self, command: SubmitTaskAnswerCommand) -> TaskAttempt:
         if not command.actor.can_submit_task_solutions():
@@ -71,6 +76,7 @@ class SubmitTaskAnswerUseCase:
 
             await self.uow.task_attempts.add(attempt)
 
+            affected_course_id = None
             if attempt.is_correct():
                 section = await self.uow.sections.get_by_id(task.section_id)
                 if section is None:
@@ -80,6 +86,7 @@ class SubmitTaskAnswerUseCase:
                 if module is None:
                     raise ModuleNotFoundError("Module not found.")
 
+                affected_course_id = module.course_id
                 progress = await self.uow.progress.get_by_student_and_course(
                     student_id=command.actor.id,
                     course_id=module.course_id,
@@ -140,4 +147,9 @@ class SubmitTaskAnswerUseCase:
                         )
 
             await self.uow.commit()
+            if self.analytics_cache is not None and affected_course_id is not None:
+                await self.analytics_cache.invalidate_student_course(
+                    student_id=command.actor.id,
+                    course_id=affected_course_id,
+                )
             return attempt

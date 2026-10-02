@@ -7,6 +7,9 @@ from app.application.exceptions import (
     QuestionNotFoundError,
     SectionNotFoundError,
 )
+from app.application.interfaces.student_analytics_cache import (
+    StudentAnalyticsCache,
+)
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.domain.entities.progress import Progress
 from app.domain.entities.question_attempt import QuestionAttempt
@@ -25,8 +28,13 @@ class SubmitQuestionAnswerCommand:
 
 
 class SubmitQuestionAnswerUseCase:
-    def __init__(self, uow: UnitOfWork) -> None:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        analytics_cache: StudentAnalyticsCache | None = None,
+    ) -> None:
         self.uow = uow
+        self.analytics_cache = analytics_cache
 
     async def execute(self, command: SubmitQuestionAnswerCommand) -> QuestionAttempt:
         if not command.actor.can_take_learning_activities():
@@ -77,6 +85,7 @@ class SubmitQuestionAnswerUseCase:
 
             await self.uow.question_attempts.add(attempt)
 
+            affected_course_id = None
             if attempt.is_correct():
                 section = await self.uow.sections.get_by_id(question.section_id)
                 if section is None:
@@ -86,6 +95,7 @@ class SubmitQuestionAnswerUseCase:
                 if module is None:
                     raise ModuleNotFoundError("Module not found.")
 
+                affected_course_id = module.course_id
                 progress = await self.uow.progress.get_by_student_and_course(
                     student_id=command.actor.id,
                     course_id=module.course_id,
@@ -146,4 +156,9 @@ class SubmitQuestionAnswerUseCase:
                         )
 
             await self.uow.commit()
+            if self.analytics_cache is not None and affected_course_id is not None:
+                await self.analytics_cache.invalidate_student_course(
+                    student_id=command.actor.id,
+                    course_id=affected_course_id,
+                )
             return attempt

@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import NullPool
 
 import app.presentation.api.dependencies as api_dependencies
+from app.bootstrap.build_submission_queue import get_redis_client
 from app.infrastructure.config import get_settings
 from app.infrastructure.database.models import (
     AnswerOptionModel,
@@ -75,6 +76,11 @@ def session_factory(test_engine):
 
 @pytest_asyncio.fixture(autouse=True)
 async def clear_database(session_factory) -> None:
+    redis_client = get_redis_client()
+    try:
+        await redis_client.flushdb()
+    finally:
+        await redis_client.aclose()
     async with session_factory() as session:
         for model in [
             StudentActivityModel,

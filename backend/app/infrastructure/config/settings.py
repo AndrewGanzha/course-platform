@@ -61,6 +61,10 @@ class Settings(BaseSettings):
         default=300,
         validation_alias="CONTENT_CACHE_TTL_SECONDS",
     )
+    analytics_cache_ttl_seconds: int = Field(
+        default=60,
+        validation_alias="ANALYTICS_CACHE_TTL_SECONDS",
+    )
     media_root: str = Field(default="./media", validation_alias="MEDIA_ROOT")
     media_url_prefix: str = Field(
         default="/media",
