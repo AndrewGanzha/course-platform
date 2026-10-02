@@ -25,6 +25,8 @@ async def test_get_courses_returns_public_catalog(client, seeded_course_tree):
     assert item["counters"]["question_count"] == 0
     assert item["counters"]["task_count"] == 0
     assert item["counters"]["code_task_count"] == 0
+    assert item["rating"]["average_rating"] == seeded_course_tree.course_average_rating
+    assert item["rating"]["reviews_count"] == seeded_course_tree.course_reviews_count
 
 
 @pytest.mark.asyncio
@@ -43,6 +45,10 @@ async def test_get_course_returns_course_card(client, seeded_course_tree):
     assert payload["counters"]["module_count"] == 1
     assert payload["counters"]["section_count"] == 1
     assert payload["counters"]["lecture_count"] == 1
+    assert (
+        payload["rating"]["average_rating"] == seeded_course_tree.course_average_rating
+    )
+    assert payload["rating"]["reviews_count"] == seeded_course_tree.course_reviews_count
     assert len(payload["modules"]) == 1
     assert payload["modules"][0]["title"] == "MVP stage"
     assert len(payload["modules"][0]["sections"]) == 1

@@ -13,6 +13,9 @@ from app.infrastructure.database.repositories.course_repository import (
 from app.infrastructure.database.repositories.course_review_repository import (
     SqlAlchemyCourseReviewRepository,
 )
+from app.infrastructure.database.repositories.lecture_comment_repository import (
+    SqlAlchemyLectureCommentRepository,
+)
 from app.infrastructure.database.repositories.lecture_repository import (
     SqlAlchemyLectureRepository,
 )
@@ -49,6 +52,7 @@ __all__ = [
     "SqlAlchemyModuleRepository",
     "SqlAlchemySectionRepository",
     "SqlAlchemyLectureRepository",
+    "SqlAlchemyLectureCommentRepository",
     "SqlAlchemyUserRepository",
     "SqlAlchemyQuestionRepository",
     "SqlAlchemyAnswerOptionRepository",

@@ -4,6 +4,7 @@ from app.infrastructure.database.models.code_submission_model import CodeSubmiss
 from app.infrastructure.database.models.code_task_model import CodeTaskModel
 from app.infrastructure.database.models.course_model import CourseModel
 from app.infrastructure.database.models.course_review_model import CourseReviewModel
+from app.infrastructure.database.models.lecture_comment_model import LectureCommentModel
 from app.infrastructure.database.models.lecture_model import LectureModel
 from app.infrastructure.database.models.module_model import ModuleModel
 from app.infrastructure.database.models.progress_model import ProgressModel
@@ -23,6 +24,7 @@ __all__ = [
     "ModuleModel",
     "SectionModel",
     "LectureModel",
+    "LectureCommentModel",
     "UserModel",
     "QuestionModel",
     "AnswerOptionModel",

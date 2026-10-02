@@ -23,6 +23,7 @@ from app.application.services.course_rating_read_service import (
     CourseRatingReadService,
 )
 from app.application.services.cover_image_policy import CoverImagePolicy
+from app.application.services.lecture_course_resolver import LectureCourseResolver
 from app.application.use_cases.answer_options.create_answer_option import (
     CreateAnswerOptionUseCase,
 )
@@ -71,6 +72,18 @@ from app.application.use_cases.courses.remove_course import RemoveCourseUseCase
 from app.application.use_cases.courses.update_course import UpdateCourseUseCase
 from app.application.use_cases.courses.upload_course_cover import (
     UploadCourseCoverUseCase,
+)
+from app.application.use_cases.lecture_comments.create_lecture_comment import (
+    CreateLectureCommentUseCase,
+)
+from app.application.use_cases.lecture_comments.delete_lecture_comment import (
+    DeleteLectureCommentUseCase,
+)
+from app.application.use_cases.lecture_comments.get_lecture_comments import (
+    GetLectureCommentsUseCase,
+)
+from app.application.use_cases.lecture_comments.update_lecture_comment import (
+    UpdateLectureCommentUseCase,
 )
 from app.application.use_cases.lectures.create_lecture import CreateLectureUseCase
 from app.application.use_cases.lectures.get_lecture import GetLectureUseCase
@@ -227,6 +240,54 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> UpsertCourseReviewUseCase:
         return UpsertCourseReviewUseCase(uow=uow)
+
+    @provide
+    def get_lecture_course_resolver(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> LectureCourseResolver:
+        return LectureCourseResolver(
+            course_repository=uow.courses,
+            module_repository=uow.modules,
+            section_repository=uow.sections,
+        )
+
+    @provide
+    def provide_get_lecture_comments_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+        access_service: CourseContentAccessService,
+    ) -> GetLectureCommentsUseCase:
+        return GetLectureCommentsUseCase(uow=uow, access_service=access_service)
+
+    @provide
+    def provide_create_lecture_comment_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+        access_service: CourseContentAccessService,
+    ) -> CreateLectureCommentUseCase:
+        return CreateLectureCommentUseCase(
+            uow=uow,
+            access_service=access_service,
+        )
+
+    @provide
+    def provide_update_lecture_comment_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpdateLectureCommentUseCase:
+        return UpdateLectureCommentUseCase(uow=uow)
+
+    @provide
+    def provide_delete_lecture_comment_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+        course_resolver: LectureCourseResolver,
+    ) -> DeleteLectureCommentUseCase:
+        return DeleteLectureCommentUseCase(
+            uow=uow,
+            course_resolver=course_resolver,
+        )
 
     @provide
     def provide_get_course_structure_use_case(

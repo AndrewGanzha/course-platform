@@ -89,3 +89,7 @@ class CoursePublicationNotReadyError(ApplicationError):
     def __init__(self, readiness: CoursePublicationReadinessDTO) -> None:
         super().__init__("Course is not ready for publication.")
         self.readiness = readiness
+
+
+class LectureCommentNotFoundError(ApplicationError):
+    pass

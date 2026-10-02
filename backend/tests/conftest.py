@@ -20,6 +20,8 @@ from app.infrastructure.database.models import (
     CodeSubmissionModel,
     CodeTaskModel,
     CourseModel,
+    CourseReviewModel,
+    LectureCommentModel,
     LectureModel,
     ModuleModel,
     ProgressModel,
@@ -74,6 +76,8 @@ def session_factory(test_engine):
 async def clear_database(session_factory) -> None:
     async with session_factory() as session:
         for model in [
+            CourseReviewModel,
+            LectureCommentModel,
             AnswerOptionModel,
             QuestionAttemptModel,
             ProgressModel,
@@ -165,6 +169,8 @@ async def seeded_course_tree(session_factory, seeded_admin_user):
         course_cover_image_url="https://example.com/fastapi-course-cover.png",
         course_difficulty="intermediate",
         course_tag_names=["fastapi", "backend", "architecture"],
+        course_average_rating=0.0,
+        course_reviews_count=0,
         lecture_content="Lecture content",
     )
 
@@ -317,6 +323,53 @@ async def seeded_interactive_tree(session_factory, seeded_author_user):
         question_id=question_id,
         wrong_option_id=wrong_option_id,
         correct_option_id=correct_option_id,
+    )
+
+
+@pytest_asyncio.fixture
+async def seeded_draft_lecture_tree(session_factory, seeded_author_user):
+    course_id = str(uuid4())
+    module_id = str(uuid4())
+    section_id = str(uuid4())
+    lecture_id = str(uuid4())
+
+    async with session_factory() as session:
+        course = CourseModel(
+            id=course_id,
+            author_id=seeded_author_user.id,
+            title="Draft discussion course",
+            description="Draft course hidden from students.",
+            status="draft",
+        )
+        module = ModuleModel(
+            id=module_id,
+            course_id=course_id,
+            title="Draft module",
+            description="Draft module",
+            position=1,
+        )
+        section = SectionModel(
+            id=section_id,
+            module_id=module_id,
+            title="Draft section",
+            description="Draft section",
+            position=1,
+        )
+        lecture = LectureModel(
+            id=lecture_id,
+            section_id=section_id,
+            title="Draft lecture",
+            content="Draft content",
+            position=1,
+        )
+        session.add_all([course, module, section, lecture])
+        await session.commit()
+
+    return SimpleNamespace(
+        course_id=course_id,
+        module_id=module_id,
+        section_id=section_id,
+        lecture_id=lecture_id,
     )
 
 
@@ -705,4 +758,111 @@ async def seeded_author_analytics_tree(
         question_id=question_id,
         task_id=task_id,
         code_task_id=code_task_id,
+    )
+
+
+@pytest_asyncio.fixture
+async def seeded_review_eligibility(
+    session_factory,
+    seeded_author_user,
+    seeded_student_user,
+):
+    eligible_course_id = str(uuid4())
+    eligible_module_id = str(uuid4())
+    eligible_section_ids = [str(uuid4()) for _ in range(5)]
+
+    ineligible_course_id = str(uuid4())
+    ineligible_module_id = str(uuid4())
+    ineligible_section_ids = [str(uuid4()) for _ in range(5)]
+
+    eligible_course = CourseModel(
+        id=eligible_course_id,
+        author_id=seeded_author_user.id,
+        title="Review eligible course",
+        description="Course completed by exactly eighty percent.",
+        status="published",
+    )
+    eligible_module = ModuleModel(
+        id=eligible_module_id,
+        course_id=eligible_course_id,
+        title="Eligible module",
+        description="Five sections for the boundary test.",
+        position=1,
+    )
+    eligible_sections = [
+        SectionModel(
+            id=section_id,
+            module_id=eligible_module_id,
+            title=f"Eligible section {position}",
+            description="Review eligibility section.",
+            position=position,
+        )
+        for position, section_id in enumerate(eligible_section_ids, start=1)
+    ]
+    eligible_progress = ProgressModel(
+        id=str(uuid4()),
+        student_id=seeded_student_user.id,
+        course_id=eligible_course_id,
+        completed_question_ids=[],
+        completed_task_ids=[],
+        completed_code_task_ids=[],
+        completed_section_ids=eligible_section_ids[:4],
+        completed_module_ids=[],
+        total_points=0,
+    )
+
+    ineligible_course = CourseModel(
+        id=ineligible_course_id,
+        author_id=seeded_author_user.id,
+        title="Review ineligible course",
+        description="Course completed by only sixty percent.",
+        status="published",
+    )
+    ineligible_module = ModuleModel(
+        id=ineligible_module_id,
+        course_id=ineligible_course_id,
+        title="Ineligible module",
+        description="Five sections below the boundary.",
+        position=1,
+    )
+    ineligible_sections = [
+        SectionModel(
+            id=section_id,
+            module_id=ineligible_module_id,
+            title=f"Ineligible section {position}",
+            description="Review eligibility section.",
+            position=position,
+        )
+        for position, section_id in enumerate(ineligible_section_ids, start=1)
+    ]
+    ineligible_progress = ProgressModel(
+        id=str(uuid4()),
+        student_id=seeded_student_user.id,
+        course_id=ineligible_course_id,
+        completed_question_ids=[],
+        completed_task_ids=[],
+        completed_code_task_ids=[],
+        completed_section_ids=ineligible_section_ids[:3],
+        completed_module_ids=[],
+        total_points=0,
+    )
+
+    async with session_factory() as session:
+        session.add_all(
+            [
+                eligible_course,
+                eligible_module,
+                *eligible_sections,
+                eligible_progress,
+                ineligible_course,
+                ineligible_module,
+                *ineligible_sections,
+                ineligible_progress,
+            ]
+        )
+        await session.commit()
+
+    return SimpleNamespace(
+        eligible_course_id=eligible_course_id,
+        ineligible_course_id=ineligible_course_id,
     )

@@ -56,6 +56,11 @@ from app.presentation.api.schemas.courses import (
     UpdateCourseRequest,
 )
 from app.presentation.api.schemas.errors import ErrorResponse
+from app.presentation.api.schemas.lecture_comments import (
+    CreateLectureCommentRequest,
+    LectureCommentResponse,
+    UpdateLectureCommentRequest,
+)
 from app.presentation.api.schemas.lectures import (
     CreateLectureRequest,
     UpdateLectureRequest,
@@ -144,6 +149,9 @@ __all__ = [
     "SectionResponse",
     "CreateLectureRequest",
     "UpdateLectureRequest",
+    "CreateLectureCommentRequest",
+    "UpdateLectureCommentRequest",
+    "LectureCommentResponse",
     "ErrorResponse",
     "RegisterUserRequest",
     "RegisteredUserResponse",
