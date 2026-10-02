@@ -19,6 +19,9 @@ from app.application.services.course_catalog_read_service import (
 from app.application.services.course_content_access_service import (
     CourseContentAccessService,
 )
+from app.application.services.course_rating_read_service import (
+    CourseRatingReadService,
+)
 from app.application.services.cover_image_policy import CoverImagePolicy
 from app.application.use_cases.answer_options.create_answer_option import (
     CreateAnswerOptionUseCase,
@@ -46,6 +49,12 @@ from app.application.use_cases.code_tasks.remove_code_task import (
 )
 from app.application.use_cases.code_tasks.update_code_task import (
     UpdateCodeTaskUseCase,
+)
+from app.application.use_cases.course_reviews.get_course_reviews import (
+    GetCourseReviewsUseCase,
+)
+from app.application.use_cases.course_reviews.upsert_course_review import (
+    UpsertCourseReviewUseCase,
 )
 from app.application.use_cases.courses.archive_course import ArchiveCourseUseCase
 from app.application.use_cases.courses.create_course import CreateCourseUseCase
@@ -153,9 +162,19 @@ class ApiProvider(Provider):
         )
 
     @provide
+    def get_course_rating_read_service(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> CourseRatingReadService:
+        return CourseRatingReadService(
+            review_repository=uow.course_reviews,
+        )
+
+    @provide
     def get_course_catalog_read_service(
         self,
         uow: SqlAlchemyUnitOfWork,
+        rating_read_service: CourseRatingReadService,
     ) -> CourseCatalogReadService:
         return CourseCatalogReadService(
             module_repository=uow.modules,
@@ -164,6 +183,7 @@ class ApiProvider(Provider):
             question_repository=uow.questions,
             task_repository=uow.tasks,
             code_task_repository=uow.code_tasks,
+            rating_read_service=rating_read_service,
         )
 
     @provide(scope=Scope.APP)
@@ -193,6 +213,20 @@ class ApiProvider(Provider):
             access_service=access_service,
             catalog_read_service=catalog_read_service,
         )
+
+    @provide
+    def provide_get_course_reviews_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetCourseReviewsUseCase:
+        return GetCourseReviewsUseCase(uow=uow)
+
+    @provide
+    def provide_upsert_course_review_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> UpsertCourseReviewUseCase:
+        return UpsertCourseReviewUseCase(uow=uow)
 
     @provide
     def provide_get_course_structure_use_case(
