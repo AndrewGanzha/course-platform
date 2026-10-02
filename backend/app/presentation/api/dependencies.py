@@ -258,8 +258,9 @@ class ApiProvider(Provider):
     def provide_upsert_course_review_use_case(
         self,
         uow: SqlAlchemyUnitOfWork,
+        content_cache: ContentCache,
     ) -> UpsertCourseReviewUseCase:
-        return UpsertCourseReviewUseCase(uow=uow)
+        return UpsertCourseReviewUseCase(uow=uow, content_cache=content_cache)
 
     @provide
     def get_lecture_course_resolver(
