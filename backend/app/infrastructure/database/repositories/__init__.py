@@ -34,6 +34,9 @@ from app.infrastructure.database.repositories.question_repository import (
 from app.infrastructure.database.repositories.section_repository import (
     SqlAlchemySectionRepository,
 )
+from app.infrastructure.database.repositories.student_activity_repository import (
+    SqlAlchemyStudentActivityRepository,
+)
 from app.infrastructure.database.repositories.task_attempt_repository import (
     SqlAlchemyTaskAttemptRepository,
 )
@@ -64,4 +67,5 @@ __all__ = [
     "SqlAlchemyTestCaseRepository",
     "SqlAlchemyCodeSubmissionRepository",
     "SqlAlchemyCourseReviewRepository",
+    "SqlAlchemyStudentActivityRepository",
 ]

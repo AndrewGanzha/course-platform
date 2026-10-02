@@ -28,6 +28,7 @@ from app.infrastructure.database.models import (
     QuestionAttemptModel,
     QuestionModel,
     SectionModel,
+    StudentActivityModel,
     TaskAttemptModel,
     TaskModel,
     TestCaseModel,
@@ -76,6 +77,7 @@ def session_factory(test_engine):
 async def clear_database(session_factory) -> None:
     async with session_factory() as session:
         for model in [
+            StudentActivityModel,
             CourseReviewModel,
             LectureCommentModel,
             AnswerOptionModel,

@@ -92,12 +92,21 @@ from app.application.use_cases.lectures.update_lecture import UpdateLectureUseCa
 from app.application.use_cases.modules.create_module import CreateModuleUseCase
 from app.application.use_cases.modules.remove_module import RemoveModuleUseCase
 from app.application.use_cases.modules.update_module import UpdateModuleUseCase
+from app.application.use_cases.profile.get_author_activities import (
+    GetAuthorActivitiesUseCase,
+)
+from app.application.use_cases.profile.get_my_activities import (
+    GetMyActivitiesUseCase,
+)
 from app.application.use_cases.profile.get_my_course_analytics import (
     GetMyCourseAnalyticsUseCase,
 )
 from app.application.use_cases.profile.get_my_profile import GetMyProfileUseCase
 from app.application.use_cases.profile.get_my_teaching_course_analytics import (
     GetMyTeachingCourseAnalyticsUseCase,
+)
+from app.application.use_cases.profile.get_platform_activities import (
+    GetPlatformActivitiesUseCase,
 )
 from app.application.use_cases.profile.update_my_profile import (
     UpdateMyProfileUseCase,
@@ -637,6 +646,27 @@ class ApiProvider(Provider):
         uow: SqlAlchemyUnitOfWork,
     ) -> GetMyCourseAnalyticsUseCase:
         return GetMyCourseAnalyticsUseCase(uow=uow)
+
+    @provide
+    def get_get_my_activities_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetMyActivitiesUseCase:
+        return GetMyActivitiesUseCase(uow=uow)
+
+    @provide
+    def get_get_platform_activities_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetPlatformActivitiesUseCase:
+        return GetPlatformActivitiesUseCase(uow=uow)
+
+    @provide
+    def get_get_author_activities_use_case(
+        self,
+        uow: SqlAlchemyUnitOfWork,
+    ) -> GetAuthorActivitiesUseCase:
+        return GetAuthorActivitiesUseCase(uow=uow)
 
     @provide
     def get_get_my_teaching_course_analytics_use_case(

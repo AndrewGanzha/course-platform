@@ -1,9 +1,17 @@
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from app.application.dto.authenticated_user import AuthenticatedUser
+from app.application.use_cases.profile.get_author_activities import (
+    GetAuthorActivitiesQuery,
+    GetAuthorActivitiesUseCase,
+)
+from app.application.use_cases.profile.get_my_activities import (
+    GetMyActivitiesQuery,
+    GetMyActivitiesUseCase,
+)
 from app.application.use_cases.profile.get_my_course_analytics import (
     GetMyCourseAnalyticsQuery,
     GetMyCourseAnalyticsUseCase,
@@ -20,9 +28,11 @@ from app.application.use_cases.profile.update_my_profile import (
     UpdateMyProfileCommand,
     UpdateMyProfileUseCase,
 )
+from app.domain.entities.student_activity import StudentActivityType
 from app.presentation.api.schemas import (
     AuthorCourseAnalyticsResponse,
     ErrorResponse,
+    StudentActivityPageResponse,
     StudentCourseAnalyticsResponse,
     UpdateMyProfileRequest,
     UserProfileResponse,
@@ -145,3 +155,83 @@ async def get_my_teaching_course_analytics(
         GetMyTeachingCourseAnalyticsQuery(actor=actor, course_id=course_id)
     )
     return AuthorCourseAnalyticsResponse.model_validate(result)
+
+
+@router.get(
+    "/me/activities",
+    response_model=StudentActivityPageResponse,
+    summary="Get my activity history",
+    description=(
+        "Returns the activity history of the current student in reverse "
+        "chronological order. A student can only read their own history."
+    ),
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "User cannot view own activity history.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_my_activities(
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[GetMyActivitiesUseCase],
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    course_id: UUID | None = Query(default=None),
+    activity_type: StudentActivityType | None = Query(default=None),
+) -> StudentActivityPageResponse:
+    result = await use_case.execute(
+        GetMyActivitiesQuery(
+            actor=actor,
+            limit=limit,
+            offset=offset,
+            course_id=course_id,
+            activity_type=activity_type,
+        )
+    )
+    return StudentActivityPageResponse.model_validate(result)
+
+
+@router.get(
+    "/me/teaching/activities",
+    response_model=StudentActivityPageResponse,
+    summary="Get activity history of my courses",
+    description=(
+        "Returns student activity for courses owned by the current author. "
+        "The author cannot read activity of courses they do not own."
+    ),
+    responses={
+        401: {
+            "description": "Authentication credentials are missing or invalid.",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "User cannot view teaching activity history.",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def get_author_activities(
+    actor: FromDishka[AuthenticatedUser],
+    use_case: FromDishka[GetAuthorActivitiesUseCase],
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    student_id: UUID | None = Query(default=None),
+    course_id: UUID | None = Query(default=None),
+    activity_type: StudentActivityType | None = Query(default=None),
+) -> StudentActivityPageResponse:
+    result = await use_case.execute(
+        GetAuthorActivitiesQuery(
+            actor=actor,
+            limit=limit,
+            offset=offset,
+            student_id=student_id,
+            course_id=course_id,
+            activity_type=activity_type,
+        )
+    )
+    return StudentActivityPageResponse.model_validate(result)

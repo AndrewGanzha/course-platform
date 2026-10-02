@@ -92,6 +92,10 @@ from app.presentation.api.schemas.sections import (
     SectionResponse,
     UpdateSectionRequest,
 )
+from app.presentation.api.schemas.student_activities import (
+    StudentActivityPageResponse,
+    StudentActivityResponse,
+)
 from app.presentation.api.schemas.student_analytics import (
     StudentCourseAnalyticsResponse,
     StudentModuleAnalyticsResponse,
@@ -187,6 +191,8 @@ __all__ = [
     "StudentWeakQuestionResponse",
     "StudentWeakTaskResponse",
     "StudentWeakCodeTaskResponse",
+    "StudentActivityPageResponse",
+    "StudentActivityResponse",
     "AuthorCourseAnalyticsResponse",
     "AuthorModuleAnalyticsResponse",
     "DifficultQuestionAnalyticsResponse",

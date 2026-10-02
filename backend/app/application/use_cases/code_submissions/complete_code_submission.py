@@ -10,6 +10,10 @@ from app.application.exceptions import (
 from app.application.interfaces.unit_of_work import UnitOfWork
 from app.domain.entities.execution_result import ExecutionResult, ExecutionStatus
 from app.domain.entities.progress import Progress
+from app.domain.entities.student_activity import (
+    StudentActivity,
+    StudentActivityType,
+)
 
 
 @dataclass(slots=True)
@@ -78,10 +82,49 @@ class CompleteCodeSubmissionUseCase:
                     )
                     await self.uow.progress.add(progress)
 
-                progress.complete_code_task(code_task.id, code_task.reward_points)
-                progress.sync_section_completion(section)
-                progress.sync_module_completion(module)
+                code_task_completed = progress.complete_code_task(
+                    code_task.id, code_task.reward_points
+                )
+                section_completed = progress.sync_section_completion(section)
+                module_completed = progress.sync_module_completion(module)
                 await self.uow.progress.update(progress)
+
+                if code_task_completed:
+                    await self.uow.student_activities.add(
+                        StudentActivity(
+                            id=uuid4(),
+                            student_id=submission.student_id,
+                            course_id=module.course_id,
+                            activity_type=(StudentActivityType.CODE_TASK_COMPLETED),
+                            entity_id=code_task.id,
+                            title=code_task.title,
+                            details={"awarded_points": code_task.reward_points},
+                        )
+                    )
+
+                if section_completed:
+                    await self.uow.student_activities.add(
+                        StudentActivity(
+                            id=uuid4(),
+                            student_id=submission.student_id,
+                            course_id=module.course_id,
+                            activity_type=StudentActivityType.SECTION_COMPLETED,
+                            entity_id=section.id,
+                            title=section.title,
+                        )
+                    )
+
+                if module_completed:
+                    await self.uow.student_activities.add(
+                        StudentActivity(
+                            id=uuid4(),
+                            student_id=submission.student_id,
+                            course_id=module.course_id,
+                            activity_type=StudentActivityType.MODULE_COMPLETED,
+                            entity_id=module.id,
+                            title=module.title,
+                        )
+                    )
 
             await self.uow.commit()
             return submission

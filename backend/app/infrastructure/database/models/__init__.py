@@ -13,6 +13,9 @@ from app.infrastructure.database.models.question_attempt_model import (
 )
 from app.infrastructure.database.models.question_model import QuestionModel
 from app.infrastructure.database.models.section_model import SectionModel
+from app.infrastructure.database.models.student_activity_model import (
+    StudentActivityModel,
+)
 from app.infrastructure.database.models.task_attempt_model import TaskAttemptModel
 from app.infrastructure.database.models.task_model import TaskModel
 from app.infrastructure.database.models.test_case_model import TestCaseModel
@@ -36,4 +39,5 @@ __all__ = [
     "CodeTaskModel",
     "TestCaseModel",
     "CourseReviewModel",
+    "StudentActivityModel",
 ]

@@ -124,3 +124,7 @@ class InvalidCourseReviewError(DomainError):
 
 class InvalidLectureCommentError(DomainError):
     pass
+
+
+class InvalidStudentActivityError(DomainError):
+    pass

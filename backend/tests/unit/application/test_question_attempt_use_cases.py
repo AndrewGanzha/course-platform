@@ -133,6 +133,42 @@ class FakeSectionRepository:
         self.items[section.id] = section
 
 
+class FakeStudentActivityRepository:
+    def __init__(self) -> None:
+        self.items = []
+
+    async def add(self, activity) -> None:
+        self.items.append(activity)
+
+    async def list_by_student_id(self, student_id, limit, offset):
+        return [item for item in self.items if item.student_id == student_id][
+            offset : offset + limit
+        ]
+
+    async def count_by_student_id(self, student_id) -> int:
+        return sum(1 for item in self.items if item.student_id == student_id)
+
+    async def list_activities(
+        self,
+        limit,
+        offset,
+        student_id=None,
+        course_id=None,
+        course_ids=None,
+        activity_type=None,
+    ):
+        return []
+
+    async def count_activities(
+        self,
+        student_id=None,
+        course_id=None,
+        course_ids=None,
+        activity_type=None,
+    ) -> int:
+        return 0
+
+
 class FakeInteractiveUnitOfWork:
     def __init__(self) -> None:
         self.courses = FakeCourseRepository()
@@ -142,6 +178,7 @@ class FakeInteractiveUnitOfWork:
         self.answer_options = FakeAnswerOptionRepository()
         self.question_attempts = FakeQuestionAttemptRepository()
         self.progress = FakeProgressRepository()
+        self.student_activities = FakeStudentActivityRepository()
         self.committed = False
         self.rolled_back = False
 
